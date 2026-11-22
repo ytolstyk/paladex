@@ -8,6 +8,7 @@ import { NO_WARNINGS, turnWarnings, warningText } from '@/domain/turn'
 import { catalog, usePlayStore } from '@/state/session'
 import { useUiStore } from '@/state/uiStore'
 import { CastButton, CastRoundel } from './CardParts'
+import { opensDetail } from './detailTrigger'
 
 /** A class or species feature, spent from its counter. Pool features (Lay On Hands) ask how much. */
 export const FeatureCard = memo(function FeatureCard({ feature }: { feature: Feature }): React.JSX.Element {
@@ -32,11 +33,16 @@ export const FeatureCard = memo(function FeatureCard({ feature }: { feature: Fea
   }
 
   return (
-    <article className="spell-card feature-card" data-role={feature.role} data-dimmed={!usable || undefined}>
+    <article
+      className="spell-card feature-card"
+      data-role={feature.role}
+      data-dimmed={!usable || undefined}
+      onClick={(e) => opensDetail(e.target) && openDetail(feature.id)}
+    >
       <CastRoundel castTime={feature.castTime} />
       <div className="spell-card__body">
         <h3 className="spell-card__name">
-          <button type="button" className="name-button" onClick={() => openDetail(feature.id)} title="Show details">
+          <button type="button" className="name-button" title="Show details">
             {feature.name}
           </button>
         </h3>

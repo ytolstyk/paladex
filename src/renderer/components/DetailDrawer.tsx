@@ -1,8 +1,10 @@
-import { useEffect } from 'react'
+import { useRef } from 'react'
 import { describeComponents } from '@/domain/components'
 import { describeCastTime, describeFeatureCost, describeFeatureKind, describeSpellCost, describeSpellKind } from '@/domain/describe'
+import { useDismiss } from '@/hooks/useDismiss'
 import { catalog } from '@/state/session'
 import { useUiStore } from '@/state/uiStore'
+import { opensDetail } from './detailTrigger'
 
 function Fact({ label, children }: { label: string; children: React.ReactNode }): React.JSX.Element | null {
   if (children === null || children === undefined || children === false || children === '') return null
@@ -18,15 +20,10 @@ function Fact({ label, children }: { label: string; children: React.ReactNode })
 export function DetailDrawer(): React.JSX.Element | null {
   const detailId = useUiStore((s) => s.detailId)
   const closeDetail = useUiStore((s) => s.closeDetail)
+  const drawer = useRef<HTMLElement>(null)
 
-  useEffect(() => {
-    if (!detailId) return
-    const onKey = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape') closeDetail()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [detailId, closeDetail])
+  // A press outside the drawer or Escape closes it. A press on a card's body is left to the card, which opens or switches the drawer.
+  useDismiss(detailId !== null, drawer, closeDetail, opensDetail)
 
   if (!detailId) return null
   const spell = catalog.spellById(detailId)
@@ -40,7 +37,7 @@ export function DetailDrawer(): React.JSX.Element | null {
   const paragraphs = description ? description.split('\n').filter((line) => line.trim() !== '') : []
 
   return (
-    <aside className="drawer" aria-label={`${title} details`}>
+    <aside ref={drawer} className="drawer" aria-label={`${title} details`}>
       <header className="drawer__head">
         <div>
           <h2 className="drawer__title">{title}</h2>

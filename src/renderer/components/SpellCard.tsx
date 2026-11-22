@@ -12,6 +12,7 @@ import { selectEffectFor, useEffectsStore } from '@/state/effectsStore'
 import { useUiStore } from '@/state/uiStore'
 import { CastButton, CastRoundel, ComponentMarks } from './CardParts'
 import { FxHost, type FxHandle } from './CastEffect'
+import { opensDetail } from './detailTrigger'
 import { RangeBadge } from './RangeBadge'
 
 function paymentLabel(payment: Payment): string | null {
@@ -55,11 +56,18 @@ export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): R
 
   return (
     <FxHost ref={fx} role={spell.role} className="fx-host--card">
-      <article className="spell-card" data-role={spell.role} data-active={active || undefined} data-dimmed={dimmed || undefined}>
+      <article
+        className="spell-card"
+        data-role={spell.role}
+        data-active={active || undefined}
+        data-dimmed={dimmed || undefined}
+        onClick={(e) => opensDetail(e.target) && openDetail(spell.id)}
+      >
         <CastRoundel castTime={spell.castTime} />
         <div className="spell-card__body">
           <h3 className="spell-card__name">
-            <button type="button" className="name-button" onClick={() => openDetail(spell.id)} title="Show details">
+            {/* No handler of its own: its click (and Enter or Space) bubbles to the card. It stays a button for the keyboard. */}
+            <button type="button" className="name-button" title="Show details">
               {spell.name}
             </button>
           </h3>

@@ -509,6 +509,7 @@ button {
 }
 .spell-card {
   --tincture: var(--iron);
+  cursor: pointer;
   position: relative;
   display: grid;
   grid-template-columns: auto 1fr auto;
