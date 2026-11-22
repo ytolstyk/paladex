@@ -1,4 +1,5 @@
 import type { Feature, OtherFeature, Spell } from '@shared/types'
+import { componentWords } from './components'
 import { CAST_LABEL, LEVEL_TITLE, ROLE_LABEL, SOURCE_LABEL } from './labels'
 
 /**
@@ -56,10 +57,18 @@ function spellHaystack(spell: Spell): Haystack {
       spell.tag,
       spell.castingNote,
       spell.concentration && 'concentration',
-      spell.ritual && 'ritual'
+      spell.ritual && 'ritual',
+      // The card shows V, S and M, so a search for the words is not a hidden match. The item text is only in the drawer.
+      ...componentWords(spell.components)
     ])
     const level = spell.level === 0 ? 'cantrip' : `level ${spell.level} ${LEVEL_TITLE[spell.level] ?? ''}`
-    const details = join([spell.description, CAST_LABEL[spell.castTime], level, SOURCE_LABEL[spell.source]])
+    const details = join([
+      spell.description,
+      spell.components.materialText,
+      CAST_LABEL[spell.castTime],
+      level,
+      SOURCE_LABEL[spell.source]
+    ])
     return { shown, all: `${shown} ${details}` }
   })
 }

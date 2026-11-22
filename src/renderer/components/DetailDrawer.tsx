@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { describeComponents } from '@/domain/components'
 import { describeCastTime, describeFeatureCost, describeFeatureKind, describeSpellCost, describeSpellKind } from '@/domain/describe'
 import { catalog } from '@/state/session'
 import { useUiStore } from '@/state/uiStore'
@@ -55,6 +56,7 @@ export function DetailDrawer(): React.JSX.Element | null {
           <>
             <Fact label="Casting time">{describeCastTime(spell)}</Fact>
             <Fact label="Range">{spell.range}</Fact>
+            <Fact label="Components">{describeComponents(spell.components)}</Fact>
             <Fact label="Duration">
               {spell.duration}
               {spell.concentration ? ', concentration' : ''}

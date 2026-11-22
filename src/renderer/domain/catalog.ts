@@ -1,4 +1,4 @@
-import type { Character, CounterDef, Feature, OtherFeature, SeedData, Spell } from '@shared/types'
+import type { Character, CounterDef, Feature, OtherFeature, SeedData, Spell, SpellComponents } from '@shared/types'
 import { isChoosable } from './prepared'
 import { paladinSlotCapacity } from './slots'
 
@@ -39,6 +39,11 @@ function assertCatalogInvariants(seed: SeedData): void {
       if ((cost.kind === 'free' || cost.kind === 'charge') && !counterIds.has(cost.counterId)) {
         throw new Error(`Spell "${spell.name}" costs unknown counter "${cost.counterId}"`)
       }
+    }
+    // The renderer cannot use zod, so check the one field every card and search reads without a guard.
+    const parts = spell.components as Partial<SpellComponents> | undefined
+    if (typeof parts?.verbal !== 'boolean' || typeof parts.somatic !== 'boolean' || typeof parts.material !== 'boolean') {
+      throw new Error(`Spell "${spell.name}" has no components; regenerate the seed (npm run seed)`)
     }
     if (spell.level === 0 && !spell.costs.some((c) => c.kind === 'none')) {
       throw new Error(`Cantrip "${spell.name}" must list a { kind: 'none' } cost`)

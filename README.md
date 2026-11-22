@@ -28,6 +28,12 @@ showing ("11 spells and 6 features").
   count. These describe spells, so class features are hidden while any is on.
 - When filters hide spells you haven't prepared, the status line offers them ("2 more matches among unprepared spells").
 
+Every spell card also shows its **components** as V S M: a lit letter is something the spell needs (words, a free hand for
+gestures, an item) and a faded one is not. Hover for what each asks of you; the detail drawer names the item ("Material (a
+drop of blood)", including any cost or "which the spell consumes"). Searching "verbal", "somatic", "material" or an item
+name ("blood") finds spells by what they need. A few spells list a material component without its item text, because their
+D&D Beyond pages could not be read; check those spells' pages.
+
 Every spell card shows its **range** large, with an icon (you, a hand, an arrow), the distance, any area ("Self, 30 ft
 area") and a meter that fills with distance. Filters, search and sort are view settings: they are not saved and not undoable.
 

@@ -10,7 +10,7 @@ import { NO_WARNINGS, turnWarnings, warningText } from '@/domain/turn'
 import { catalog, usePlayStore } from '@/state/session'
 import { selectEffectFor, useEffectsStore } from '@/state/effectsStore'
 import { useUiStore } from '@/state/uiStore'
-import { CastButton, CastRoundel } from './CardParts'
+import { CastButton, CastRoundel, ComponentMarks } from './CardParts'
 import { FxHost, type FxHandle } from './CastEffect'
 import { RangeBadge } from './RangeBadge'
 
@@ -77,6 +77,7 @@ export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): R
           </p>
           <p className="spell-card__facts">
             <RangeBadge range={spell.range} />
+            <ComponentMarks components={spell.components} />
             <span className="spell-card__duration">{spell.tag ? `${spell.duration} · ${spell.tag}` : spell.duration}</span>
           </p>
           <p className="spell-card__summary">{spell.summary}</p>

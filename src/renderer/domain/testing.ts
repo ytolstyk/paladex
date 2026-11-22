@@ -13,6 +13,7 @@ export function spell(over: Partial<Spell> = {}): Spell {
     school: 'Evocation',
     castTime: 'action',
     concentration: false,
+    components: { verbal: true, somatic: false, material: false },
     range: 'Self',
     duration: 'Instantaneous',
     role: 'utility',

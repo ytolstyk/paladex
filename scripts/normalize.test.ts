@@ -84,6 +84,34 @@ describe('spell mechanics come from DDB (action economy is the whole point)', ()
   })
 })
 
+describe('spell components', () => {
+  it('come from the DDB codes (1 verbal, 2 somatic, 3 material) and name the item', () => {
+    expect(spell('Misty Step')?.components).toEqual({ verbal: true, somatic: false, material: false })
+    expect(spell('Lesser Restoration')?.components).toEqual({ verbal: true, somatic: true, material: false })
+    expect(spell('Bane')?.components).toEqual({ verbal: true, somatic: true, material: true, materialText: 'a drop of blood' })
+    expect(spell('Protection from Evil and Good')?.components.materialText).toMatch(/Holy Water worth 25\+ GP, which the spell consumes/)
+  })
+
+  it('authored spells carry them too, with the item where the page could be read', () => {
+    expect(spell('Command')?.components).toEqual({ verbal: true, somatic: false, material: false })
+    expect(spell('Searing Orb')?.components).toEqual({ verbal: false, somatic: true, material: true })
+    expect(spell('Shield of Faith')?.components.materialText).toBe('a prayer scroll')
+  })
+
+  it('every material component either names its item or is one of the few we could not read', () => {
+    const unnamed = seed.character.spells.filter((s) => s.components.material && !s.components.materialText).map((s) => s.name)
+    expect(unnamed.sort()).toEqual(['Ceremony', 'Dueling Ground', 'Searing Orb', 'Wardaway'])
+  })
+
+  it('the schema rejects item text on a spell with no material component', () => {
+    const broken = structuredClone(seed)
+    const [first] = broken.character.spells
+    if (!first) throw new Error('seed has no spells')
+    first.components = { verbal: true, somatic: false, material: false, materialText: 'a feather' }
+    expect(SeedSchema.safeParse(broken).success).toBe(false)
+  })
+})
+
 describe('authored spells', () => {
   it('adds the rest of the 2024 Paladin level 1-2 list without duplicating sheet spells', () => {
     const ids = seed.character.spells.map((s) => s.id)

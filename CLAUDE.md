@@ -38,6 +38,18 @@ schema, vitest for tests. See README.md for scripts and layout.
 - The dial's geometry is in `domain/dial.ts`; the component only draws and handles input. A drag saves once, on release, so it
   is one undo step; typed or arrow-key changes coalesce through the `initiative` undo key.
 
+## Spell components
+
+- `Spell.components` is `{ verbal, somatic, material, materialText? }`, data not play state. `scripts/components.ts` is the only place
+  one is built (DDB codes 1/2/3, or the compact `'VSM'` codes in `scripts/data/authored-spells.ts`) and it throws on item text
+  without a material component. A missing DDB list is an import error, never "none". `createCatalog` also checks the field at
+  startup, since the renderer cannot use zod.
+- `materialText` is absent when the spell has no M, and also for the few spells whose D&D Beyond page could not be read
+  (`normalize.test.ts` lists them as a deliberate tripwire: when you fill one in, remove it there). The UI says "item not recorded".
+- The card's V S M marks (`ComponentMarks`) are always all three: lit = needed, dashed and struck = not needed (no `opacity`, so
+  theme contrast stays token-based). Search matches "verbal", "somatic", "material" as shown words and the item text as hidden text.
+  It is not a `FACETS` entry: facets are one value per spell and components combine. A "no verbal" style filter needs its own shape.
+
 ## Color themes
 
 - Every color in `app.css` comes from a CSS custom property. Do not add hex or `rgba()` literals there; use or add a

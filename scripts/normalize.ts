@@ -2,6 +2,7 @@ import { createCatalog } from '../src/renderer/domain/catalog'
 import { abilityMod, proficiencyForLevel } from '../src/renderer/domain/derived'
 import { isChoosable } from '../src/renderer/domain/prepared'
 import type { Character, CounterDef, Feature, OtherFeature, SeedData, Spell } from '../src/shared/types'
+import { componentsFromCode, componentsFromDdb } from './components'
 import { AUTHORED_SPELLS } from './data/authored-spells'
 import { FEATURE_OVERLAYS } from './data/feature-overlay'
 import { SPELL_OVERLAY, type SpellOverlay } from './data/spell-overlay'
@@ -329,6 +330,9 @@ function buildSpells(data: Json, ctx: PlaceholderContext, warnings: string[]): {
     const save = def.requiresSavingThrow && SAVE_LABEL[def.saveDcAbilityId] ? `${SAVE_LABEL[def.saveDcAbilityId]} save` : undefined
     const tag = overlay?.tag ?? save ?? (def.requiresAttackRoll ? 'spell attack' : undefined)
     const id = `spell:${slug}`
+    const components = componentsFromDdb(def.components, def.componentsDescription)
+    // Absent is not "none": a missing list would otherwise print as a spell you can cast gagged and bound.
+    if (!components) throw new Error(`DDB spell "${def.name}" has no components list; the payload shape may have changed`)
     const built: Spell = {
       id,
       ddbId: def.id,
@@ -338,6 +342,7 @@ function buildSpells(data: Json, ctx: PlaceholderContext, warnings: string[]): {
       ...castTimeOf(def),
       ...(def.ritual ? { ritual: true } : {}),
       concentration: Boolean(def.concentration),
+      components,
       range: rangeText(def),
       duration: durationText(def),
       role,
@@ -368,6 +373,7 @@ function buildSpells(data: Json, ctx: PlaceholderContext, warnings: string[]): {
       ...(a.castingNote ? { castingNote: a.castingNote } : {}),
       ...(a.ritual ? { ritual: true } : {}),
       concentration: a.concentration,
+      components: componentsFromCode(a.components, a.materialText),
       range: a.range,
       duration: a.duration,
       role: a.role,

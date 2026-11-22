@@ -32,6 +32,17 @@ const counter = z
   })
   .strict()
 
+const components = z
+  .object({
+    verbal: z.boolean(),
+    somatic: z.boolean(),
+    material: z.boolean(),
+    materialText: z.string().min(1).max(300).optional()
+  })
+  .strict()
+  // Text without a material component would be a contradiction.
+  .refine((c) => c.material || c.materialText === undefined, 'materialText requires material')
+
 const spell = z
   .object({
     id: z.string().regex(/^spell:[a-z0-9-]+$/),
@@ -43,6 +54,7 @@ const spell = z
     castingNote: z.string().optional(),
     ritual: z.boolean().optional(),
     concentration: z.boolean(),
+    components,
     range: z.string().min(1),
     duration: z.string().min(1),
     role: z.enum(ROLES),

@@ -116,6 +116,30 @@ describe('found beyond the card', () => {
   })
 })
 
+describe('components', () => {
+  const bane = spell({
+    name: 'Bane',
+    components: { verbal: true, somatic: true, material: true, materialText: 'a drop of blood' }
+  })
+  const misty = spell({ name: 'Misty Step', components: { verbal: true, somatic: false, material: false } })
+
+  it('finds spells by what they need', () => {
+    expect(spellMatches(bane, searchTokens('material'))).toBe(true)
+    expect(spellMatches(misty, searchTokens('material'))).toBe(false)
+    expect(spellMatches(misty, searchTokens('somatic'))).toBe(false)
+    expect(spellMatches(misty, searchTokens('verbal'))).toBe(true)
+  })
+
+  it('finds a spell by its material item, and says it was found in the text the card does not show', () => {
+    expect(spellMatches(bane, searchTokens('blood'))).toBe(true)
+    expect(spellFoundBeyondCard(bane, searchTokens('blood'))).toBe(true)
+  })
+
+  it('does not call a search for the shown V, S, M words a hidden match', () => {
+    expect(spellFoundBeyondCard(bane, searchTokens('verbal'))).toBe(false)
+  })
+})
+
 describe('matchesTokens', () => {
   it('requires every token', () => {
     expect(matchesTokens('alpha beta', ['alpha', 'beta'])).toBe(true)

@@ -26,6 +26,11 @@
         "school": "Abjuration",
         "castTime": "action",
         "concentration": true,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": false
+        },
         "range": "Touch",
         "duration": "1 minute",
         "role": "support",
@@ -50,6 +55,11 @@
         "school": "Necromancy",
         "castTime": "action",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": false
+        },
         "range": "15 ft",
         "duration": "Instantaneous",
         "role": "support",
@@ -74,6 +84,12 @@
         "school": "Enchantment",
         "castTime": "action",
         "concentration": true,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": true,
+          "materialText": "a drop of blood"
+        },
         "range": "30 ft",
         "duration": "1 minute",
         "role": "control",
@@ -100,6 +116,12 @@
         "school": "Enchantment",
         "castTime": "action",
         "concentration": true,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": true,
+          "materialText": "a Holy Symbol worth 5+ GP"
+        },
         "range": "30 ft",
         "duration": "1 minute",
         "role": "support",
@@ -125,6 +147,11 @@
         "castingNote": "1 hour",
         "ritual": true,
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": true
+        },
         "range": "Touch",
         "duration": "Instantaneous",
         "role": "support",
@@ -147,6 +174,11 @@
         "school": "Enchantment",
         "castTime": "action",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": false,
+          "material": false
+        },
         "range": "60 ft",
         "duration": "Instantaneous",
         "role": "control",
@@ -170,6 +202,11 @@
         "school": "Enchantment",
         "castTime": "bonus",
         "concentration": true,
+        "components": {
+          "verbal": true,
+          "somatic": false,
+          "material": false
+        },
         "range": "30 ft",
         "duration": "1 minute",
         "role": "control",
@@ -193,6 +230,11 @@
         "school": "Abjuration",
         "castTime": "action",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": false
+        },
         "range": "Touch",
         "duration": "Instantaneous",
         "role": "support",
@@ -215,6 +257,11 @@
         "school": "Divination",
         "castTime": "action",
         "concentration": true,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": false
+        },
         "range": "Self (30 ft)",
         "duration": "10 minutes",
         "role": "utility",
@@ -238,6 +285,11 @@
         "castTime": "action",
         "ritual": true,
         "concentration": true,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": false
+        },
         "range": "Self (30 ft)",
         "duration": "10 minutes",
         "role": "utility",
@@ -261,6 +313,12 @@
         "castTime": "action",
         "ritual": true,
         "concentration": true,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": true,
+          "materialText": "a yew leaf"
+        },
         "range": "Self (30 ft)",
         "duration": "10 minutes",
         "role": "utility",
@@ -283,6 +341,11 @@
         "school": "Transmutation",
         "castTime": "bonus",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": false
+        },
         "range": "Self",
         "duration": "1 minute",
         "role": "offense",
@@ -306,6 +369,11 @@
         "school": "Evocation",
         "castTime": "bonus",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": false,
+          "material": false
+        },
         "range": "Self",
         "duration": "Instantaneous",
         "role": "offense",
@@ -335,6 +403,11 @@
         "school": "Enchantment",
         "castTime": "action",
         "concentration": true,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": false
+        },
         "range": "Touch",
         "duration": "1 minute",
         "role": "support",
@@ -358,6 +431,11 @@
         "school": "Divination",
         "castTime": "bonus",
         "concentration": true,
+        "components": {
+          "verbal": true,
+          "somatic": false,
+          "material": false
+        },
         "range": "90 ft",
         "duration": "1 hour",
         "role": "offense",
@@ -383,6 +461,12 @@
         "school": "Abjuration",
         "castTime": "action",
         "concentration": true,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": true,
+          "materialText": "a flask of Holy Water worth 25+ GP, which the spell consumes"
+        },
         "range": "Touch",
         "duration": "10 minutes",
         "role": "support",
@@ -411,6 +495,11 @@
         "castTime": "action",
         "ritual": true,
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": false
+        },
         "range": "10 ft",
         "duration": "Instantaneous",
         "role": "utility",
@@ -433,6 +522,11 @@
         "school": "Evocation",
         "castTime": "bonus",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": false,
+          "material": false
+        },
         "range": "Self",
         "duration": "1 minute",
         "role": "offense",
@@ -456,6 +550,12 @@
         "school": "Abjuration",
         "castTime": "bonus",
         "concentration": true,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": true,
+          "materialText": "a prayer scroll"
+        },
         "range": "60 ft",
         "duration": "10 minutes",
         "role": "support",
@@ -478,6 +578,11 @@
         "school": "Evocation",
         "castTime": "bonus",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": false,
+          "material": false
+        },
         "range": "Self",
         "duration": "Instantaneous",
         "role": "offense",
@@ -501,6 +606,11 @@
         "school": "Abjuration",
         "castTime": "action",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": true
+        },
         "range": "60 ft",
         "duration": "Instantaneous",
         "role": "offense",
@@ -524,6 +634,11 @@
         "school": "Necromancy",
         "castTime": "bonus",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": false,
+          "material": false
+        },
         "range": "Self",
         "duration": "1 minute",
         "role": "offense",
@@ -547,6 +662,12 @@
         "school": "Abjuration",
         "castTime": "action",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": true,
+          "materialText": "a strip of white cloth"
+        },
         "range": "30 ft",
         "duration": "8 hours",
         "role": "support",
@@ -569,6 +690,11 @@
         "school": "Evocation",
         "castTime": "action",
         "concentration": true,
+        "components": {
+          "verbal": true,
+          "somatic": false,
+          "material": false
+        },
         "range": "Self (15 ft)",
         "duration": "1 minute",
         "role": "control",
@@ -593,6 +719,11 @@
         "castingNote": "10 minutes",
         "ritual": true,
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": true
+        },
         "range": "Touch (15 ft)",
         "duration": "1 hour",
         "role": "utility",
@@ -616,6 +747,11 @@
         "school": "Conjuration",
         "castTime": "action",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": false
+        },
         "range": "30 ft",
         "duration": "Instantaneous",
         "role": "utility",
@@ -645,6 +781,12 @@
         "castTime": "action",
         "ritual": true,
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": true,
+          "materialText": "2 Copper Pieces, which the spell consumes"
+        },
         "range": "Touch",
         "duration": "10 days",
         "role": "utility",
@@ -668,6 +810,12 @@
         "school": "Enchantment",
         "castTime": "action",
         "concentration": true,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": true,
+          "materialText": "a straight piece of iron"
+        },
         "range": "60 ft",
         "duration": "1 minute",
         "role": "control",
@@ -694,6 +842,11 @@
         "school": "Abjuration",
         "castTime": "bonus",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": false
+        },
         "range": "Touch",
         "duration": "Instantaneous",
         "role": "support",
@@ -717,6 +870,12 @@
         "school": "Divination",
         "castTime": "action",
         "concentration": true,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": true,
+          "materialText": "a forked twig"
+        },
         "range": "Self",
         "duration": "10 minutes",
         "role": "utility",
@@ -739,6 +898,11 @@
         "school": "Transmutation",
         "castTime": "bonus",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": false
+        },
         "range": "Touch",
         "duration": "1 hour",
         "role": "support",
@@ -763,6 +927,11 @@
         "school": "Conjuration",
         "castTime": "bonus",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": false,
+          "material": false
+        },
         "range": "Self",
         "duration": "Instantaneous",
         "role": "utility",
@@ -787,6 +956,11 @@
         "school": "Abjuration",
         "castTime": "action",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": false
+        },
         "range": "Touch",
         "duration": "24 hours",
         "role": "utility",
@@ -810,6 +984,11 @@
         "castTime": "long",
         "castingNote": "10 minutes",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": false,
+          "material": false
+        },
         "range": "30 ft",
         "duration": "Instantaneous",
         "role": "support",
@@ -832,6 +1011,11 @@
         "school": "Abjuration",
         "castTime": "action",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": false
+        },
         "range": "Touch",
         "duration": "1 hour",
         "role": "support",
@@ -854,6 +1038,11 @@
         "school": "Evocation",
         "castTime": "action",
         "concentration": false,
+        "components": {
+          "verbal": false,
+          "somatic": true,
+          "material": true
+        },
         "range": "60 ft",
         "duration": "Instantaneous",
         "role": "offense",
@@ -877,6 +1066,11 @@
         "school": "Transmutation",
         "castTime": "bonus",
         "concentration": true,
+        "components": {
+          "verbal": true,
+          "somatic": false,
+          "material": false
+        },
         "range": "Self",
         "duration": "1 minute",
         "role": "offense",
@@ -900,6 +1094,12 @@
         "school": "Abjuration",
         "castTime": "action",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": true,
+          "materialText": "a pair of platinum rings worth 50+ GP each, which you and the target must wear for the duration"
+        },
         "range": "Touch",
         "duration": "1 hour",
         "role": "support",
@@ -922,6 +1122,11 @@
         "school": "Enchantment",
         "castTime": "action",
         "concentration": false,
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": false
+        },
         "range": "60 ft",
         "duration": "10 minutes",
         "role": "control",

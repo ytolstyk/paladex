@@ -21,6 +21,19 @@ export type Payment =
   | { kind: 'charge'; counterId: string }
   | { kind: 'none' }
 
+/**
+ * What casting a spell demands of the body and the pouch: words (verbal), gestures (somatic), an item (material).
+ * `materialText` is what the spell page says the item is ("a drop of blood", "a flask of Holy Water worth 25+ GP, which
+ * the spell consumes"). It is absent when the spell has no material component, and also for a few spells whose page we
+ * could not read: `material: true` with no text means "needs something; check the spell".
+ */
+export interface SpellComponents {
+  verbal: boolean
+  somatic: boolean
+  material: boolean
+  materialText?: string
+}
+
 export interface Spell {
   /** Stable id, `spell:<slug>`. Keys prepared set, overlay and overrides. */
   id: string
@@ -35,6 +48,7 @@ export interface Spell {
   castingNote?: string
   ritual?: boolean
   concentration: boolean
+  components: SpellComponents
   range: string
   duration: string
   role: Role
