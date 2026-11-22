@@ -1,0 +1,171 @@
+/*
+ * Color themes, besides the default Candlelit Oak (which lives in tokens.css).
+ * Each block overrides the palette tokens only; derived tokens are computed in tokens.css.
+ * The ids here must match THEMES in domain/themes.ts (a test enforces it), and every palette is
+ * contrast-checked by domain/themes.test.ts, so keep values as plain hex literals.
+ */
+
+/* Moonlit Steel: cool slate with a silver accent */
+[data-theme='moon'] {
+  color-scheme: dark;
+  --oak-shadow: #0e131a;
+  --oak: #141b25;
+  --iron: #2d3745;
+  --vellum-deep: #1a2330;
+  --vellum: #212c3b;
+  --vellum-raised: #2a3748;
+  --bone: #e0e8f2;
+  --bone-dim: #9eadbf;
+  --gold: #b4bfcf;
+  --gold-bright: #e6ecf5;
+  --gold-dim: #667690;
+  --gules: #b8353c;
+  --gules-lit: #ea6b71;
+  --purpure: #8157ad;
+  --purpure-lit: #b08cdb;
+  --vert: #3f8f58;
+  --vert-lit: #7cc592;
+  --azure: #3070ae;
+  --azure-lit: #77b2ec;
+  --on-gold: #0e131a;
+  --on-vert: #0e131a;
+  --on-gules: #ffffff;
+  --on-azure: #ffffff;
+  --shadow: #000;
+  --well: #05080c;
+  --gem-spent-core: #04070b;
+  --gem-spent-rim: #26303e;
+  --grain: var(--grain-light-ink);
+}
+
+/* Elven Glade: deep forest green with a leaf-gold accent */
+[data-theme='glade'] {
+  color-scheme: dark;
+  --oak-shadow: #0c150e;
+  --oak: #121f16;
+  --iron: #2b3b2f;
+  --vellum-deep: #16251b;
+  --vellum: #1d3024;
+  --vellum-raised: #26402f;
+  --bone: #e4ecd4;
+  --bone-dim: #a6b698;
+  --gold: #c7b65c;
+  --gold-bright: #ebd983;
+  --gold-dim: #7a7338;
+  --gules: #c2353b;
+  --gules-lit: #f0707a;
+  --purpure: #8a5eb5;
+  --purpure-lit: #b794e0;
+  --vert: #62a86a;
+  --vert-lit: #93d89b;
+  --azure: #2f72a8;
+  --azure-lit: #7ab6e8;
+  --on-gold: #0c150e;
+  --on-vert: #0c150e;
+  --on-gules: #ffffff;
+  --on-azure: #ffffff;
+  --shadow: #000;
+  --well: #050a06;
+  --gem-spent-core: #040803;
+  --gem-spent-rim: #223326;
+  --grain: var(--grain-light-ink);
+}
+
+/* Ember Court: burgundy and banked coals, with a copper accent */
+[data-theme='ember'] {
+  color-scheme: dark;
+  --oak-shadow: #1a0d0e;
+  --oak: #251315;
+  --iron: #44272b;
+  --vellum-deep: #2b1618;
+  --vellum: #361c1f;
+  --vellum-raised: #452328;
+  --bone: #f2ddd3;
+  --bone-dim: #c4a49a;
+  --gold: #d28c4c;
+  --gold-bright: #f4b574;
+  --gold-dim: #8c5c33;
+  --gules: #d1393f;
+  --gules-lit: #f27a7f;
+  --purpure: #8f5ab8;
+  --purpure-lit: #bd90e4;
+  --vert: #4f9457;
+  --vert-lit: #86cb8f;
+  --azure: #3270ad;
+  --azure-lit: #7cb2e6;
+  --on-gold: #1a0d0e;
+  --on-vert: #1a0d0e;
+  --on-gules: #ffffff;
+  --on-azure: #ffffff;
+  --shadow: #000;
+  --well: #0a0405;
+  --gem-spent-core: #080304;
+  --gem-spent-rim: #3a2024;
+  --grain: var(--grain-light-ink);
+}
+
+/* Parchment & Ink: the one light theme. "Dark chrome" tokens are light here; accents are deepened so they read as text. */
+[data-theme='parchment'] {
+  color-scheme: light;
+  --oak-shadow: #dccdaa;
+  --oak: #eadfc3;
+  --iron: #bfae86;
+  --vellum-deep: #f4ecd6;
+  --vellum: #f8f2e0;
+  --vellum-raised: #fffbee;
+  --bone: #2b2014;
+  --bone-dim: #5c4c36;
+  --gold: #86600f;
+  --gold-bright: #6b4a06;
+  --gold-dim: #a88a4e;
+  --gules: #a8232a;
+  --gules-lit: #8f1b21;
+  --purpure: #6d3f96;
+  --purpure-lit: #583080;
+  --vert: #3b7842;
+  --vert-lit: #2b5f32;
+  --azure: #2a63a0;
+  --azure-lit: #1e4f87;
+  --on-gold: #fff8e6;
+  --on-vert: #ffffff;
+  --on-gules: #ffffff;
+  --on-azure: #ffffff;
+  --shadow: #4a3a1c;
+  --well: #cfbf96;
+  --gem-spent-core: #cdbb90;
+  --gem-spent-rim: #a88a4e;
+  --grain: var(--grain-dark-ink);
+}
+
+/* High Contrast: black and white with a saturated yellow accent; every pair clears WCAG AAA where text is involved */
+[data-theme='contrast'] {
+  color-scheme: dark;
+  --oak-shadow: #000000;
+  --oak: #0b0b0b;
+  --iron: #4d4d4d;
+  --vellum-deep: #101010;
+  --vellum: #161616;
+  --vellum-raised: #1f1f1f;
+  --bone: #ffffff;
+  --bone-dim: #d6d6d6;
+  --gold: #ffd23f;
+  --gold-bright: #ffe784;
+  --gold-dim: #c9a62e;
+  --gules: #e8434a;
+  --gules-lit: #ff8c91;
+  --purpure: #b080ec;
+  --purpure-lit: #d2b3ff;
+  --vert: #3fb64f;
+  --vert-lit: #84e690;
+  --azure: #4393e6;
+  --azure-lit: #93c8ff;
+  --on-gold: #000000;
+  --on-vert: #000000;
+  --on-gules: #000000;
+  --on-azure: #000000;
+  --shadow: #000;
+  --well: #000;
+  --gem-spent-core: #000000;
+  --gem-spent-rim: #5a5a5a;
+  --grain: none;
+}

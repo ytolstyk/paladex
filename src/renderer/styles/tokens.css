@@ -1,4 +1,40 @@
-:root {
+/*
+ * Design tokens.
+ *
+ * Palette token NAMES were chosen for the first theme (Candlelit Oak) but are ROLES: their values change per theme, and
+ * in the light theme several mean the opposite of what the word suggests. Edit by this contract, not by the name:
+ *
+ *   --oak-shadow   Banner and footer background. "Deepest chrome": darkest on dark themes, a deeper paper tone on light.
+ *   --oak          Page background (gradient with --oak-shadow), also the sticky filter bar.
+ *   --iron         Inactive borders and disabled fills. No fixed lightness order: only ever distinct from the panel it sits on.
+ *   --vellum-deep  Panels and inputs. --vellum: cards. --vellum-raised: popovers, drawer, buttons. Raised = nearer the reader.
+ *   --bone         Body text; must read on every surface above.
+ *   --bone-dim     Secondary text; must also read on every surface (4.5:1), not merely look quieter.
+ *   --gold         Accent for fills and headings. --gold-bright: accent for text, outlines and hover; it is the STRONGER
+ *                  accent, so it is darker than --gold on the light theme. --gold-dim: borders and rules (quietest).
+ *   --gules, --purpure, --vert, --azure   Spell-role tinctures, used as fills and stripes.
+ *   --*-lit        The same hue strengthened for use as TEXT on panels: lighter on dark themes, darker on light ones.
+ *   --on-*         Text drawn on top of the matching filled accent (cast button, pressed chips).
+ *   --shadow       The shadow COLOR (a tint, not a size). --shadow-sm/md/lg below are that color at fixed strengths.
+ *   --well         Recessed track behind the hit-point fill.
+ *   --gem-spent-*  The empty socket (core and rim) of a spent slot gem. --grain: panel texture; light ink on dark themes, dark on light.
+ *
+ * Where to put a new token: a color that differs per theme is a palette token (this file for Oak, themes.css for the
+ * rest, with a hex literal so the contrast test can read it). A value computed from palette tokens is a derived token
+ * and goes in the `:root, [data-theme]` block below. Anything theme-independent goes in the final `:root` block.
+ * `themes.css` must be imported after this file (see main.tsx): `:root` and `[data-theme='x']` tie on specificity.
+ *
+ * Every theme is a `[data-theme='id']` block (see themes.css), selected by the attribute on <html>. Selectors are
+ * attribute-based, not `:root`-only, so a preview swatch inside the settings page can wear another theme locally.
+ * Derived tokens below therefore live on `:root, [data-theme]`: a custom property that references var() is resolved
+ * on the element that declares it, so each themed element must re-derive its own.
+ */
+
+/* Candlelit Oak: the default palette. Applies with no attribute at all. */
+:root,
+[data-theme='oak'] {
+  color-scheme: dark;
+
   /* Oak and iron: the chrome around the page */
   --oak-shadow: #17110c;
   --oak: #221911;
@@ -16,7 +52,7 @@
   --gold-bright: #e6c36a;
   --gold-dim: #7d6630;
 
-  /* Heraldic tinctures: spell roles */
+  /* Heraldic tinctures: spell roles. `-lit` is the variant used as text, so it must read on the panel surfaces. */
   --gules: #b3262d; /* offense */
   --gules-lit: #d8454b;
   --purpure: #7d4fa6; /* control */
@@ -26,6 +62,23 @@
   --azure: #2f6fa8; /* utility */
   --azure-lit: #5b9bd2;
 
+  /* Text drawn ON a filled accent */
+  --on-gold: #17110c;
+  --on-vert: #17110c;
+  --on-gules: #eadfc6;
+  --on-azure: #eadfc6;
+
+  /* Shadows, wells and the spent-gem socket */
+  --shadow: #000;
+  --well: #000;
+  --gem-spent-core: #050302;
+  --gem-spent-rim: #2a2118;
+  --grain: var(--grain-light-ink);
+}
+
+/* Derived tokens: re-evaluated on every themed element (see header). */
+:root,
+[data-theme] {
   --role-offense: var(--gules);
   --role-offense-lit: var(--gules-lit);
   --role-control: var(--purpure);
@@ -34,6 +87,33 @@
   --role-support-lit: var(--vert-lit);
   --role-utility: var(--azure);
   --role-utility-lit: var(--azure-lit);
+
+  /* Gilt rules at three strengths, and the soft glow behind the page */
+  --rule-faint: color-mix(in srgb, var(--gold) 25%, transparent);
+  --rule: color-mix(in srgb, var(--gold) 35%, transparent);
+  --rule-strong: color-mix(in srgb, var(--gold) 45%, transparent);
+  --glow: color-mix(in srgb, var(--gold) 10%, transparent);
+  --gold-deep: color-mix(in srgb, var(--gold-dim) 75%, black);
+
+  --shadow-sm: color-mix(in srgb, var(--shadow) 42%, transparent);
+  --shadow-md: color-mix(in srgb, var(--shadow) 58%, transparent);
+  --shadow-lg: color-mix(in srgb, var(--shadow) 70%, transparent);
+  --tint-dim: color-mix(in srgb, var(--shadow) 20%, transparent);
+  --notice-bg: color-mix(in srgb, var(--gules) 15%, transparent);
+
+  /* The faceted gem: four facets of the accent, light to deep */
+  --gem-a: color-mix(in srgb, var(--gold-bright) 80%, white);
+  --gem-b: color-mix(in srgb, var(--gold) 78%, black);
+  --gem-c: var(--gold-bright);
+  --gem-d: color-mix(in srgb, var(--gold) 62%, black);
+  --gem-glow: color-mix(in srgb, var(--gold-bright) 65%, transparent);
+}
+
+:root {
+  /* Oak grain behind everything; vellum grain inside panels (inline SVG, offline). Light ink on dark themes,
+     dark ink on light ones: a theme picks one via --grain. */
+  --grain-light-ink: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .9  0 0 0 0 .8  0 0 0 0 .6  0 0 0 .16 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --grain-dark-ink: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .25  0 0 0 0 .1  0 0 0 .14 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 
   /* Type */
   --font-display: 'Cinzel', 'Trajan Pro', 'Times New Roman', serif;
