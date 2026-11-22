@@ -1,6 +1,12 @@
 /* ───────── Base ───────── */
 * {
   box-sizing: border-box;
+  /* Gilt scrollbars that follow the theme */
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-dim) transparent;
+}
+::selection {
+  background: color-mix(in srgb, var(--gold) 45%, transparent);
 }
 html {
   font-size: 17px;
@@ -39,11 +45,35 @@ button {
   color: var(--bone-dim);
 }
 
+/* Every pressable thing eases between its states instead of snapping */
+.btn,
+.chip,
+.step,
+.pip,
+.prep-toggle,
+.icon-button,
+.link-button,
+.name-button,
+.field {
+  transition:
+    border-color var(--dur-fast),
+    color var(--dur-fast),
+    background-color var(--dur-fast),
+    transform 0.12s;
+}
+.btn:active:not(:disabled),
+.chip:active,
+.step:active {
+  transform: translateY(1px);
+}
+
 /* ───────── Layout ───────── */
 .app {
+  position: relative;
+  isolation: isolate; /* the light layers below sit behind the content but above the background */
   display: grid;
-  grid-template-columns: var(--rail-width) 1fr;
-  grid-template-rows: var(--banner-height) 1fr var(--footer-height);
+  grid-template-columns: var(--rail-width) minmax(0, 1fr); /* minmax: wide content scrolls inside .stage, never stretches the page */
+  grid-template-rows: var(--banner-height) minmax(0, 1fr) var(--footer-height);
   height: 100vh;
   background:
     radial-gradient(1200px 600px at 70% -10%, var(--glow), transparent 60%),
@@ -52,17 +82,44 @@ button {
 .app--loading {
   display: block;
 }
+/* A hearth at the lower left that gutters like a candle, and a vignette that darkens the corners of the room */
+.app::before,
+.app::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+/* Sized to the corner it lights: a full-window layer re-composited every frame would be wasted work */
+.app::before {
+  left: 0;
+  bottom: 0;
+  width: 900px;
+  height: 560px;
+  background: radial-gradient(closest-side at 0% 100%, var(--hearth), transparent);
+  animation: candle 7s ease-in-out infinite;
+}
+.app::after {
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 45%, transparent 55%, var(--shadow-sm));
+}
 
 /* ───────── Banner ───────── */
 .banner {
   grid-column: 1 / -1;
+  position: relative;
+  z-index: 5; /* above the stage (so its shadow rules show) and the drawer (so the HP popover is never under it) */
   display: flex;
   align-items: center;
   gap: var(--space-5);
   padding: 0 var(--space-5) 0 92px; /* clears the macOS traffic lights */
   background: var(--oak-shadow);
   border-bottom: 1px solid var(--gold-dim);
-  box-shadow: 0 1px 0 var(--shadow);
+  /* a second, finer gilt rule beneath the first */
+  box-shadow:
+    0 2px 0 var(--oak-shadow),
+    0 3px 0 var(--rule),
+    0 6px 14px var(--shadow-sm);
   -webkit-app-region: drag;
 }
 .banner__id {
@@ -76,6 +133,8 @@ button {
   color: var(--gold-bright);
   line-height: 1.1;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .banner__dev {
   margin-left: var(--space-3);
@@ -91,6 +150,9 @@ button {
   color: var(--bone-dim);
   font-style: italic;
   font-size: var(--step--1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .vital {
   display: flex;
@@ -110,6 +172,7 @@ button {
   font-weight: 500;
 }
 .vital__label {
+  white-space: nowrap;
   font-variant: small-caps;
   letter-spacing: 0.04em;
   color: var(--bone-dim);
@@ -131,7 +194,17 @@ button {
 }
 .hp-bar__fill {
   height: 100%;
-  background: linear-gradient(var(--gules-lit), var(--gules));
+  background:
+    linear-gradient(var(--specular-soft), transparent 55%),
+    linear-gradient(var(--gules-lit), var(--gules));
+  transition: width 0.6s var(--ease-out);
+}
+/* At a quarter health or less the bar throbs like a heartbeat */
+.hp-bar[data-low] {
+  border-color: var(--gules-lit);
+}
+.hp-bar[data-low] .hp-bar__fill {
+  animation: heartbeat 1.3s ease-in-out infinite;
 }
 
 /* ───────── Panels ───────── */
@@ -153,12 +226,45 @@ button {
     inset 0 0 0 4px var(--rule-strong),
     0 6px 16px var(--shadow-sm);
 }
+/* Gilt corner studs, painted through alpha masks so the active theme's gold shows */
+.panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--gold);
+  opacity: 0.75;
+  mask-image: var(--corner-tl), var(--corner-tr), var(--corner-bl), var(--corner-br);
+  mask-repeat: no-repeat;
+  mask-size: 18px 18px;
+  mask-position:
+    left 5px top 5px,
+    right 5px top 5px,
+    left 5px bottom 5px,
+    right 5px bottom 5px;
+}
 .panel__title {
   font-family: var(--font-display);
   font-weight: 500;
   font-size: var(--step-0);
   color: var(--gold);
+}
+/* Rail panels only: the underline and icon slot do not apply to other uses of .panel__title (the unreadable-state box) */
+.rail .panel__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   margin-bottom: var(--space-2);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule-faint);
+}
+.panel__title svg {
+  flex: none;
+  color: var(--gold-bright);
+}
+.rail > .panel {
+  animation: rise-in 0.35s var(--ease-out) backwards;
+  animation-delay: calc(sibling-index() * 50ms);
 }
 
 /* ───────── Slot rail: the jewels ───────── */
@@ -199,11 +305,27 @@ button {
   place-items: center;
 }
 .gem__facet {
+  position: relative;
   display: block;
   width: 30px;
   height: 34px;
   clip-path: polygon(50% 0, 100% 26%, 100% 74%, 50% 100%, 0 74%, 0 26%);
   transition: filter 0.15s, transform 0.12s;
+}
+/* A glint crosses each full gem once as the sheet appears (out of step with its neighbours) and again whenever the slot
+   panel is hovered. Never an infinite loop: an idle sheet should not keep the compositor awake. */
+.gem[data-state='full'] .gem__facet::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 38%, var(--specular) 50%, transparent 62%);
+  transform: translateX(-120%);
+  animation: glint 1.4s ease-in-out backwards;
+  animation-delay: calc(0.6s + var(--order, 0) * 0.12s);
+}
+.slot-rail:hover .gem[data-state='full'] .gem__facet::after {
+  animation: glint-hover 1.2s ease-in-out;
+  animation-delay: calc(var(--order, 0) * 0.06s);
 }
 .gem[data-state='full'] .gem__facet {
   background:
@@ -211,12 +333,14 @@ button {
     linear-gradient(20deg, transparent 0 58%, rgba(0, 0, 0, 0.32) 58% 100%),
     conic-gradient(from 200deg at 50% 52%, var(--gem-a), var(--gem-b), var(--gem-c), var(--gem-d), var(--gem-a));
   filter: drop-shadow(0 0 7px var(--gem-glow));
+  animation: gem-kindle 0.6s var(--ease-out);
 }
 .gem[data-state='spent'] .gem__facet {
   background:
     radial-gradient(circle at 50% 55%, var(--gem-spent-core) 0 55%, var(--gem-spent-rim) 56% 100%);
   filter: none;
   opacity: 0.85;
+  animation: gem-quench 0.4s var(--ease-out);
 }
 .gem:hover .gem__facet {
   transform: translateY(-1px);
@@ -236,6 +360,19 @@ button {
 }
 .turn-line[data-active] {
   border-left-color: var(--gold-bright);
+}
+.turn-line__concentrating {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.rune-ring {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  color: var(--gold-bright);
+  filter: drop-shadow(0 0 4px var(--gem-glow));
+  animation: spin 16s linear infinite;
 }
 .turn-line + .turn-line {
   margin-top: var(--space-2);
@@ -300,6 +437,8 @@ button {
 }
 .pip[data-state='full'] {
   background: var(--gold);
+  box-shadow: 0 0 6px var(--gem-glow);
+  animation: pip-kindle 0.5s var(--ease-out);
 }
 
 /* ───────── Spells ───────── */
@@ -317,6 +456,7 @@ button {
   margin-top: var(--space-4);
 }
 .spell-level__title {
+  position: relative;
   font-family: var(--font-display);
   font-weight: 500;
   font-size: var(--step-1);
@@ -324,6 +464,17 @@ button {
   margin-bottom: var(--space-2);
   padding-bottom: 2px;
   border-bottom: 1px solid var(--gold-dim);
+}
+/* A lozenge closes the heading rule, like the end of a ruled line in an illuminated manuscript */
+.spell-level__title::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: -5px;
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg);
+  background: var(--gold);
 }
 /* Rubricated initial, as in a manuscript */
 .spell-level__title::first-letter {
@@ -333,7 +484,7 @@ button {
 }
 .spell-level__cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-min), 1fr));
   gap: var(--space-2) var(--space-3);
 }
 .spell-card {
@@ -348,6 +499,18 @@ button {
   border: 1px solid var(--rule);
   border-left: 6px solid var(--tincture);
   box-shadow: 0 3px 10px var(--shadow-sm);
+  /* only compositor-friendly properties ease; the hover shadow snaps rather than repainting the card every frame */
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    opacity var(--dur-base);
+  animation: rise-in 0.3s var(--ease-out) backwards;
+  animation-delay: calc(min(sibling-index(), 8) * 20ms);
+}
+.spell-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 18px var(--shadow-md),
+    -6px 0 14px -6px var(--tincture);
 }
 .spell-card[data-role='offense'] {
   --tincture: var(--role-offense);
@@ -368,6 +531,17 @@ button {
 .spell-card[data-active] {
   outline: 2px solid var(--gold-bright);
   outline-offset: -2px;
+}
+/* A held spell pulses with light. Only this overlay's opacity animates, which costs the card no repaint. */
+.spell-card[data-active]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow:
+    0 0 16px 2px var(--gem-glow),
+    inset 0 0 14px var(--gem-glow);
+  animation: arcane-pulse 2.6s ease-in-out infinite;
 }
 .roundel {
   display: grid;
@@ -423,12 +597,17 @@ button {
   overflow: hidden;
 }
 .cast-button {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   min-width: 68px;
   padding: 4px 8px;
-  background: linear-gradient(var(--gold-bright), var(--gold));
+  /* the first layer is a sheen that sweeps across the gilt on hover */
+  background:
+    linear-gradient(105deg, transparent 30%, var(--specular) 50%, transparent 70%) no-repeat -130% 0 / 60% 100%,
+    linear-gradient(var(--gold-bright), var(--gold));
+  transition: background-position 0.6s var(--ease-out);
   border: 1px solid var(--gold-deep);
   color: var(--on-gold);
   font-family: var(--font-display);
@@ -440,6 +619,37 @@ button {
   font-family: var(--font-text);
   font-weight: 400;
   font-size: 0.8rem;
+}
+/* A ring of light released by a press (see CastButton) */
+.cast-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cast-burst::before,
+.cast-burst::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border-radius: 50%;
+  opacity: 0; /* so a reduced-motion run (no animation) shows nothing at all */
+}
+.cast-burst::before {
+  border: 2px solid var(--gold-bright);
+  animation: burst-ring 0.7s var(--ease-out);
+}
+.cast-burst::after {
+  background: radial-gradient(circle, var(--gem-glow), transparent 68%);
+  animation: burst-glow 0.7s ease-out; /* same length as the ring: CastButton unmounts the burst on the first animationend */
+}
+.cast-button:hover:not(:disabled) {
+  background-position:
+    230% 0,
+    0 0;
 }
 .cast-button:active:not(:disabled) {
   transform: translateY(2px);
@@ -515,8 +725,11 @@ button {
   padding: var(--space-2) var(--space-4);
   background: var(--vellum-raised);
   border: 1px solid var(--gold);
-  box-shadow: 0 8px 24px var(--shadow-md);
   animation: toast-in 0.18s ease-out;
+  box-shadow:
+    0 8px 24px var(--shadow-md),
+    0 0 0 3px var(--vellum-raised),
+    0 0 0 4px var(--rule-strong);
 }
 @keyframes toast-in {
   from {
@@ -711,6 +924,7 @@ button.vital:hover .vital__value {
   background: var(--grain), var(--vellum-raised);
   border: 1px solid var(--gold);
   box-shadow: 0 10px 28px var(--shadow-lg);
+  animation: rise-in 0.18s var(--ease-out);
 }
 .hp-popover__actions {
   display: flex;
@@ -733,6 +947,7 @@ button.vital:hover .vital__value {
   margin-right: calc(-1 * var(--space-2));
   filter: drop-shadow(0 2px 3px var(--shadow-md));
   user-select: none;
+  animation: emblem-in 1s var(--ease-out) backwards;
 }
 
 /* ───────── Names that open the drawer ───────── */
@@ -773,13 +988,14 @@ button.vital:hover .vital__value {
   top: var(--banner-height);
   right: 0;
   bottom: var(--footer-height);
-  width: 400px;
+  width: var(--drawer-width);
   overflow-y: auto;
   padding: var(--space-4);
   background: var(--grain), var(--vellum-raised);
   border-left: 1px solid var(--gold);
   box-shadow: -12px 0 28px var(--shadow-md);
   user-select: text;
+  animation: slide-in-right 0.28s var(--ease-out);
 }
 .drawer__head {
   display: flex;
@@ -842,7 +1058,8 @@ button.vital:hover .vital__value {
   margin: var(--space-3) 0 0;
   padding: 0;
   display: grid;
-  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+  gap: var(--space-3) var(--space-5);
   user-select: text;
 }
 .other-features h3 {
@@ -867,6 +1084,12 @@ button.vital:hover .vital__value {
   color: var(--bone-dim);
   cursor: pointer;
 }
+.icon-button svg {
+  transition: transform 0.5s var(--ease-out);
+}
+.icon-button:hover svg {
+  transform: rotate(45deg);
+}
 .icon-button:hover,
 .icon-button[aria-pressed='true'] {
   color: var(--gold-bright);
@@ -880,13 +1103,13 @@ button.vital:hover .vital__value {
   align-content: start;
   gap: var(--space-4);
   user-select: text;
+  animation: fade-in var(--dur-base) ease-out;
 }
 .settings__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  max-width: 1040px;
 }
 .settings__title {
   font-family: var(--font-display);
@@ -902,11 +1125,9 @@ button.vital:hover .vital__value {
   color: var(--gold);
 }
 .settings__note {
-  max-width: 1040px;
   font-style: italic;
 }
 .theme-picker {
-  max-width: 1040px;
   margin: 0;
   padding: 0;
   border: 0;
@@ -926,9 +1147,15 @@ button.vital:hover .vital__value {
   background: var(--grain), var(--vellum-deep);
   border: 1px solid var(--gold-dim);
   cursor: pointer;
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    border-color var(--dur-fast),
+    box-shadow var(--dur-base);
 }
 .theme-option:hover {
   border-color: var(--gold-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px var(--shadow-md);
 }
 .theme-option__input {
   position: absolute;
@@ -937,7 +1164,9 @@ button.vital:hover .vital__value {
 }
 .theme-option:has(.theme-option__input:checked) {
   border-color: var(--gold-bright);
-  box-shadow: inset 0 0 0 2px var(--gold-bright);
+  box-shadow:
+    inset 0 0 0 2px var(--gold-bright),
+    0 0 18px var(--gem-glow);
 }
 .theme-option:has(.theme-option__input:focus-visible) {
   outline: 2px solid var(--gold-bright);
@@ -1051,4 +1280,229 @@ button.vital:hover .vital__value {
 }
 .theme-preview__roles i[data-role='utility'] {
   --tincture: var(--role-utility);
+}
+
+/* ───────── Heraldic rule ───────── */
+.flourish {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--gold-dim);
+}
+.flourish::before,
+.flourish::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, currentColor);
+}
+.flourish::after {
+  transform: scaleX(-1);
+}
+.flourish i {
+  width: 9px;
+  height: 9px;
+  transform: rotate(45deg);
+  background: var(--gold);
+  box-shadow:
+    -16px 0 0 -3px var(--gold-dim),
+    16px 0 0 -3px var(--gold-dim);
+}
+
+/* ───────── Rest: light across the page ───────── */
+.rest-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(ellipse 80% 70% at 50% 115%, var(--dawn), transparent 70%);
+  animation: dawn 1.8s ease-in-out;
+}
+.rest-glow[data-kind='short'] {
+  background: radial-gradient(ellipse 50% 45% at 50% 115%, var(--dawn), transparent 70%);
+  animation-duration: 1.2s;
+}
+
+/* ───────── Motion ───────── */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+}
+@keyframes emblem-in {
+  from {
+    opacity: 0;
+    filter: drop-shadow(0 0 0 transparent) brightness(2.2);
+    transform: scale(0.85);
+  }
+  55% {
+    filter: drop-shadow(0 0 14px var(--gem-glow)) brightness(1.4);
+  }
+}
+/* The hearth gutters: irregular, never a clean sine wave */
+@keyframes candle {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  12% {
+    opacity: 1;
+  }
+  27% {
+    opacity: 0.7;
+  }
+  41% {
+    opacity: 0.95;
+  }
+  58% {
+    opacity: 0.75;
+  }
+  73% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 0.85;
+  }
+}
+/* Individual transform properties (scale, not transform) so they compose with the hover transforms and the pip's rotation */
+@keyframes gem-kindle {
+  from {
+    scale: 0.55;
+    filter: brightness(2.4) drop-shadow(0 0 16px var(--gem-glow));
+  }
+  60% {
+    scale: 1.14;
+  }
+}
+@keyframes gem-quench {
+  from {
+    scale: 1.12;
+    opacity: 1;
+  }
+}
+@keyframes pip-kindle {
+  from {
+    scale: 0.4;
+  }
+  60% {
+    scale: 1.4;
+  }
+}
+@keyframes glint {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(120%);
+  }
+}
+@keyframes glint-hover {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(120%);
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes arcane-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes heartbeat {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  14% {
+    opacity: 0.55;
+  }
+  28% {
+    opacity: 1;
+  }
+  42% {
+    opacity: 0.7;
+  }
+}
+@keyframes burst-ring {
+  from {
+    opacity: 0.95;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 0;
+    transform: scale(4.5);
+  }
+}
+@keyframes burst-glow {
+  from {
+    opacity: 0.9;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: scale(3.6);
+  }
+}
+@keyframes dawn {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Unfocused or hidden window: the looping ambient animations hold still (see ambient.ts) */
+html[data-ambient='off'] .app::before,
+html[data-ambient='off'] .rune-ring,
+html[data-ambient='off'] .hp-bar[data-low] .hp-bar__fill,
+html[data-ambient='off'] .spell-card[data-active]::after {
+  animation-play-state: paused;
+}
+
+/* ───────── Narrower windows ───────── */
+@media (max-width: 1180px) {
+  .banner {
+    gap: var(--space-3);
+    padding-left: 84px;
+    padding-right: var(--space-3);
+  }
+  .banner__emblem {
+    height: 40px;
+  }
+  .banner__name {
+    font-size: var(--step-1);
+  }
+  .vital {
+    min-width: 54px;
+  }
+  .vital--hp {
+    min-width: 150px;
+  }
 }

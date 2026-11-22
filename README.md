@@ -47,6 +47,22 @@ it before the first paint so there is no flash of the default theme on launch.
 
 The settings preview needs no extra work: it wears the theme through `data-theme`, so it always matches the real UI.
 
+## Window and layout
+
+The window reopens where you left it: size, position, maximized and full-screen state are saved to `window-state.json` in the
+profile folder (next to the `state/` folder, but never part of the play state, so a reset leaves it alone). If the saved monitor is
+gone the window opens centred on the main display, and a frame larger than the screen is fitted to it. Minimum size is 960x560.
+
+Every page fills the window. The rail, detail drawer and card columns grow with the width (`--rail-width`, `--drawer-width`,
+`--card-min` in `tokens.css`), so a wide window shows more cards per row and the settings page uses the full width.
+
+## Motion and ornament
+
+Candle-flicker light and vignette behind the page, gilt corner studs on panels, heading lozenges, gems that kindle and glint,
+a pulsing frame and turning rune ring while concentrating, a ring of light on Cast, a heartbeat on the HP bar at 25% or less,
+and a wash of light on short and long rests. It is all CSS and inline SVG (no assets, no JS animation), tinted by the active
+theme, and switched off entirely by the system's "reduce motion" setting.
+
 ## Where things live
 
 ```

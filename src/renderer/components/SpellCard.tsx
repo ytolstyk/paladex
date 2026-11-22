@@ -8,7 +8,7 @@ import { isChoosable, isInDefaultView } from '@/domain/prepared'
 import { NO_WARNINGS, turnWarnings, warningText } from '@/domain/turn'
 import { catalog, usePlayStore } from '@/state/session'
 import { useUiStore } from '@/state/uiStore'
-import { CastRoundel } from './CardParts'
+import { CastButton, CastRoundel } from './CardParts'
 
 function paymentLabel(payment: Payment): string | null {
   switch (payment.kind) {
@@ -69,17 +69,14 @@ export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): R
         </p>
         <p className="spell-card__summary">{spell.summary}</p>
       </div>
-      <button
-        type="button"
-        className="cast-button"
+      <CastButton
+        verb="Cast"
+        detail={label}
         disabled={!castable}
-        data-warn={(castable && warnings.length > 0) || undefined}
-        onClick={() => cast(spell.id)}
+        warn={castable && warnings.length > 0}
         title={castable ? warningText(warnings) || undefined : dimmed ? 'Prepare this spell to cast it' : 'Nothing left to pay for this spell'}
-      >
-        Cast
-        {label && <span className="cast-button__level">{label}</span>}
-      </button>
+        onActivate={() => cast(spell.id)}
+      />
     </article>
   )
 })

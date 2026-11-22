@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { CastTime } from '@shared/types'
 import { NO_FILTERS, type Filters, type Intent } from '@/domain/filters'
+import type { RestKind } from '@/domain/rests'
 
 export type ViewId = 'sheet' | 'settings'
 
@@ -17,6 +18,10 @@ interface UiStore {
   detailId: string | null
   openDetail(id: string): void
   closeDetail(): void
+  /** The rest whose light is currently washing over the page (a visual flourish only). `n` restarts it on a repeat. */
+  restGlow: { kind: RestKind; n: number } | null
+  glowRest(kind: RestKind): void
+  clearRestGlow(): void
   filters: Filters
   toggleIntent(intent: Intent): void
   toggleCastTime(time: CastTime): void
@@ -39,6 +44,9 @@ export const useUiStore = create<UiStore>((set) => ({
   detailId: null,
   openDetail: (id) => set({ detailId: id }),
   closeDetail: () => set({ detailId: null }),
+  restGlow: null,
+  glowRest: (kind) => set((s) => ({ restGlow: { kind, n: (s.restGlow?.n ?? 0) + 1 } })),
+  clearRestGlow: () => set({ restGlow: null }),
   filters: { ...NO_FILTERS },
   toggleIntent: (intent) => set((s) => ({ filters: { ...s.filters, intents: toggleIn(s.filters.intents, intent) } })),
   toggleCastTime: (time) => set((s) => ({ filters: { ...s.filters, castTimes: toggleIn(s.filters.castTimes, time) } })),

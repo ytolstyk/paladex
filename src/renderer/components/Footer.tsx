@@ -1,5 +1,7 @@
 import { formatLog } from '@/domain/log'
+import type { RestKind } from '@/domain/rests'
 import { catalog, usePlayStore } from '@/state/session'
+import { useUiStore } from '@/state/uiStore'
 
 export function Footer(): React.JSX.Element {
   const lastEntry = usePlayStore((s) => s.play?.log.at(-1))
@@ -8,6 +10,11 @@ export function Footer(): React.JSX.Element {
   const saveError = usePlayStore((s) => s.saveError)
   const exportRaw = usePlayStore((s) => s.exportRaw)
   const takeRest = usePlayStore((s) => s.takeRest)
+  const glowRest = useUiStore((s) => s.glowRest)
+  const rest = (kind: RestKind): void => {
+    takeRest(kind)
+    glowRest(kind)
+  }
 
   return (
     <footer className="footer">
@@ -22,10 +29,10 @@ export function Footer(): React.JSX.Element {
         <button type="button" className="btn" onClick={undoLast} disabled={!canUndo} title="Undo (Cmd+Z)">
           Undo
         </button>
-        <button type="button" className="btn" onClick={() => takeRest('short')} title="Short rest: Channel Divinity +1">
+        <button type="button" className="btn" onClick={() => rest('short')} title="Short rest: Channel Divinity +1">
           Short rest
         </button>
-        <button type="button" className="btn" onClick={() => takeRest('long')} title="Long rest: slots, resources and hit points">
+        <button type="button" className="btn" onClick={() => rest('long')} title="Long rest: slots, resources and hit points">
           Long rest
         </button>
         <button type="button" className="btn btn--quiet" onClick={() => void exportRaw()}>

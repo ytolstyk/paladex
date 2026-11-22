@@ -107,6 +107,12 @@
   --gem-c: var(--gold-bright);
   --gem-d: color-mix(in srgb, var(--gold) 62%, black);
   --gem-glow: color-mix(in srgb, var(--gold-bright) 65%, transparent);
+
+  /* Neutral highlights for glints and sheens (white, like the gem's specular layers), and the hearth-light overlays */
+  --specular: color-mix(in srgb, white 45%, transparent);
+  --specular-soft: color-mix(in srgb, white 22%, transparent);
+  --hearth: color-mix(in srgb, var(--gold-bright) 16%, transparent);
+  --dawn: color-mix(in srgb, var(--gold-bright) 55%, transparent);
 }
 
 :root {
@@ -130,7 +136,30 @@
   --space-4: 16px;
   --space-5: 24px;
 
-  --rail-width: 336px;
+  /* Layout: the rail, drawer and card columns grow with the window instead of sitting at a fixed width */
+  --rail-width: clamp(336px, 22vw, 480px);
+  --drawer-width: clamp(380px, 28vw, 560px);
+  --card-min: clamp(290px, 17vw, 380px);
   --banner-height: 64px;
   --footer-height: 52px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-fast: 0.15s;
+  --dur-base: 0.3s;
+
+  /* Heraldic corner studs, drawn as alpha masks so each theme's own gold shows through (see .panel::after). One
+     SVG per corner because a CSS mask layer cannot be mirrored. */
+  --corner-tl: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M4 .6 7.4 4 4 7.4.6 4Z'/><path d='M9.5 3.4h12.4v1.2H9.5ZM3.4 9.5h1.2v12.4H3.4Z'/><circle cx='22.6' cy='4' r='1.2'/><circle cx='4' cy='22.6' r='1.2'/></svg>");
+  --corner-tr: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><g transform='matrix(-1 0 0 1 24 0)'><path d='M4 .6 7.4 4 4 7.4.6 4Z'/><path d='M9.5 3.4h12.4v1.2H9.5ZM3.4 9.5h1.2v12.4H3.4Z'/><circle cx='22.6' cy='4' r='1.2'/><circle cx='4' cy='22.6' r='1.2'/></g></svg>");
+  --corner-bl: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><g transform='matrix(1 0 0 -1 0 24)'><path d='M4 .6 7.4 4 4 7.4.6 4Z'/><path d='M9.5 3.4h12.4v1.2H9.5ZM3.4 9.5h1.2v12.4H3.4Z'/><circle cx='22.6' cy='4' r='1.2'/><circle cx='4' cy='22.6' r='1.2'/></g></svg>");
+  --corner-br: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><g transform='rotate(180 12 12)'><path d='M4 .6 7.4 4 4 7.4.6 4Z'/><path d='M9.5 3.4h12.4v1.2H9.5ZM3.4 9.5h1.2v12.4H3.4Z'/><circle cx='22.6' cy='4' r='1.2'/><circle cx='4' cy='22.6' r='1.2'/></g></svg>");
+}
+
+/* A short window gives the chrome back to the cards */
+@media (max-height: 640px) {
+  :root {
+    --banner-height: 56px;
+    --footer-height: 44px;
+  }
 }

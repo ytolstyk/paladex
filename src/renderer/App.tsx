@@ -4,6 +4,7 @@ import { DetailDrawer } from './components/DetailDrawer'
 import { Footer } from './components/Footer'
 import { OtherFeatures } from './components/OtherFeatures'
 import { ResourcePanel } from './components/ResourcePanel'
+import { RestGlow } from './components/RestGlow'
 import { SettingsPage } from './components/SettingsPage'
 import { SlotTracker } from './components/SlotTracker'
 import { SpellGrid } from './components/SpellGrid'
@@ -54,6 +55,7 @@ export function App(): React.JSX.Element {
       <Footer />
       <DetailDrawer />
       <Toast />
+      <RestGlow />
     </div>
   )
 }

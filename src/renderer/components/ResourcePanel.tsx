@@ -1,6 +1,7 @@
 import type { CounterDef } from '@shared/types'
 import { selectCounters } from '@/state/selectors'
 import { catalog, usePlayStore } from '@/state/session'
+import { ShieldIcon } from './Ornaments'
 
 /** Pools bigger than this get ±5 buttons as well as ±1 (Lay On Hands is spent in chunks). */
 const BIG_POOL = 10
@@ -52,7 +53,10 @@ export function ResourcePanel(): React.JSX.Element {
   const used = usePlayStore(selectCounters)
   return (
     <section className="panel" aria-label="Resources">
-      <h2 className="panel__title">Resources</h2>
+      <h2 className="panel__title">
+        <ShieldIcon />
+        Resources
+      </h2>
       <ul className="resources">
         {catalog.counters.map((c) => {
           const left = Math.max(0, c.max - (used[c.id] ?? 0))

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useUiStore } from '@/state/uiStore'
+import { Flourish } from './Ornaments'
 import { ThemePicker } from './ThemePicker'
 
 /** Full-width settings view. Esc or the back button returns to the sheet. */
@@ -24,6 +25,7 @@ export function SettingsPage(): React.JSX.Element {
           Back to sheet
         </button>
       </header>
+      <Flourish />
       <ThemePicker />
       <p className="muted settings__note">Your choice is remembered on this computer and applies instantly.</p>
     </main>

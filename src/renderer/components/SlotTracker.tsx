@@ -1,7 +1,9 @@
+import type { CSSProperties } from 'react'
 import { roman } from '@/domain/derived'
 import { slotsRemaining } from '@/domain/slots'
 import { selectSlotsUsed } from '@/state/selectors'
 import { catalog, usePlayStore } from '@/state/session'
+import { GemIcon } from './Ornaments'
 
 export function SlotTracker(): React.JSX.Element {
   const slotsUsed = usePlayStore(selectSlotsUsed)
@@ -9,8 +11,12 @@ export function SlotTracker(): React.JSX.Element {
 
   return (
     <section className="panel slot-rail" aria-label="Spell slots">
-      <h2 className="panel__title">Spell slots</h2>
+      <h2 className="panel__title">
+        <GemIcon />
+        Spell slots
+      </h2>
       {catalog.slotCapacity.map((total, i) => {
+        const rowStart = catalog.slotCapacity.slice(0, i).reduce((sum, n) => sum + n, 0) // running gem count, for the glint stagger
         const level = i + 1
         const remaining = slotsRemaining(catalog.slotCapacity, slotsUsed, level)
         return (
@@ -28,6 +34,7 @@ export function SlotTracker(): React.JSX.Element {
                     type="button"
                     className="gem"
                     data-state={full ? 'full' : 'spent'}
+                    style={{ '--order': rowStart + gem } as CSSProperties}
                     aria-label={`Level ${level} slot ${gem + 1}: ${full ? 'available, tap to spend' : 'spent, tap to restore'}`}
                     onClick={() => adjustSlot(level, full ? 'spend' : 'restore')}
                   >

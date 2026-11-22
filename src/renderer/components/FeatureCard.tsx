@@ -6,7 +6,7 @@ import { ROLE_LABEL } from '@/domain/labels'
 import { NO_WARNINGS, turnWarnings, warningText } from '@/domain/turn'
 import { catalog, usePlayStore } from '@/state/session'
 import { useUiStore } from '@/state/uiStore'
-import { CastRoundel } from './CardParts'
+import { CastButton, CastRoundel } from './CardParts'
 
 /** A class or species feature, spent from its counter. Pool features (Lay On Hands) ask how much. */
 export const FeatureCard = memo(function FeatureCard({ feature }: { feature: Feature }): React.JSX.Element {
@@ -58,17 +58,14 @@ export const FeatureCard = memo(function FeatureCard({ feature }: { feature: Fea
             onChange={(e) => setAmount(e.target.value)}
           />
         )}
-        <button
-          type="button"
-          className="cast-button"
+        <CastButton
+          verb="Use"
+          detail={usable ? `${left}/${counter?.max ?? left} left` : 'none left'}
           disabled={!usable}
-          data-warn={(usable && warnings.length > 0) || undefined}
-          onClick={use}
+          warn={usable && warnings.length > 0}
           title={usable ? warningText(warnings) || undefined : 'Nothing left to spend'}
-        >
-          Use
-          <span className="cast-button__level">{usable ? `${left}/${counter?.max ?? left} left` : 'none left'}</span>
-        </button>
+          onActivate={use}
+        />
       </div>
     </article>
   )

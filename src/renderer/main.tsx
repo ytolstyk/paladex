@@ -6,11 +6,13 @@ import './styles/tokens.css'
 import './styles/themes.css'
 import './styles/app.css'
 import { App } from './App'
+import { initAmbientPause } from './ambient'
 import { usePlayStore } from './state/session'
 import { initTheme } from './state/themeStore'
 
 // public/theme-boot.js already set the attribute before first paint; this makes the store authoritative.
 initTheme()
+initAmbientPause()
 
 // Start the load now so the IPC round trip overlaps React's first render (init() is idempotent).
 void usePlayStore.getState().init()

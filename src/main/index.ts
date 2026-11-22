@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, Menu, session, type IpcMainInvokeEvent } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, Menu, screen, session, type IpcMainInvokeEvent } from 'electron'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -7,8 +7,11 @@ import { IPC, type ProfileInfo } from '../shared/ipc'
 import { parsePlayState } from '../shared/schema'
 import { migrateLegacyProfile, PROFILE_NAME, profileDir, type ProfileOptions } from './profile'
 import { StateStore } from './store'
+import { placeWindow, WindowStateStore, type WindowDefaults } from './windowState'
 
-const WINDOW = { width: 1280, height: 760, minWidth: 1100, minHeight: 640 } as const
+const WINDOW: WindowDefaults = { width: 1280, height: 760, minWidth: 960, minHeight: 560 }
+/** How long to wait after the last move/resize before writing the window's frame to disk. */
+const WINDOW_SAVE_DELAY_MS = 400
 const WINDOW_BACKGROUND = '#1b130d' // matches --oak in tokens.css so there is no white flash
 const isProdProfile = app.isPackaged || process.env['PALADEX_PROFILE'] === 'prod'
 const isDevProfile = !isProdProfile
@@ -30,6 +33,7 @@ app.setName(PROFILE_NAME)
 app.setPath('userData', profileDir(profileOptions()))
 
 const store = new StateStore(join(app.getPath('userData'), 'state'))
+const windowStore = new WindowStateStore(join(app.getPath('userData'), 'window-state.json'))
 let mainWindow: BrowserWindow | null = null
 
 /** Vite dev-server URL when running unpackaged under `npm run dev`; null for built/packaged runs. */
@@ -99,10 +103,52 @@ function registerIpc(): void {
   )
 }
 
+/** Remember where the user leaves the window (size, position, maximized, full screen) and reopen it there. */
+function trackWindowState(win: BrowserWindow): void {
+  let timer: NodeJS.Timeout | null = null
+  let lastWritten = ''
+  const capture = (): void => {
+    if (win.isDestroyed()) return
+    try {
+      // getNormalBounds is the windowed frame even while maximized or full screen, so un-maximizing later restores it.
+      const state = { ...win.getNormalBounds(), maximized: win.isMaximized(), fullScreen: win.isFullScreen() }
+      const serialized = JSON.stringify(state)
+      if (serialized === lastWritten) return // restoring maximized/full screen at launch fires events but changes nothing
+      windowStore.save(state)
+      lastWritten = serialized
+    } catch (err) {
+      console.error('Could not save the window position:', err) // a view preference: never worth interrupting play
+    }
+  }
+  const schedule = (): void => {
+    if (timer) clearTimeout(timer)
+    timer = setTimeout(capture, WINDOW_SAVE_DELAY_MS)
+  }
+  win.on('resize', schedule)
+  win.on('move', schedule)
+  win.on('maximize', schedule)
+  win.on('unmaximize', schedule)
+  win.on('enter-full-screen', schedule)
+  win.on('leave-full-screen', schedule)
+  win.on('close', () => {
+    if (timer) clearTimeout(timer)
+    capture()
+  })
+}
+
 function createWindow(): void {
+  const saved = windowStore.load()
+  const displays = screen.getAllDisplays()
+  const placement = placeWindow(
+    saved,
+    displays.map((d) => d.workArea),
+    screen.getPrimaryDisplay().workArea,
+    WINDOW
+  )
   mainWindow = new BrowserWindow({
-    ...WINDOW,
-    useContentSize: true,
+    ...placement,
+    minWidth: WINDOW.minWidth,
+    minHeight: WINDOW.minHeight,
     show: false,
     title: isDevProfile ? `${PROFILE_NAME} (dev)` : PROFILE_NAME,
     titleBarStyle: 'hiddenInset',
@@ -115,6 +161,10 @@ function createWindow(): void {
       webSecurity: true
     }
   })
+
+  if (saved?.maximized) mainWindow.maximize()
+  if (saved?.fullScreen) mainWindow.setFullScreen(true)
+  trackWindowState(mainWindow)
 
   mainWindow.once('ready-to-show', () => mainWindow?.show())
 

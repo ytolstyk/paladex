@@ -1,5 +1,6 @@
 import { selectConcentration } from '@/state/selectors'
 import { catalog, usePlayStore } from '@/state/session'
+import { HourglassIcon, RuneRing } from './Ornaments'
 
 /**
  * What you have spent this turn. Rules (2024): one spell slot per turn, and one bonus action per turn.
@@ -16,12 +17,18 @@ export function TurnPanel(): React.JSX.Element {
 
   return (
     <section className="panel" aria-label="This turn">
-      <h2 className="panel__title">This turn</h2>
+      <h2 className="panel__title">
+        <HourglassIcon />
+        This turn
+      </h2>
       <div className="turn-line" data-active={concentration ? true : undefined}>
         {concentration ? (
           <>
-            <span>
-              Concentrating on <strong>{catalog.nameOf(concentration)}</strong>
+            <span className="turn-line__concentrating">
+              <RuneRing />
+              <span>
+                Concentrating on <strong>{catalog.nameOf(concentration)}</strong>
+              </span>
             </span>
             <button type="button" className="link-button" onClick={dropConcentration}>
               Drop

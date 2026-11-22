@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { usePlayStore } from '@/state/session'
 
+/** At or below this share of maximum hit points the bar throbs. */
+const LOW_HP_PERCENT = 25
+
 /** The hit-point block in the banner. Click it to take damage or heal; the number field takes any amount. */
 export function HpControl(): React.JSX.Element | null {
   const vitals = usePlayStore((s) => s.play?.vitals)
@@ -27,6 +30,7 @@ export function HpControl(): React.JSX.Element | null {
 
   if (!vitals) return null
   const hpPct = Math.max(0, Math.min(100, (vitals.hp / vitals.hpMax) * 100))
+  const low = hpPct <= LOW_HP_PERCENT
   const parsed = Number.parseInt(amount, 10)
   const valid = Number.isFinite(parsed) && parsed > 0
 
@@ -46,7 +50,7 @@ export function HpControl(): React.JSX.Element | null {
         aria-label={`Hit points ${vitals.hp} of ${vitals.hpMax}${vitals.tempHp ? `, ${vitals.tempHp} temporary` : ''}. Change hit points`}
         onClick={() => setOpen((o) => !o)}
       >
-        <div className="hp-bar" role="img" aria-label={`${Math.round(hpPct)} percent health`}>
+        <div className="hp-bar" role="img" aria-label={`${Math.round(hpPct)} percent health`} data-low={low || undefined}>
           <div className="hp-bar__fill" style={{ width: `${hpPct}%` }} />
         </div>
         <span className="vital__value">

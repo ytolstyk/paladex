@@ -56,3 +56,13 @@ footer stay. The gear button in `VitalsBanner` and Cmd/Ctrl+, (in `hooks/useShor
 `uiStore.toggleSettings()`, which also closes the detail drawer when opening. Esc closes settings (handled in
 `SettingsPage`). Cmd/Ctrl+, works even while an input has focus; `N` (new turn) is disabled on the settings page.
 `useShortcuts` treats only text-type inputs as typing targets, so a focused radio does not swallow shortcuts.
+
+## Window state, layout and motion
+
+- Window geometry is a view preference: `src/main/windowState.ts` (electron-free, tested) persists it to
+  `<userData>/window-state.json`, wired up in `main/index.ts`. Do not put it in the play state or the renderer.
+- Never give a page or panel a fixed `max-width`; widths come from the clamp tokens in `tokens.css`.
+- Animations use compositor-friendly properties (opacity, transform, `scale`) and the shared keyframes at the end of
+  `app.css`. Infinite animations are limited to the candle glow, gem glint, rune ring, held-spell pulse and low-HP
+  heartbeat. Anything that must be invisible without animation has `opacity: 0` as its base state, because the
+  reduce-motion rule sets `animation: none`. Ornament colors come from tokens; corner studs are alpha masks in `tokens.css`.
