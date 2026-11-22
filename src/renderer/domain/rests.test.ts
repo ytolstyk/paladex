@@ -26,7 +26,7 @@ describe('restore policies on the real seed', () => {
   })
 
   it('Lay On Hands and the free casts need a long rest', () => {
-    for (const id of ['lay-on-hands', 'free-smite', 'free-find-steed', 'breath-weapon', 'draconic-flight', 'death-coil']) {
+    for (const id of ['lay-on-hands', 'free-smite', 'free-find-steed', 'breath-weapon', 'draconic-flight']) {
       expect(restoredBy(def(id), 'short'), id).toBe(0)
       expect(restoredBy(def(id), 'long'), id).toBe(def(id).max)
     }

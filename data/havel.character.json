@@ -1009,15 +1009,6 @@
         }
       },
       {
-        "id": "death-coil",
-        "label": "Death Coil dice (d8)",
-        "max": 4,
-        "kind": "pool",
-        "restore": {
-          "long": "full"
-        }
-      },
-      {
         "id": "arbiters-ward",
         "label": "Arbiter’s Ward",
         "max": 6,
@@ -1108,24 +1099,6 @@
         "spend": {
           "kind": "uses"
         }
-      },
-      {
-        "id": "feature:death-coil",
-        "name": "Death Coil",
-        "castTime": "bonus",
-        "role": "offense",
-        "targets": [
-          "enemy"
-        ],
-        "summary": "DM homebrew: spend dice from your pool to force a save for necrotic damage, or heal an undead.",
-        "description": "As a Bonus action, you can target a creature you can see within 60 feet of yourself and force it to make a Con. save, expending dice from the pool. The maximum number of dice you can expend at once equals 3. Roll the dice you expend. The target takes Necrotic damage equal to the roll’s total on a failed save or half as much damage on a successful one. If the target is an Undead, you can choose to have it regain Hit Points equal to the roll’s total instead. Your pool regains all expended dice when you finish a Long Rest.",
-        "source": "homebrew",
-        "counterId": "death-coil",
-        "spend": {
-          "kind": "pool",
-          "maxPerUse": 3
-        },
-        "tag": "CON save"
       }
     ]
   },

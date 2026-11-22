@@ -87,10 +87,11 @@ export interface Feature {
   summary: string
   /** Full text from the sheet, plain text. */
   description?: string
+  /** `homebrew` has no importer producer today (tile-less homebrew goes to `OtherFeature`); it stays for hand-written seed entries. */
   source: 'class' | 'race' | 'homebrew'
   /** The counter this is spent from. */
   counterId: string
-  /** `uses`: one use per activation. `pool`: you choose an amount, up to `maxPerUse` (default: all that is left). */
+  /** `uses`: one use per activation. `pool`: you choose an amount, up to `maxPerUse` (default: all that is left). The importer sets no cap today; it is set by hand in the seed. */
   spend: { kind: 'uses' } | { kind: 'pool'; maxPerUse?: number }
   tag?: string
 }

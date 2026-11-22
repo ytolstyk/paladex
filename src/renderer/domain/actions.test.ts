@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { LOG_CAP } from '@shared/constants'
 import { activateFeature, adjustSlot, castSpell, dropConcentration, startNewTurn, togglePrepared } from './actions'
 import { formatLog } from './log'
-import { bless, cure, mistyStep, deathCoil, freshState, guidance, holdPerson, layOnHands, protection, smite, testCatalog, vowOfEnmity } from './testing'
+import { bless, cure, mistyStep, cappedPool, freshState, guidance, holdPerson, layOnHands, protection, smite, testCatalog, vowOfEnmity } from './testing'
 
 const catalog = testCatalog()
 const state0 = freshState(catalog)
@@ -235,11 +235,11 @@ describe('activateFeature', () => {
     expect(activateFeature(low, catalog, layOnHands.id, 0, 1)!.state.counters['lay-on-hands']).toBe(23) // at least 1
   })
 
-  it('respects a per-use limit (Death Coil: at most 3 dice at once)', () => {
-    expect(activateFeature(state0, catalog, deathCoil.id, 10, 1)).toBeNull() // not in this catalog
-    const withCoil = testCatalog(undefined, [deathCoil])
-    const state = freshState(withCoil)
-    expect(activateFeature(state, withCoil, deathCoil.id, 10, 1)!.state.counters['lay-on-hands']).toBe(3)
+  it('respects a per-use cap on pool features', () => {
+    expect(activateFeature(state0, catalog, cappedPool.id, 10, 1)).toBeNull() // not in this catalog
+    const withCap = testCatalog(undefined, [cappedPool])
+    const state = freshState(withCap)
+    expect(activateFeature(state, withCap, cappedPool.id, 10, 1)!.state.counters['lay-on-hands']).toBe(3)
   })
 
   it('a uses-feature spends exactly one use and ignores the amount; it is not a bonus action when it is an action', () => {

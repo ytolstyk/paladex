@@ -242,12 +242,6 @@ function buildCounters(data: Json, level: number, prof: number, mods: Record<Abi
   if (level >= 5) counters.push({ id: 'draconic-flight', label: 'Draconic Flight', kind: 'uses', max: 1, restore: { long: 'full' } })
   counters.push({ id: 'hit-dice', label: 'Hit Dice (d10)', kind: 'pool', max: level, restore: { long: { fraction: 0.5 } } })
 
-  const homebrewDice = (data.actions?.class ?? []).some((a: Json) => a.name === 'Death Coil: Dice Pool')
-  if (homebrewDice) {
-    // DM homebrew: a pool of d8s equal to 1 + CHA modifier (minimum 1), regained on a long rest.
-    counters.push({ id: 'death-coil', label: 'Death Coil dice (d8)', kind: 'pool', max: Math.max(1, 1 + mods.cha), restore: { long: 'full' } })
-  }
-
   const seededUsed: Record<string, number> = {}
   for (const item of data.inventory ?? []) {
     const lim = item.limitedUse
@@ -431,10 +425,7 @@ function buildFeatures(data: Json, ctx: PlaceholderContext, warnings: string[]):
       ...(text ? { description: text } : {}),
       source: overlay.source,
       counterId: overlay.counterId,
-      spend:
-        overlay.spend === 'uses'
-          ? { kind: 'uses' }
-          : { kind: 'pool', ...(overlay.maxPerUse ? { maxPerUse: Math.max(1, ctx.mods.cha) } : {}) },
+      spend: overlay.spend === 'uses' ? { kind: 'uses' } : { kind: 'pool' },
       ...(tag ? { tag } : {})
     })
   }
@@ -443,7 +434,8 @@ function buildFeatures(data: Json, ctx: PlaceholderContext, warnings: string[]):
 
 // ───────────────────────── other features ─────────────────────────
 
-// Homebrew with no tile (Death Coil has one, so its text lives on that tile instead).
+// Homebrew with no tile. This is an allowlist: a new action on the sheet is not shown until it is listed here.
+// The sheet also carries a "Death Coil" that the table never used; it is left off on purpose, do not add it.
 const HOMEBREW_PREFIXES = ['Initiate a Circle Spell', 'Circle Spell', 'Undead Steed']
 
 function buildOtherFeatures(data: Json, ctx: PlaceholderContext): OtherFeature[] {

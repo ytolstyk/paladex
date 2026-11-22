@@ -55,13 +55,17 @@ export const vowOfEnmity: Feature = {
   counterId: 'channel-divinity',
   spend: { kind: 'uses' }
 }
-export const deathCoil: Feature = {
-  id: 'feature:death-coil',
-  name: 'Death Coil',
+/**
+ * A pool feature with a per-use cap, to test `maxPerUse`. It draws on the Lay On Hands counter so the test catalog needs no
+ * extra counter, and `source: 'homebrew'` is relied on by describe.test.ts.
+ */
+export const cappedPool: Feature = {
+  id: 'feature:capped-pool',
+  name: 'Capped Pool',
   castTime: 'bonus',
   role: 'offense',
   targets: ['enemy'],
-  summary: 'Necrotic damage from dice',
+  summary: 'Spend a few points from a shared pool at once',
   source: 'homebrew',
   counterId: 'lay-on-hands',
   spend: { kind: 'pool', maxPerUse: 3 }

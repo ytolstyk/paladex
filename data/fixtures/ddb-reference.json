@@ -23,7 +23,6 @@
     "layOnHandsPool": 25,
     "channelDivinityUses": 2,
     "hitDice": "5d10",
-    "deathCoilDice": 4,
     "breathWeaponDc": 15
   },
   "itemCharges": {

@@ -16,8 +16,6 @@ export interface FeatureOverlay {
   source: 'class' | 'race' | 'homebrew'
   counterId: string
   spend: 'uses' | 'pool'
-  /** Pool features: cap per activation. `cha-mod` = the character's CHA modifier (minimum 1). */
-  maxPerUse?: 'cha-mod'
   /** When it isn't a plain action, e.g. "with the Attack action". */
   timing?: string
   /** A save the feature forces, with the ability whose modifier sets its DC (8 + prof + mod). */
@@ -83,18 +81,5 @@ export const FEATURE_OVERLAYS: FeatureOverlay[] = [
     source: 'race',
     counterId: 'draconic-flight',
     spend: 'uses'
-  },
-  {
-    id: 'feature:death-coil',
-    name: 'Death Coil',
-    payloadName: 'Death Coil: Necrotic Damage',
-    role: 'offense',
-    targets: ['enemy'],
-    summary: 'DM homebrew: spend dice from your pool to force a save for necrotic damage, or heal an undead.',
-    source: 'homebrew',
-    counterId: 'death-coil',
-    spend: 'pool',
-    maxPerUse: 'cha-mod',
-    tag: 'CON save'
   }
 ]

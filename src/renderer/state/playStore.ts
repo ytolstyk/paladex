@@ -39,7 +39,7 @@ export interface PaladexStore {
   /** Manual gem correction: spend or restore one slot. */
   adjustSlot(level: number, direction: 'spend' | 'restore'): void
   newTurn(): void
-  /** Use a class/race feature. `amount` only matters for pool features (Lay On Hands, Death Coil). */
+  /** Use a class/race feature. `amount` only matters for pool features (Lay On Hands). */
   activateFeature(featureId: string, amount?: number): void
   /** Choose or un-choose a spell as prepared. */
   togglePrepared(spellId: string): void

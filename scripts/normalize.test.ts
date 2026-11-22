@@ -31,7 +31,6 @@ describe('seed matches the DDB reference sheet', () => {
     expect(counter('channel-divinity')?.max).toBe(ref.derived.channelDivinityUses)
     expect(counter('hit-dice')?.max).toBe(5)
     expect(counter('breath-weapon')?.max).toBe(3)
-    expect(counter('death-coil')?.max).toBe(ref.derived.deathCoilDice)
   })
 
   it("the Arbiter's Ward is consumable and seeds from the sheet (1 charge left)", () => {
@@ -138,14 +137,14 @@ describe('seed hygiene', () => {
     expect(seedText).not.toContain('see D&D Beyond') // the marker for a placeholder we could not resolve
   })
 
-  it('homebrew without a tile stays read-only; Death Coil became a tile with its dice count resolved', () => {
+  it('homebrew without a tile stays read-only', () => {
     const names = seed.otherFeatures.map((f) => f.name)
     expect(names.some((n) => n.startsWith('Circle Spell'))).toBe(true)
     expect(names).toContain('Undead Steed: Ghostly Stride')
-    expect(names.some((n) => n.startsWith('Death Coil'))).toBe(false)
-    const coil = seed.character.features.find((f) => f.id === 'feature:death-coil')
-    expect(coil?.description).toContain('maximum number of dice you can expend at once equals 3') // CHA modifier, resolved from {{...}}
-    expect(seed.character.counters.find((c) => c.id === 'death-coil')?.max).toBe(ref.derived.deathCoilDice)
+  })
+
+  it('Death Coil is on the DDB sheet but the table never used it, so it stays out of the app (the regeneration check below makes this hold for a re-import too)', () => {
+    expect(JSON.stringify(seed)).not.toMatch(/death.?coil/i)
   })
 })
 
@@ -156,7 +155,6 @@ describe('feature tiles', () => {
     ['lay-on-hands', 'bonus'],
     ['divine-sense', 'bonus'],
     ['draconic-flight', 'bonus'],
-    ['death-coil', 'bonus'],
     ['vow-of-enmity', 'action'],
     ['breath-weapon', 'action']
   ])('%s takes a %s, as the sheet says (Vow and Breath Weapon are Attack-action riders, not bonus actions)', (id, castTime) => {
@@ -172,10 +170,6 @@ describe('feature tiles', () => {
     expect(feature('lay-on-hands')).toMatchObject({ counterId: 'lay-on-hands', spend: { kind: 'pool' } })
     expect(feature('vow-of-enmity')?.counterId).toBe('channel-divinity')
     expect(feature('divine-sense')?.counterId).toBe('channel-divinity')
-  })
-
-  it('Death Coil spends at most CHA-modifier dice at once (3 with CHA 16)', () => {
-    expect(feature('death-coil')?.spend).toEqual({ kind: 'pool', maxPerUse: 3 })
   })
 
   it('Breath Weapon names its save and DC from the sheet text and our numbers (8 + CON + proficiency)', () => {
