@@ -8,6 +8,8 @@ const AA_NORMAL_TEXT = 4.5
 const AA_LARGE_TEXT = 3
 /** Role stripes are decorative (the role is also written as text), so they are held below WCAG 1.4.11's 3:1. */
 const STRIPE_MIN_CONTRAST = 1.8
+/** The secondary and tertiary accents must be their own colors, not shades of the primary or of each other. */
+const MIN_HUE_GAP = 40
 
 const STYLES_DIR = resolve(import.meta.dirname, '../styles')
 const readCss = (file: string): string => readFileSync(resolve(STYLES_DIR, file), 'utf8')
@@ -42,6 +44,22 @@ function hexTokens(block: string): Record<string, string> {
     tokens[name] = value.trim()
   }
   return tokens
+}
+
+/** Hue of a hex color in degrees, 0 to 360. */
+function hue(hex: string): number {
+  const full = hex.length === 4 ? `#${[...hex.slice(1)].map((c) => c + c).join('')}` : hex
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(full.slice(i, i + 2), 16) / 255) as [number, number, number]
+  const max = Math.max(r, g, b)
+  const d = max - Math.min(r, g, b)
+  if (d === 0) return 0
+  const h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4
+  return (h * 60 + 360) % 360
+}
+
+function hueGap(a: string, b: string): number {
+  const gap = Math.abs(hue(a) - hue(b))
+  return Math.min(gap, 360 - gap)
 }
 
 /** WCAG 2.x relative luminance of an sRGB hex color. */
@@ -83,11 +101,23 @@ const TEXT_PAIRS: readonly [string, string][] = [
   ['vert-lit', 'vellum'],
   ['azure-lit', 'vellum'],
   ['azure-lit', 'oak-shadow'],
+  ['second-lit', 'oak-shadow'],
+  ['second-lit', 'oak'],
+  ['second-lit', 'vellum-deep'],
+  ['second-lit', 'vellum'],
+  ['second-lit', 'vellum-raised'],
+  ['third-lit', 'oak-shadow'],
+  ['third-lit', 'oak'],
+  ['third-lit', 'vellum-deep'],
+  ['third-lit', 'vellum'],
+  ['third-lit', 'vellum-raised'],
   ['on-gold', 'gold'],
   ['on-gold', 'gold-bright'],
   ['on-vert', 'vert'],
   ['on-gules', 'gules'],
-  ['on-azure', 'azure']
+  ['on-azure', 'azure'],
+  ['on-second', 'second'],
+  ['on-third', 'third']
 ]
 
 /** The disabled cast button: deliberately muted, still readable. Held to the large-text bar, not AA. */
@@ -136,6 +166,19 @@ describe.each(THEMES.map((t) => t.id))('theme "%s"', (id) => {
 
   it.each(MUTED_PAIRS)('%s on %s stays readable (large-text bar)', (fg, bg) => {
     expect(contrast(tokens[fg] as string, tokens[bg] as string)).toBeGreaterThanOrEqual(AA_LARGE_TEXT)
+  })
+
+  it('gives the secondary and tertiary accents hues of their own', () => {
+    const [gold, second, third] = [tokens['gold'], tokens['second'], tokens['third']] as [string, string, string]
+    expect(hueGap(gold, second)).toBeGreaterThanOrEqual(MIN_HUE_GAP)
+    expect(hueGap(gold, third)).toBeGreaterThanOrEqual(MIN_HUE_GAP)
+    expect(hueGap(second, third)).toBeGreaterThanOrEqual(MIN_HUE_GAP)
+  })
+
+  it('keeps accent fills visible against panels', () => {
+    for (const accent of ['second', 'third']) {
+      expect(contrast(tokens[accent] as string, tokens['vellum'] as string)).toBeGreaterThanOrEqual(STRIPE_MIN_CONTRAST)
+    }
   })
 
   it('keeps spell-role stripes visible against panels', () => {

@@ -13,6 +13,10 @@
  *   --gold         Accent for fills and headings. --gold-bright: accent for text, outlines and hover; it is the STRONGER
  *                  accent, so it is darker than --gold on the light theme. --gold-dim: borders and rules (quietest).
  *   --gules, --purpure, --vert, --azure   Spell-role tinctures, used as fills and stripes.
+ *   --second, --third   Secondary and tertiary accents. Each has its OWN hue, at least 40 degrees from --gold (a test
+ *                  enforces it), so the page has real color contrast rather than shades of one color. Roles: --second for
+ *                  structure and headings (panel titles, section labels, selected filters), --third for action and
+ *                  state (buttons, concentration, counts). Used as fills and rules; --*-lit is the text variant.
  *   --*-lit        The same hue strengthened for use as TEXT on panels: lighter on dark themes, darker on light ones.
  *   --on-*         Text drawn on top of the matching filled accent (cast button, pressed chips).
  *   --shadow       The shadow COLOR (a tint, not a size). --shadow-sm/md/lg below are that color at fixed strengths.
@@ -67,6 +71,13 @@
   --on-vert: #17110c;
   --on-gules: #eadfc6;
   --on-azure: #eadfc6;
+  /* Secondary and tertiary accents: their own hues, not shades of the primary */
+  --second: #3a9a8e;
+  --second-lit: #6cc7ba;
+  --on-second: #17110c;
+  --third: #c2607c;
+  --third-lit: #e68fa8;
+  --on-third: #17110c;
 
   /* Shadows, wells and the spent-gem socket */
   --shadow: #000;
@@ -93,6 +104,7 @@
   --rule: color-mix(in srgb, var(--gold) 35%, transparent);
   --rule-strong: color-mix(in srgb, var(--gold) 45%, transparent);
   --glow: color-mix(in srgb, var(--gold) 10%, transparent);
+  --glow-second: color-mix(in srgb, var(--second) 12%, transparent);
   --gold-deep: color-mix(in srgb, var(--gold-dim) 75%, black);
 
   --shadow-sm: color-mix(in srgb, var(--shadow) 42%, transparent);

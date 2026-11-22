@@ -55,7 +55,7 @@ export function FilterPanel({ id }: { id: string }): React.JSX.Element {
       <p className="filter-panel__foot">
         <span className="muted">Level, range, school, save, source and ritual describe spells, so class features are hidden while any of them is on.</span>
         {chosen > 0 && (
-          <button type="button" className="link-button" onClick={clear}>
+          <button type="button" className="btn btn--action" onClick={clear}>
             Clear all filters
           </button>
         )}

@@ -27,6 +27,8 @@ const ThemePreview = memo(function ThemePreview({ id }: { id: ThemeId }): React.
           <i data-role="control" />
           <i data-role="support" />
           <i data-role="utility" />
+          <i data-accent="second" />
+          <i data-accent="third" />
         </div>
       </div>
     </div>

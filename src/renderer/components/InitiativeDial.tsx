@@ -162,7 +162,7 @@ export function InitiativeDial(): React.JSX.Element {
         <span className="dial__caption">
           Initiative
           {initiative !== null ? (
-            <button type="button" className="link-button dial__clear" onClick={() => save(null)}>
+            <button type="button" className="btn btn--action" onClick={() => save(null)}>
               clear
             </button>
           ) : (

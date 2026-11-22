@@ -82,7 +82,8 @@ it before the first paint so there is no flash of the default theme on launch.
    values; every palette token must be present, as plain hex literals. Set `color-scheme: dark` or `light` in the block.
 2. Add `{ id, name, blurb }` to `THEMES` in `src/renderer/domain/themes.ts`.
 3. Run `npm test`. `domain/themes.test.ts` checks that the registry and CSS agree (no missing or orphaned blocks) and
-   enforces WCAG AA contrast (4.5:1) on every text pair of every palette.
+   enforces WCAG AA contrast (4.5:1) on every text pair of every palette. Each palette needs a secondary (`--second`) and
+   tertiary (`--third`) accent with hues at least 40 degrees from the gold and from each other; the test fails otherwise.
 
 The settings preview needs no extra work: it wears the theme through `data-theme`, so it always matches the real UI.
 

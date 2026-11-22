@@ -20,7 +20,7 @@ export function Toast(): React.JSX.Element | null {
     <div className="toast" role="status" key={toast.id}>
       <span>{toast.msg}</span>
       {canUndo && toast.undoable && (
-        <button type="button" className="link-button" onClick={undoLast}>
+        <button type="button" className="btn btn--action" onClick={undoLast}>
           Undo
         </button>
       )}

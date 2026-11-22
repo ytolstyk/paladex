@@ -30,7 +30,7 @@ export function TurnPanel(): React.JSX.Element {
                 Concentrating on <strong>{catalog.nameOf(concentration)}</strong>
               </span>
             </span>
-            <button type="button" className="link-button" onClick={dropConcentration}>
+            <button type="button" className="btn btn--action" onClick={dropConcentration}>
               Drop
             </button>
           </>
@@ -59,7 +59,7 @@ export function TurnPanel(): React.JSX.Element {
         ) : (
           <span className="muted">Bonus action free</span>
         )}
-        <button type="button" className="link-button" onClick={newTurn} title="Start a new turn (N)">
+        <button type="button" className="btn btn--action" onClick={newTurn} title="Start a new turn (N)">
           New turn
         </button>
       </div>

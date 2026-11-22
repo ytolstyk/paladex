@@ -166,7 +166,7 @@ export function FilterBar(): React.JSX.Element {
         </p>
         <ActiveFilters />
         {hasActiveFilters(filters) && (
-          <button type="button" className="link-button" onClick={clear}>
+          <button type="button" className="btn btn--action" onClick={clear}>
             Clear filters
           </button>
         )}

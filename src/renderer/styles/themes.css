@@ -31,6 +31,13 @@
   --on-vert: #0e131a;
   --on-gules: #ffffff;
   --on-azure: #ffffff;
+  /* Secondary and tertiary accents: their own hues, not shades of the primary */
+  --second: #c99441;
+  --second-lit: #e8b765;
+  --on-second: #0e131a;
+  --third: #a56bb0;
+  --third-lit: #cc9bd6;
+  --on-third: #0e131a;
   --shadow: #000;
   --well: #05080c;
   --gem-spent-core: #04070b;
@@ -64,6 +71,13 @@
   --on-vert: #0c150e;
   --on-gules: #ffffff;
   --on-azure: #ffffff;
+  /* Secondary and tertiary accents: their own hues, not shades of the primary */
+  --second: #c9675c;
+  --second-lit: #ee9a8e;
+  --on-second: #0c150e;
+  --third: #4f9fc2;
+  --third-lit: #82c6e6;
+  --on-third: #0c150e;
   --shadow: #000;
   --well: #050a06;
   --gem-spent-core: #040803;
@@ -97,6 +111,13 @@
   --on-vert: #1a0d0e;
   --on-gules: #ffffff;
   --on-azure: #ffffff;
+  /* Secondary and tertiary accents: their own hues, not shades of the primary */
+  --second: #3aa898;
+  --second-lit: #6fd3c3;
+  --on-second: #1a0d0e;
+  --third: #8f7fd0;
+  --third-lit: #b9acf0;
+  --on-third: #1a0d0e;
   --shadow: #000;
   --well: #0a0405;
   --gem-spent-core: #080304;
@@ -130,6 +151,13 @@
   --on-vert: #ffffff;
   --on-gules: #ffffff;
   --on-azure: #ffffff;
+  /* Secondary and tertiary accents: their own hues, not shades of the primary */
+  --second: #2a7f79;
+  --second-lit: #14524d;
+  --on-second: #ffffff;
+  --third: #a8446a;
+  --third-lit: #7a2748;
+  --on-third: #ffffff;
   --shadow: #4a3a1c;
   --well: #cfbf96;
   --gem-spent-core: #cdbb90;
@@ -163,6 +191,13 @@
   --on-vert: #000000;
   --on-gules: #000000;
   --on-azure: #000000;
+  /* Secondary and tertiary accents: their own hues, not shades of the primary */
+  --second: #4dd8e8;
+  --second-lit: #8aeaf5;
+  --on-second: #000000;
+  --third: #ff7ad9;
+  --third-lit: #ffa8e8;
+  --on-third: #000000;
   --shadow: #000;
   --well: #000;
   --gem-spent-core: #000000;

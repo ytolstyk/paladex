@@ -45,7 +45,11 @@ schema, vitest for tests. See README.md for scripts and layout.
 - Palette token names were chosen for the first theme but are roles, and several invert in the light theme (e.g.
   `--gold-bright` is the stronger accent, so it is darker than `--gold` on Parchment). The contract for every token is in
   the `tokens.css` header: read it before editing a palette. Text drawn on a filled accent uses `--on-gold` /
-  `--on-vert` / `--on-gules` / `--on-azure`, never `--oak-shadow`.
+  `--on-vert` / `--on-gules` / `--on-azure` / `--on-second` / `--on-third`, never `--oak-shadow`.
+- Three accent families: gold (primary: brand, cast button, gems), `--second` (structure: panel titles, section labels,
+  selected chips, the dial's lit arc, range badge) and `--third` (action and state: `.btn--action`, concentration, counts,
+  tags, held inspiration). Each has `-lit` for text. They must have their own hues (a test enforces a 40 degree gap from
+  gold), not be tints of the background or of gold. A reset or clear control is `className="btn btn--action"`, not `.link-button`.
 - Palettes: Candlelit Oak is the default and lives in `styles/tokens.css` (`:root, [data-theme='oak']`); the others are
   `[data-theme='id']` blocks in `styles/themes.css`. `themes.css` must be imported after `tokens.css` (they tie on
   specificity). The id is set as `data-theme` on `<html>` twice: first by the blocking classic script
