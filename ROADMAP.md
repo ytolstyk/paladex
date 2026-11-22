@@ -1,0 +1,113 @@
+# Paladex roadmap
+
+Ideas for what could go on the sheet next, ordered by how much they help at the table. Nothing here is promised; it is a
+menu. "Today" notes what the app does now, so each idea starts from a real gap.
+
+The test for every item: **does it answer a question a player asks mid-turn, faster than the book or D&D Beyond would?**
+
+Size: **S** is an afternoon, **M** is a few days, **L** is a project. Items marked *(play state)* need a new persisted field
+(it must use `.default()` in the zod schema, see `CLAUDE.md`); the rest are view-only and belong in `state/uiStore.ts`.
+
+## 1. Find things faster (spells, features, abilities)
+
+Today: three intent chips, three cast-time chips, "No concentration", "Castable now", "Show all spells" and a search box over
+spell name, summary and school. Spells are always grouped by level in catalog order. Filters reset on every launch.
+
+- [ ] **Sort** the grid: by name, cast time, range, school, or "most useful right now" (castable first). Keep level grouping
+      as the default, and add a "no grouping" mode so a sort across levels is possible. **S**
+- [ ] **More facets**: spell level, school, ritual, range (self / touch / 30 ft+), duration, save type (CHA save, melee hit). **S**
+- [ ] **Search the full text**, not just the one-line summary, and search class features the same way. Today the
+      "Other features" list at the bottom cannot be searched or filtered at all. **S**
+- [ ] **Focus search with `/`** (and Esc to clear it), so the whole find-a-spell loop works without the mouse. **S**
+- [ ] **Hide or collapse sections**: a "Spells / Features" toggle, and collapsible level groups, for turns when you only want one. **S**
+- [ ] **Remember filters** across launches (view preference, so `localStorage` like the theme, not play state). **S**
+- [ ] **Saved filter sets**: "Combat", "Exploring", "Downtime", one click each, with a "last used" default. **M**
+- [ ] **Favorites / pins**: star the five spells you actually cast and float them to the top or to a "Pinned" group. *(play state)* **M**
+- [ ] **Recently cast**: a short row of the last few spells and features, for repeating a turn. Data is already in the log. **S**
+- [ ] **Command palette (Cmd/Ctrl+K)**: type a spell, feature, rest or setting and jump to it or run it. **M**
+
+## 2. Casting and the turn
+
+Today: Cast always pays with the first available option (a free cast, else the lowest slot). The store's `cast()` already
+accepts a payment, but the card has no way to pick one. One slotted spell and one bonus action per turn are soft hints.
+
+- [ ] **Choose the slot level when casting (upcasting)**: a small stepper or menu on the Cast button, using the payment list
+      `availableCosts()` already produces. **M**
+- [ ] **Reaction and action tracking** next to the existing slot and bonus-action lines, plus a "turn N / round N" counter. *(play state)* **S**
+- [ ] **Duration timers**: when you cast Bless or Hunter's Mark, count rounds (1 minute = 10) and tell you when it ends. *(play state)* **M**
+- [ ] **Concentration target note**: "Hunter's Mark on the ogre". A one-line field on the active concentration. *(play state)* **S**
+- [ ] **Concentration check helper** when taking damage: show the DC (10, or half the damage if higher) and your save bonus. **S**
+- [ ] **Damage and dice helper** for Divine Smite and friends: dice by slot level, crit doubling, and a roller that logs the result. **M**
+- [ ] **Undo history list**, not only the last step: show the last 10 changes and undo back to a chosen one. **M**
+
+## 3. Preparing spells
+
+Today: "Prepare" toggles on each card, a "Prepared 2 of 6" counter, and "Show all spells" to see the rest.
+
+- [ ] **A dedicated prepare view** (a page like Settings): all spells by level with checkboxes, the live count against the limit,
+      and always-prepared spells locked. Opened after a long rest. **M**
+- [ ] **Swap suggestions after a long rest**: "you had X prepared yesterday", with one click to restore that set. *(play state)* **M**
+- [ ] **Named prepared sets** ("Dungeon", "Social", "Boss fight") that you can switch between. *(play state)* **M**
+
+## 4. Hit points and conditions
+
+Today: damage and heal from the HP popover. Temp HP is stored and absorbs damage, but there is no way to set it.
+
+- [ ] **Set temp HP** (and the rule that it doesn't stack) from the same popover. **S**
+- [ ] **Conditions**: toggle chips for Prone, Frightened, Poisoned and so on, with the rules text one click away. *(play state)* **M**
+- [ ] **Death saves**: three success and three failure pips that appear at 0 HP and reset on healing. *(play state)* **S**
+- [ ] **Short rest dialog**: spend hit dice, roll or enter the result, and apply the healing. Today a short rest only gives back
+      Channel Divinity. **M**
+- [ ] **Exhaustion and other long-term effects** (2024 exhaustion is a numeric level) as a vitals-bar badge. *(play state)* **S**
+
+## 5. The rest of the character
+
+Today: ability scores are stored but only used to compute spell save DC and attack bonus. There is no place for anything
+outside spellcasting.
+
+- [ ] **Abilities, saving throws and skills** panel with modifiers and proficiency markers. Needs skill data in the seed. **M**
+- [ ] **Quick numbers** in the banner or a tooltip: initiative, speed, passive Perception. **S**
+- [ ] **Notes**: one free-text session scratchpad, plus an optional note per spell or feature ("Bless: Mira, Tor, me"). *(play state)* **M**
+- [ ] **Inventory and attunement**: item list with charges (Protection from Evil and Good is already an item charge), weight,
+      attunement slots (max 3). *(play state)* **L**
+- [ ] **Currency and consumables** (potions, spell scrolls) with a count and a "use" button. *(play state)* **M**
+- [ ] **Feats and Oath features reference**: the other-features list as searchable cards, with the same filters as spells. **M**
+
+## 6. Keyboard, accessibility and display
+
+Today: Cmd/Ctrl+, opens settings, Cmd/Ctrl+Z undoes, `N` starts a new turn. Buttons carry ARIA labels and motion respects the
+system setting.
+
+- [ ] **More shortcuts**: `/` search, `1`-`9` spend a slot of that level, `R` for a reaction, `?` for a cheat sheet of all keys. **S**
+- [ ] **Arrow-key navigation** through the card grid, Enter to open details, a modifier to cast. **M**
+- [ ] **Text size and density** (compact cards for small windows or a second monitor). View preference. **S**
+- [ ] **Larger tap targets mode** for use on a touch screen or when played on a tablet-sized window. **S**
+- [ ] **A "pinned" detail drawer** that stays open while you filter, so a spell can be read while you pick another. **S**
+
+## 7. Data safety and sharing
+
+Today: Export writes the play-state JSON. There is no way to bring it back in. State is saved atomically with one backup.
+
+- [ ] **Import / restore** from an exported file, with the same validation the store uses and a confirmation that shows what will
+      be replaced. **M**
+- [ ] **Automatic dated backups** (keep the last N) with a "restore" list in settings. **M**
+- [ ] **Reset with a safety net**: confirm, and take a backup first. **S**
+- [ ] **Printable one-page summary** (slots, prepared spells, DC and attack) for tables that want paper. **M**
+- [ ] **Session recap**: from the log, "what happened this session" as copyable text. The log keeps 200 entries but only the last
+      is shown today. **M**
+
+## 8. Bigger bets
+
+- [ ] **Multiple characters** and a character switcher. The catalog is currently one baked-in character, so this touches the
+      seed, the store and the profile layout. **L**
+- [ ] **In-app editing of the character** (level-up, new spells, changed AC) instead of reseeding from a D&D Beyond export. **L**
+- [ ] **Other classes**: the domain logic is Paladin-shaped (smite, Lay On Hands). Generalizing counters and costs is possible
+      but is a rewrite of the seed format. **L**
+- [ ] **Companion view** for a second screen: only slots, HP and concentration, big and readable from across the table. **M**
+
+## Small fixes worth doing along the way
+
+- [ ] The footer log shows raw counter ids: "Spent 1 channel-divinity". Use the counter's label (`formatLog` in
+      `domain/log.ts` reads `entry.counterId` directly).
+- [ ] The Cast buttons show a red dashed "warn" outline on every slotted spell once a slot is spent. Correct, but it may read as
+      an error; consider a quieter style plus the existing tooltip.

@@ -3,6 +3,11 @@
 An offline spell, slot and resource tracker for a D&D 2024-rules Paladin, built with Electron, React and TypeScript.
 It tracks spell slots, prepared spells, per-turn action economy, class resources, hit points and rests, with undo.
 
+![Paladex showing spell slots, the current turn, class resources and a grid of spell cards, mid-combat](docs/screenshot.png)
+
+*Mid-turn: Bless is being concentrated on, a level I slot is spent, and the cast buttons warn about a second slotted spell.
+Ideas for what comes next are in [ROADMAP.md](ROADMAP.md).*
+
 ## Getting started
 
 ```bash
