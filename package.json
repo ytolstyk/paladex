@@ -1,0 +1,53 @@
+{
+  "name": "paladex",
+  "version": "0.1.0",
+  "description": "Paladex: an offline spell, slot and resource tracker for a D&D Paladin",
+  "private": true,
+  "main": "./out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "build:app": "rm -rf dist && electron-vite build && electron-builder --dir --mac",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.test.json",
+    "seed": "tsx scripts/import-ddb.ts",
+    "install-app": "tsx scripts/install-app.ts",
+    "icon": "tsx scripts/make-icon.ts"
+  },
+  "build": {
+    "appId": "local.paladex",
+    "productName": "Paladex",
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.games",
+      "identity": null,
+      "icon": "build/icon.icns"
+    }
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@fontsource/cinzel": "^5.3.0",
+    "@fontsource/eb-garamond": "^5.3.0",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "electron": "^45.4.1",
+    "electron-builder": "^26.18.0",
+    "electron-vite": "^6.0.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.1",
+    "zustand": "^5.1.0"
+  }
+}

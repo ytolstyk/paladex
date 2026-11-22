@@ -1,0 +1,56 @@
+:root {
+  /* Oak and iron: the chrome around the page */
+  --oak-shadow: #17110c;
+  --oak: #221911;
+  --iron: #3a3027;
+
+  /* Dark vellum: panels, lit by candle */
+  --vellum-deep: #261d15;
+  --vellum: #30261c;
+  --vellum-raised: #3b2f23;
+
+  /* Ink and leaf */
+  --bone: #eadfc6;
+  --bone-dim: #b8a98c;
+  --gold: #c9a24b;
+  --gold-bright: #e6c36a;
+  --gold-dim: #7d6630;
+
+  /* Heraldic tinctures: spell roles */
+  --gules: #b3262d; /* offense */
+  --gules-lit: #d8454b;
+  --purpure: #7d4fa6; /* control */
+  --purpure-lit: #a374cc;
+  --vert: #4e8a54; /* support */
+  --vert-lit: #78b57e;
+  --azure: #2f6fa8; /* utility */
+  --azure-lit: #5b9bd2;
+
+  --role-offense: var(--gules);
+  --role-offense-lit: var(--gules-lit);
+  --role-control: var(--purpure);
+  --role-control-lit: var(--purpure-lit);
+  --role-support: var(--vert);
+  --role-support-lit: var(--vert-lit);
+  --role-utility: var(--azure);
+  --role-utility-lit: var(--azure-lit);
+
+  /* Type */
+  --font-display: 'Cinzel', 'Trajan Pro', 'Times New Roman', serif;
+  --font-text: 'EB Garamond', Garamond, 'Times New Roman', serif;
+
+  /* Scale (1.2) */
+  --step--1: 0.9rem;
+  --step-0: 1.05rem;
+  --step-1: 1.25rem;
+  --step-2: 1.5rem;
+
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+
+  --rail-width: 336px;
+  --banner-height: 64px;
+  --footer-height: 52px;
+}

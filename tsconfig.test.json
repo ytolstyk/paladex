@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM"],
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "paths": { "@shared/*": ["./src/shared/*"], "@data/*": ["./data/*"], "@/*": ["./src/renderer/*"] }
+  },
+  "include": ["scripts/**/*.ts", "src/**/*.test.ts", "src/shared/**/*", "src/renderer/domain/**/*", "src/renderer/data/**/*", "src/main/store.ts"]
+}

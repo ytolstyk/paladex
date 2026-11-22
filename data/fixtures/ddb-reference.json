@@ -1,0 +1,58 @@
+{
+  "_note": "Reference values. `rendered` were read from the rendered DDB sheet (2026-11-21); `derived` are computed from the payload (base scores + feat ASIs + Amulet of Health) and cross-checked against rendered initiative (+1 => DEX 12), HP max 52 (=> CON 19) and passive Perception 12 (=> WIS 14). Spell DC / attack were NOT visible on the rendered pages we could reach; confirm against the Spells tab. Contains no account identifiers.",
+  "character": "Havel Dandythought",
+  "class": "Paladin",
+  "level": 5,
+  "subclass": "Oath of Vengeance",
+  "rendered": {
+    "hpMax": 52,
+    "hpCurrentAtCapture": 12,
+    "armorClass": 16,
+    "proficiencyBonus": 3,
+    "walkingSpeedFt": 30,
+    "initiative": 1,
+    "passivePerception": 12
+  },
+  "derived": {
+    "spellSaveDc": 14,
+    "spellAttack": 6,
+    "slots": {
+      "1": 4,
+      "2": 2
+    },
+    "layOnHandsPool": 25,
+    "channelDivinityUses": 2,
+    "hitDice": "5d10",
+    "deathCoilDice": 4,
+    "breathWeaponDc": 15
+  },
+  "itemCharges": {
+    "The Arbiter's Ward": {
+      "max": 6,
+      "used": 5,
+      "resetsOnRest": false
+    }
+  },
+  "abilityScoresBase": {
+    "str": 16,
+    "dex": 11,
+    "con": 14,
+    "int": 10,
+    "wis": 14,
+    "cha": 15
+  },
+  "abilityScores": {
+    "str": 19,
+    "dex": 12,
+    "con": 19,
+    "int": 10,
+    "wis": 14,
+    "cha": 16
+  },
+  "abilityScoreSources": {
+    "str": "16 base +1 (Ability Score Improvement) +2 (Soldier)",
+    "dex": "11 base +1 (Soldier)",
+    "con": "14 base; Amulet of Health sets 19 while attuned",
+    "cha": "15 base +1 (Ability Score Improvement)"
+  }
+}

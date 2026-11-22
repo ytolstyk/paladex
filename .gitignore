@@ -1,0 +1,9 @@
+node_modules/
+dist/
+out/
+release/
+data/raw/
+*.log
+.DS_Store
+.env*
+.vitest/

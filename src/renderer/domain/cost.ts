@@ -1,0 +1,67 @@
+import type { PlayState } from '@shared/schema'
+import type { CounterDef, Feature, Payment, Spell } from '@shared/types'
+import type { Catalog } from './catalog'
+import { isPrepared } from './prepared'
+import { slotsRemaining } from './slots'
+
+/** Uses left on a counter (never negative). */
+export function usesLeft(def: CounterDef, used: Record<string, number>): number {
+  return Math.max(0, def.max - (used[def.id] ?? 0))
+}
+
+/** The most a feature can spend right now: what is left, limited to its per-use cap (one for `uses`, `maxPerUse` for pools). */
+export function featureSpendCap(feature: Feature, counter: CounterDef, used: Record<string, number>): number {
+  const left = usesLeft(counter, used)
+  const perUse = feature.spend.kind === 'pool' ? (feature.spend.maxPerUse ?? left) : 1
+  return Math.min(left, perUse)
+}
+
+/** Uses left by counter id. Unknown counters have none. */
+export function remainingUses(state: PlayState, catalog: Catalog, counterId: string): number {
+  const def = catalog.counterById(counterId)
+  return def ? usesLeft(def, state.counters) : 0
+}
+
+/**
+ * Every way the spell can be paid for right now, in the spell's own preference order
+ * (e.g. Divine Smite: its free cast first, then each slot level from lowest up).
+ * The single source of truth for "castable now": the card, the upcast stepper and the filters all use it.
+ */
+export function availableCosts(state: PlayState, spell: Spell, catalog: Catalog): Payment[] {
+  const options: Payment[] = []
+  const prepared = isPrepared(state, spell)
+  for (const cost of spell.costs) {
+    switch (cost.kind) {
+      case 'none':
+        options.push({ kind: 'none' })
+        break
+      case 'slot':
+        if (!prepared) break // an unprepared spell can't be cast from a slot (item charges still work)
+        for (let level = Math.max(1, spell.level); level <= catalog.slotCapacity.length; level++) {
+          if (slotsRemaining(catalog.slotCapacity, state.slotsUsed, level) > 0) options.push({ kind: 'slot', level })
+        }
+        break
+      case 'free':
+        if (!prepared) break
+        if (remainingUses(state, catalog, cost.counterId) > 0) options.push({ kind: 'free', counterId: cost.counterId })
+        break
+      case 'charge':
+        if (remainingUses(state, catalog, cost.counterId) > 0) options.push({ kind: cost.kind, counterId: cost.counterId })
+        break
+    }
+  }
+  return options
+}
+
+export function defaultPayment(state: PlayState, spell: Spell, catalog: Catalog): Payment | null {
+  return availableCosts(state, spell, catalog)[0] ?? null
+}
+
+export function samePayment(a: Payment, b: Payment): boolean {
+  if (a.kind !== b.kind) return false
+  if (a.kind === 'slot' && b.kind === 'slot') return a.level === b.level
+  if ((a.kind === 'free' || a.kind === 'charge') && (b.kind === 'free' || b.kind === 'charge')) {
+    return a.counterId === b.counterId
+  }
+  return true
+}

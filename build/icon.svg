@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>Paladex</title>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="34%" r="78%">
+      <stop offset="0" stop-color="#3f2d1c"/><stop offset=".55" stop-color="#21170f"/><stop offset="1" stop-color="#0e0906"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8dc88"/><stop offset=".45" stop-color="#c9a24b"/><stop offset="1" stop-color="#7d5c1c"/>
+    </linearGradient>
+    <linearGradient id="field" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2e2218"/><stop offset="1" stop-color="#150e09"/>
+    </linearGradient>
+    <linearGradient id="gules" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d8454b"/><stop offset="1" stop-color="#8f1c22"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#f6d57a" stop-opacity=".75"/><stop offset=".55" stop-color="#c9a24b" stop-opacity=".25"/><stop offset="1" stop-color="#c9a24b" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="tile"><rect x="100" y="100" width="824" height="824" rx="186"/></clipPath>
+    <clipPath id="inner"><path d="M326 292 H698 V520 C698 650 616 724 512 778 C408 724 326 650 326 520 Z"/></clipPath>
+    <filter id="drop" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000" flood-opacity=".55"/>
+    </filter>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="186" fill="url(#bg)" filter="url(#drop)"/>
+  <g clip-path="url(#tile)">
+    <path d="M512,560 L1270.8,517.6 L1270.8,602.4 Z M512,560 L1255.9,715.4 L1234,797.4 Z M512,560 L1190.4,902.7 L1147.9,976.1 Z M512,560 L1078.6,1066.6 L1018.6,1126.6 Z M512,560 L928.1,1195.9 L854.7,1238.4 Z M512,560 L749.4,1282 L667.4,1303.9 Z M512,560 L554.4,1318.8 L469.6,1318.8 Z M512,560 L356.6,1303.9 L274.6,1282 Z M512,560 L169.3,1238.4 L95.9,1195.9 Z M512,560 L5.4,1126.6 L-54.6,1066.6 Z M512,560 L-123.9,976.1 L-166.4,902.7 Z M512,560 L-210,797.4 L-231.9,715.4 Z M512,560 L-246.8,602.4 L-246.8,517.6 Z M512,560 L-231.9,404.6 L-210,322.6 Z M512,560 L-166.4,217.3 L-123.9,143.9 Z M512,560 L-54.6,53.4 L5.4,-6.6 Z M512,560 L95.9,-75.9 L169.3,-118.4 Z M512,560 L274.6,-162 L356.6,-183.9 Z M512,560 L469.6,-198.8 L554.4,-198.8 Z M512,560 L667.4,-183.9 L749.4,-162 Z M512,560 L854.7,-118.4 L928.1,-75.9 Z M512,560 L1018.6,-6.6 L1078.6,53.4 Z M512,560 L1147.9,143.9 L1190.4,217.3 Z M512,560 L1234,322.6 L1255.9,404.6 Z" fill="#e6c36a" opacity=".13"/>
+    <circle cx="512" cy="560" r="300" fill="url(#glow)" opacity=".35"/>
+  </g>
+  <rect x="130" y="130" width="764" height="764" rx="158" fill="none" stroke="url(#gold)" stroke-width="5" opacity=".6"/>
+  <rect x="146" y="146" width="732" height="732" rx="144" fill="none" stroke="#c9a24b" stroke-width="2" opacity=".35"/>
+  <g filter="url(#drop)">
+    <path d="M302 268 H722 V520 C722 668 628 752 512 812 C396 752 302 668 302 520 Z" fill="url(#gold)"/>
+    <path d="M314 280 H710 V520 C710 660 622 738 512 796 C402 738 314 660 314 520 Z" fill="#17100a"/>
+    <path d="M326 292 H698 V520 C698 650 616 724 512 778 C408 724 326 650 326 520 Z" fill="url(#field)"/>
+    <g clip-path="url(#inner)">
+      <rect x="300" y="292" width="424" height="84" fill="url(#gules)"/>
+      <rect x="300" y="372" width="424" height="6" fill="url(#gold)"/>
+      <circle cx="512" cy="560" r="190" fill="url(#glow)"/>
+    </g>
+    <path d="M326 292 H698 V520 C698 650 616 724 512 778 C408 724 326 650 326 520 Z" fill="none" stroke="url(#gold)" stroke-width="5"/>
+    <g>
+      <polygon points="512,442 614.2,501 542,508" fill="#d2b673" stroke="#5e400c" stroke-width="2" stroke-linejoin="round"/><polygon points="614.2,501 542,508 572,560" fill="#c8a14f" stroke="#5e400c" stroke-width="2" stroke-linejoin="round"/><polygon points="614.2,501 614.2,619 572,560" fill="#9b732c" stroke="#5e400c" stroke-width="2" stroke-linejoin="round"/><polygon points="614.2,619 572,560 542,612" fill="#a9781c" stroke="#5e400c" stroke-width="2" stroke-linejoin="round"/><polygon points="614.2,619 512,678 542,612" fill="#8c6119" stroke="#5e400c" stroke-width="2" stroke-linejoin="round"/><polygon points="512,678 542,612 482,612" fill="#b4872f" stroke="#5e400c" stroke-width="2" stroke-linejoin="round"/><polygon points="512,678 409.8,619 482,612" fill="#b5934d" stroke="#5e400c" stroke-width="2" stroke-linejoin="round"/><polygon points="409.8,619 482,612 452,560" fill="#ddbf75" stroke="#5e400c" stroke-width="2" stroke-linejoin="round"/><polygon points="409.8,619 409.8,501 452,560" fill="#ecd694" stroke="#5e400c" stroke-width="2" stroke-linejoin="round"/><polygon points="409.8,501 452,560 482,508" fill="#fce8a8" stroke="#5e400c" stroke-width="2" stroke-linejoin="round"/><polygon points="409.8,501 512,442 482,508" fill="#fbe8a7" stroke="#5e400c" stroke-width="2" stroke-linejoin="round"/><polygon points="512,442 482,508 542,508" fill="#f1d995" stroke="#5e400c" stroke-width="2" stroke-linejoin="round"/><polygon points="542,508 572,560 542,612 482,612 452,560 482,508" fill="#fff1bd" stroke="#5e400c" stroke-width="2.5" stroke-linejoin="round"/>
+      <polygon points="512,442 614.2,501 614.2,619 512,678 409.8,619 409.8,501" fill="none" stroke="#fff3c4" stroke-opacity=".5" stroke-width="3" stroke-linejoin="round"/>
+      <polygon points="478,498 516,470 520,500 492,514" fill="#ffffff" opacity=".5"/>
+    </g>
+    <path d="M646,422 Q646,452 676,452 Q646,452 646,482 Q646,452 616,452 Q646,452 646,422 Z" fill="#fff3c4" opacity="0.95"/><path d="M392,646 Q392,664 410,664 Q392,664 392,682 Q392,664 374,664 Q392,664 392,646 Z" fill="#fff3c4" opacity="0.8"/><path d="M668,610 Q668,622 680,622 Q668,622 668,634 Q668,622 656,622 Q668,622 668,610 Z" fill="#fff3c4" opacity="0.7"/>
+  </g>
+</svg>

@@ -1,0 +1,1173 @@
+{
+  "character": {
+    "name": "Havel Dandythought",
+    "race": "Dragonborn",
+    "className": "Paladin",
+    "subclass": "Oath of Vengeance",
+    "level": 5,
+    "abilities": {
+      "str": 19,
+      "dex": 12,
+      "con": 19,
+      "int": 10,
+      "wis": 14,
+      "cha": 16
+    },
+    "proficiencyBonus": 3,
+    "spellcastingAbility": "cha",
+    "hpMax": 52,
+    "ac": 16,
+    "spells": [
+      {
+        "id": "spell:resistance",
+        "ddbId": 2618947,
+        "name": "Resistance",
+        "level": 0,
+        "school": "Abjuration",
+        "castTime": "action",
+        "concentration": true,
+        "range": "Touch",
+        "duration": "1 minute",
+        "role": "support",
+        "targets": [
+          "ally"
+        ],
+        "summary": "A willing creature adds a d4 to one saving throw.",
+        "description": "You touch a willing creature and choose a damage type: Acid, Bludgeoning, Cold, Fire, Lightning, Necrotic, Piercing, Poison, Radiant, Slashing, or Thunder. When the creature takes damage of the chosen type before the spell ends, the creature reduces the total damage taken by 1d4. A creature can benefit from this spell only once per turn.",
+        "source": "cantrip",
+        "costs": [
+          {
+            "kind": "none"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:spare-the-dying",
+        "ddbId": 2619067,
+        "name": "Spare the Dying",
+        "level": 0,
+        "school": "Necromancy",
+        "castTime": "action",
+        "concentration": false,
+        "range": "15 ft",
+        "duration": "Instantaneous",
+        "role": "support",
+        "targets": [
+          "ally"
+        ],
+        "summary": "Stabilize a creature that is at 0 hit points.",
+        "description": "Choose a creature within range that has 0 Hit Points and isn’t dead. The creature becomes Stable.\nCantrip Upgrade. The range doubles when you reach levels 5 (30 feet), 11 (60 feet), and 17 (120 feet).",
+        "source": "cantrip",
+        "costs": [
+          {
+            "kind": "none"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:bane",
+        "ddbId": 2618900,
+        "name": "Bane",
+        "level": 1,
+        "school": "Enchantment",
+        "castTime": "action",
+        "concentration": true,
+        "range": "30 ft",
+        "duration": "1 minute",
+        "role": "control",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "Up to three creatures that fail a save subtract a d4 from attacks and saves.",
+        "description": "Up to three creatures of your choice that you can see within range must each make a Charisma saving throw. Whenever a target that fails this save makes an attack roll or a saving throw before the spell ends, the target must subtract 1d4 from the attack roll or save.\nUsing a Higher-Level Spell Slot. You can target one additional creature for each spell slot level above 1.",
+        "source": "oath",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "tag": "CHA save",
+        "alwaysPrepared": true,
+        "verified": true
+      },
+      {
+        "id": "spell:bless",
+        "ddbId": 2618933,
+        "name": "Bless",
+        "level": 1,
+        "school": "Enchantment",
+        "castTime": "action",
+        "concentration": true,
+        "range": "30 ft",
+        "duration": "1 minute",
+        "role": "support",
+        "targets": [
+          "ally"
+        ],
+        "summary": "Up to three allies add a d4 to attack rolls and saving throws.",
+        "description": "You bless up to three creatures within range. Whenever a target makes an attack roll or a saving throw before the spell ends, the target adds 1d4 to the attack roll or save.\nUsing a Higher-Level Spell Slot. You can target one additional creature for each spell slot level above 1.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:ceremony",
+        "name": "Ceremony",
+        "level": 1,
+        "school": "Abjuration",
+        "castTime": "long",
+        "castingNote": "1 hour",
+        "ritual": true,
+        "concentration": false,
+        "range": "Touch",
+        "duration": "Instantaneous",
+        "role": "support",
+        "targets": [
+          "ally"
+        ],
+        "summary": "An hour-long ritual that grants a minor blessing.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:command",
+        "name": "Command",
+        "level": 1,
+        "school": "Enchantment",
+        "castTime": "action",
+        "concentration": false,
+        "range": "60 ft",
+        "duration": "Instantaneous",
+        "role": "control",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "Give a one-word order; the target obeys on its next turn unless it saves.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "tag": "WIS save",
+        "verified": true
+      },
+      {
+        "id": "spell:compelled-duel",
+        "name": "Compelled Duel",
+        "level": 1,
+        "school": "Enchantment",
+        "castTime": "bonus",
+        "concentration": true,
+        "range": "30 ft",
+        "duration": "1 minute",
+        "role": "control",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "Draw a creature into fighting you instead of others.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "tag": "WIS save",
+        "verified": true
+      },
+      {
+        "id": "spell:cure-wounds",
+        "name": "Cure Wounds",
+        "level": 1,
+        "school": "Abjuration",
+        "castTime": "action",
+        "concentration": false,
+        "range": "Touch",
+        "duration": "Instantaneous",
+        "role": "support",
+        "targets": [
+          "ally"
+        ],
+        "summary": "A touched creature regains 2d8 plus your spellcasting modifier in hit points.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:detect-evil-and-good",
+        "name": "Detect Evil and Good",
+        "level": 1,
+        "school": "Divination",
+        "castTime": "action",
+        "concentration": true,
+        "range": "Self (30 ft)",
+        "duration": "10 minutes",
+        "role": "utility",
+        "targets": [
+          "self"
+        ],
+        "summary": "Sense aberrations, celestials, elementals, fey, fiends and undead nearby.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:detect-magic",
+        "name": "Detect Magic",
+        "level": 1,
+        "school": "Divination",
+        "castTime": "action",
+        "ritual": true,
+        "concentration": true,
+        "range": "Self (30 ft)",
+        "duration": "10 minutes",
+        "role": "utility",
+        "targets": [
+          "self"
+        ],
+        "summary": "Sense the presence of magic within 30 feet.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:detect-poison-and-disease",
+        "name": "Detect Poison and Disease",
+        "level": 1,
+        "school": "Divination",
+        "castTime": "action",
+        "ritual": true,
+        "concentration": true,
+        "range": "Self (30 ft)",
+        "duration": "10 minutes",
+        "role": "utility",
+        "targets": [
+          "self"
+        ],
+        "summary": "Sense poisons, poisonous creatures and contagions within 30 feet.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:divine-favor",
+        "name": "Divine Favor",
+        "level": 1,
+        "school": "Transmutation",
+        "castTime": "bonus",
+        "concentration": false,
+        "range": "Self",
+        "duration": "1 minute",
+        "role": "offense",
+        "targets": [
+          "self"
+        ],
+        "summary": "Your weapon hits deal extra radiant damage for a minute.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:divine-smite",
+        "ddbId": 2618833,
+        "name": "Divine Smite",
+        "level": 1,
+        "school": "Evocation",
+        "castTime": "bonus",
+        "concentration": false,
+        "range": "Self",
+        "duration": "Instantaneous",
+        "role": "offense",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "Right after a melee hit, add radiant damage; more with a higher slot.",
+        "description": "The target takes an extra 2d8 Radiant damage from the attack. The damage increases by 1d8 if the target is a Fiend or an Undead.\nUsing a Higher-Level Spell Slot. The damage increases by 1d8 for each spell slot level above 1.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "free",
+            "counterId": "free-smite"
+          },
+          {
+            "kind": "slot"
+          }
+        ],
+        "tag": "on melee hit",
+        "alwaysPrepared": true,
+        "verified": true
+      },
+      {
+        "id": "spell:heroism",
+        "name": "Heroism",
+        "level": 1,
+        "school": "Enchantment",
+        "castTime": "action",
+        "concentration": true,
+        "range": "Touch",
+        "duration": "1 minute",
+        "role": "support",
+        "targets": [
+          "ally"
+        ],
+        "summary": "A creature is immune to fear and gains temporary hit points each turn.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:hunters-mark",
+        "ddbId": 2619166,
+        "name": "Hunter's Mark",
+        "level": 1,
+        "school": "Divination",
+        "castTime": "bonus",
+        "concentration": true,
+        "range": "90 ft",
+        "duration": "1 hour",
+        "role": "offense",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "Mark a creature: your weapon hits against it deal extra damage and you can track it.",
+        "description": "You magically mark one creature you can see within range as your quarry. Until the spell ends, you deal an extra 1d6 Force damage to the target whenever you hit it with an attack roll. You also have Advantage on any Wisdom (Perception or Survival) check you make to find it.\nIf the target drops to 0 Hit Points before this spell ends, you can take a Bonus Action to move the mark to a new creature you can see within range.\nUsing a Higher-Level Spell Slot. Your Concentration can last longer with a spell slot of level 3–4 (up to 8 hours) or 5+ (up to 24 hours).",
+        "source": "oath",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "alwaysPrepared": true,
+        "verified": true
+      },
+      {
+        "id": "spell:protection-from-evil-and-good",
+        "ddbId": 2618912,
+        "name": "Protection from Evil and Good",
+        "level": 1,
+        "school": "Abjuration",
+        "castTime": "action",
+        "concentration": true,
+        "range": "Touch",
+        "duration": "10 minutes",
+        "role": "support",
+        "targets": [
+          "ally"
+        ],
+        "summary": "A touched creature is shielded from aberrations, celestials, elementals, fey, fiends and undead.",
+        "description": "Until the spell ends, one willing creature you touch is protected against creatures that are Aberrations, Celestials, Elementals, Fey, Fiends, or Undead. The protection grants several benefits. Creatures of those types have Disadvantage on attack rolls against the target. The target also can’t be possessed by or gain the Charmed or Frightened conditions from them. If the target is already possessed, Charmed, or Frightened by such a creature, the target has Advantage on any new saving throw against the relevant effect.",
+        "source": "item",
+        "costs": [
+          {
+            "kind": "charge",
+            "counterId": "arbiters-ward"
+          },
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:purify-food-and-drink",
+        "name": "Purify Food and Drink",
+        "level": 1,
+        "school": "Transmutation",
+        "castTime": "action",
+        "ritual": true,
+        "concentration": false,
+        "range": "10 ft",
+        "duration": "Instantaneous",
+        "role": "utility",
+        "targets": [
+          "ally"
+        ],
+        "summary": "Remove poison and rot from nonmagical food and drink nearby.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:searing-smite",
+        "name": "Searing Smite",
+        "level": 1,
+        "school": "Evocation",
+        "castTime": "bonus",
+        "concentration": false,
+        "range": "Self",
+        "duration": "1 minute",
+        "role": "offense",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "Your next hit adds fire damage and sets the target burning.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "tag": "on melee hit",
+        "verified": true
+      },
+      {
+        "id": "spell:shield-of-faith",
+        "name": "Shield of Faith",
+        "level": 1,
+        "school": "Abjuration",
+        "castTime": "bonus",
+        "concentration": true,
+        "range": "60 ft",
+        "duration": "10 minutes",
+        "role": "support",
+        "targets": [
+          "ally"
+        ],
+        "summary": "A creature you choose gets +2 to Armor Class.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:thunderous-smite",
+        "name": "Thunderous Smite",
+        "level": 1,
+        "school": "Evocation",
+        "castTime": "bonus",
+        "concentration": false,
+        "range": "Self",
+        "duration": "Instantaneous",
+        "role": "offense",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "Your next hit adds thunder damage and can shove the target.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "tag": "STR save",
+        "verified": true
+      },
+      {
+        "id": "spell:wardaway",
+        "name": "Wardaway",
+        "level": 1,
+        "school": "Abjuration",
+        "castTime": "action",
+        "concentration": false,
+        "range": "60 ft",
+        "duration": "Instantaneous",
+        "role": "offense",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "Blast a creature with force damage unless it makes its save.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "tag": "CON save",
+        "verified": true
+      },
+      {
+        "id": "spell:wrathful-smite",
+        "name": "Wrathful Smite",
+        "level": 1,
+        "school": "Necromancy",
+        "castTime": "bonus",
+        "concentration": false,
+        "range": "Self",
+        "duration": "1 minute",
+        "role": "offense",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "Your next hit adds necrotic damage; the target saves against the effect.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "tag": "WIS save",
+        "verified": true
+      },
+      {
+        "id": "spell:aid",
+        "name": "Aid",
+        "level": 2,
+        "school": "Abjuration",
+        "castTime": "action",
+        "concentration": false,
+        "range": "30 ft",
+        "duration": "8 hours",
+        "role": "support",
+        "targets": [
+          "ally"
+        ],
+        "summary": "Up to three creatures gain +5 maximum and current hit points.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:consecration",
+        "name": "Consecration",
+        "level": 2,
+        "school": "Evocation",
+        "castTime": "action",
+        "concentration": true,
+        "range": "Self (15 ft)",
+        "duration": "1 minute",
+        "role": "control",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "Fill the area around you with radiant power that lingers.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:dueling-ground",
+        "name": "Dueling Ground",
+        "level": 2,
+        "school": "Abjuration",
+        "castTime": "long",
+        "castingNote": "10 minutes",
+        "ritual": true,
+        "concentration": false,
+        "range": "Touch (15 ft)",
+        "duration": "1 hour",
+        "role": "utility",
+        "targets": [
+          "ally"
+        ],
+        "summary": "A ritual that marks out an area for a duel.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:find-steed",
+        "ddbId": 2618879,
+        "name": "Find Steed",
+        "level": 2,
+        "school": "Conjuration",
+        "castTime": "action",
+        "concentration": false,
+        "range": "30 ft",
+        "duration": "Instantaneous",
+        "role": "utility",
+        "targets": [
+          "self"
+        ],
+        "summary": "Call a loyal otherworldly steed that fights beside you.",
+        "description": "You summon an otherworldly being that appears as a loyal steed in an unoccupied space of your choice within range. This creature uses the Otherworldly Steed stat block. If you already have a steed from this spell, the steed is replaced by the new one.\nThe steed resembles a Large, rideable animal of your choice, such as a horse, a camel, a dire wolf, or an elk. Whenever you cast the spell, choose the steed’s creature type—Celestial, Fey, or Fiend—which determines certain traits in the stat block.\nCombat. The steed is an ally to you and your allies. In combat, it shares your Initiative count, and it functions as a controlled mount while you ride it (as defined in the rules on mounted combat). If you have the Incapacitated condition, the steed takes its turn immediately after yours and acts independently, focusing on protecting you.\nDisappearance of the Steed. The steed disappears if it drops to 0 Hit Points or if you die. When it disappears, it leaves behind anything it was wearing or carrying. If you cast this spell again, you decide whether you summon the steed that disappeared or a different one.\nUsing a Higher-Level Spell Slot. Use the spell slot’s level for the spell’s level in the stat block.\nOtherworldly Steed\nLarge Celestial, Fey, or Fiend (Your Choice), Neutral\nAC 10 + 1 per spell level\nHP 5 + 10 per spell level (the steed has a number of Hit Dice [d10s] equal to the spell’s level)\nSpeed 60 ft., Fly 60 ft. (requires level 4+ spell)\nMod\r\nSave\r\nSTR\r\n18\r\n+4\r\n+4\r\nDEX\r\n12\r\n+1\r\n+1\r\nCON\r\n14\r\n+2\r\n+2\r\nMod\r\nSave\r\nINT\r\n6\r\n 2\r\n 2\r\nWIS\r\n12\r\n+1\r\n+1\r\nCHA\r\n8\r\n 1\r\n 1\r\nSenses Passive Perception 11\nLanguages Telepathy 1 mile (works only with you)\nCR None (XP 0; PB equals your Proficiency Bonus)\nTraits\nLife Bond. When you regain Hit Points from a level 1+ spell, the steed regains the same number of Hit Points if you’re within 5 feet of it.\nActions\nOtherworldly Slam. Melee Attack Roll: Bonus equals your spell attack modifier, reach 5 ft. Hit: 1d8 plus the spell’s level of Radiant (Celestial), Psychic (Fey), or Necrotic (Fiend) damage.\nBonus Actions\nFell Glare (Fiend Only; Recharges after a Long Rest). Wisdom Saving Throw: DC equals your spell save DC, one creature within 60 feet the steed can see. Failure: The target has the Frightened condition until the end of your next turn.\nFey Step (Fey Only; Recharges after a Long Rest). The steed teleports, along with its rider, to an unoccupied space of your choice up to 60 feet away from itself.\nHealing Touch (Celestial Only; Recharges after a Long Rest). One creature within 5 feet of the steed regains a number of Hit Points equal to 2d8 plus the spell’s level.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "free",
+            "counterId": "free-find-steed"
+          },
+          {
+            "kind": "slot"
+          }
+        ],
+        "alwaysPrepared": true,
+        "verified": true
+      },
+      {
+        "id": "spell:gentle-repose",
+        "name": "Gentle Repose",
+        "level": 2,
+        "school": "Necromancy",
+        "castTime": "action",
+        "ritual": true,
+        "concentration": false,
+        "range": "Touch",
+        "duration": "10 days",
+        "role": "utility",
+        "targets": [
+          "ally"
+        ],
+        "summary": "Keep a corpse from decaying or rising as undead.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:hold-person",
+        "ddbId": 2619153,
+        "name": "Hold Person",
+        "level": 2,
+        "school": "Enchantment",
+        "castTime": "action",
+        "concentration": true,
+        "range": "60 ft",
+        "duration": "1 minute",
+        "role": "control",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "A humanoid that fails its save is paralyzed; it can retry each turn.",
+        "description": "Choose a Humanoid that you can see within range. The target must succeed on a Wisdom saving throw or have the Paralyzed condition for the duration. At the end of each of its turns, the target repeats the save, ending the spell on itself on a success.\nUsing a Higher-Level Spell Slot. You can target one additional Humanoid for each spell slot level above 2.",
+        "source": "oath",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "tag": "WIS save",
+        "alwaysPrepared": true,
+        "verified": true
+      },
+      {
+        "id": "spell:lesser-restoration",
+        "ddbId": 2619016,
+        "name": "Lesser Restoration",
+        "level": 2,
+        "school": "Abjuration",
+        "castTime": "bonus",
+        "concentration": false,
+        "range": "Touch",
+        "duration": "Instantaneous",
+        "role": "support",
+        "targets": [
+          "ally"
+        ],
+        "summary": "End one condition on a touched creature: blinded, deafened, paralyzed or poisoned.",
+        "description": "You touch a creature and end one condition on it: Blinded, Deafened, Paralyzed, or Poisoned.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:locate-object",
+        "name": "Locate Object",
+        "level": 2,
+        "school": "Divination",
+        "castTime": "action",
+        "concentration": true,
+        "range": "Self",
+        "duration": "10 minutes",
+        "role": "utility",
+        "targets": [
+          "self"
+        ],
+        "summary": "Sense the direction of a familiar object within 1,000 feet.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:magic-weapon",
+        "name": "Magic Weapon",
+        "level": 2,
+        "school": "Transmutation",
+        "castTime": "bonus",
+        "concentration": false,
+        "range": "Touch",
+        "duration": "1 hour",
+        "role": "support",
+        "targets": [
+          "self",
+          "ally"
+        ],
+        "summary": "A nonmagical weapon becomes magical with a bonus to hit and damage.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:misty-step",
+        "ddbId": 2619133,
+        "name": "Misty Step",
+        "level": 2,
+        "school": "Conjuration",
+        "castTime": "bonus",
+        "concentration": false,
+        "range": "Self",
+        "duration": "Instantaneous",
+        "role": "utility",
+        "targets": [
+          "self"
+        ],
+        "summary": "Teleport up to 30 feet to a space you can see.",
+        "description": "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space you can see.",
+        "source": "oath",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "alwaysPrepared": true,
+        "verified": true
+      },
+      {
+        "id": "spell:pinky-swear",
+        "name": "Pinky Swear",
+        "level": 2,
+        "school": "Abjuration",
+        "castTime": "action",
+        "concentration": false,
+        "range": "Touch",
+        "duration": "24 hours",
+        "role": "utility",
+        "targets": [
+          "ally"
+        ],
+        "summary": "A promise-binding spell. Details not read: check the spell before relying on it.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:prayer-of-healing",
+        "name": "Prayer of Healing",
+        "level": 2,
+        "school": "Abjuration",
+        "castTime": "long",
+        "castingNote": "10 minutes",
+        "concentration": false,
+        "range": "30 ft",
+        "duration": "Instantaneous",
+        "role": "support",
+        "targets": [
+          "ally"
+        ],
+        "summary": "Up to five creatures regain hit points and gain the benefit of a short rest.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:protection-from-poison",
+        "name": "Protection from Poison",
+        "level": 2,
+        "school": "Abjuration",
+        "castTime": "action",
+        "concentration": false,
+        "range": "Touch",
+        "duration": "1 hour",
+        "role": "support",
+        "targets": [
+          "ally"
+        ],
+        "summary": "End poison on a creature and protect it from poison for an hour.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:searing-orb",
+        "name": "Searing Orb",
+        "level": 2,
+        "school": "Evocation",
+        "castTime": "action",
+        "concentration": false,
+        "range": "60 ft",
+        "duration": "Instantaneous",
+        "role": "offense",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "A burst of radiant damage around a point; creatures in it can save.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "tag": "CON save",
+        "verified": true
+      },
+      {
+        "id": "spell:shining-smite",
+        "name": "Shining Smite",
+        "level": 2,
+        "school": "Transmutation",
+        "castTime": "bonus",
+        "concentration": true,
+        "range": "Self",
+        "duration": "1 minute",
+        "role": "offense",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "Your hits deal extra radiant damage while the spell lasts.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "tag": "on melee hit",
+        "verified": true
+      },
+      {
+        "id": "spell:warding-bond",
+        "name": "Warding Bond",
+        "level": 2,
+        "school": "Abjuration",
+        "castTime": "action",
+        "concentration": false,
+        "range": "Touch",
+        "duration": "1 hour",
+        "role": "support",
+        "targets": [
+          "ally"
+        ],
+        "summary": "Link to a willing creature: it is protected, and you share its harm.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "verified": true
+      },
+      {
+        "id": "spell:zone-of-truth",
+        "name": "Zone of Truth",
+        "level": 2,
+        "school": "Enchantment",
+        "castTime": "action",
+        "concentration": false,
+        "range": "60 ft",
+        "duration": "10 minutes",
+        "role": "control",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "Creatures in a sphere cannot knowingly lie.",
+        "source": "class",
+        "costs": [
+          {
+            "kind": "slot"
+          }
+        ],
+        "tag": "CHA save",
+        "verified": true
+      }
+    ],
+    "counters": [
+      {
+        "id": "lay-on-hands",
+        "label": "Lay On Hands",
+        "max": 25,
+        "kind": "pool",
+        "restore": {
+          "long": "full"
+        }
+      },
+      {
+        "id": "channel-divinity",
+        "label": "Channel Divinity",
+        "max": 2,
+        "kind": "uses",
+        "restore": {
+          "short": {
+            "add": 1
+          },
+          "long": "full"
+        }
+      },
+      {
+        "id": "free-smite",
+        "label": "Free Divine Smite",
+        "max": 1,
+        "kind": "uses",
+        "restore": {
+          "long": "full"
+        }
+      },
+      {
+        "id": "free-find-steed",
+        "label": "Free Find Steed",
+        "max": 1,
+        "kind": "uses",
+        "restore": {
+          "long": "full"
+        }
+      },
+      {
+        "id": "breath-weapon",
+        "label": "Breath Weapon",
+        "max": 3,
+        "kind": "uses",
+        "restore": {
+          "long": "full"
+        }
+      },
+      {
+        "id": "draconic-flight",
+        "label": "Draconic Flight",
+        "max": 1,
+        "kind": "uses",
+        "restore": {
+          "long": "full"
+        }
+      },
+      {
+        "id": "hit-dice",
+        "label": "Hit Dice (d10)",
+        "max": 5,
+        "kind": "pool",
+        "restore": {
+          "long": {
+            "fraction": 0.5
+          }
+        }
+      },
+      {
+        "id": "death-coil",
+        "label": "Death Coil dice (d8)",
+        "max": 4,
+        "kind": "pool",
+        "restore": {
+          "long": "full"
+        }
+      },
+      {
+        "id": "arbiters-ward",
+        "label": "Arbiter’s Ward",
+        "max": 6,
+        "kind": "uses",
+        "restore": {}
+      }
+    ],
+    "features": [
+      {
+        "id": "feature:lay-on-hands",
+        "name": "Lay On Hands",
+        "castTime": "bonus",
+        "role": "support",
+        "targets": [
+          "ally"
+        ],
+        "summary": "Touch a creature and spend points from your healing pool to restore its hit points.",
+        "description": "As a Bonus Action, you can touch a creature (which could be yourself) and restore a number of HP to that creature, up to the maximum amount remaining in the pool.",
+        "source": "class",
+        "counterId": "lay-on-hands",
+        "spend": {
+          "kind": "pool"
+        }
+      },
+      {
+        "id": "feature:vow-of-enmity",
+        "name": "Vow of Enmity",
+        "castTime": "action",
+        "timing": "with the Attack action",
+        "role": "offense",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "Swear a vow against a creature within 30 feet to favour your attacks against it. Costs a Channel Divinity use.",
+        "description": "When you take the Attack action, you can expend one use of Channel Divinity to utter a vow of enmity against a creature you can see within 30 ft. You have Advantage on attack rolls against that creature for 1 minute or until you use this feature again. \r\nIf the creature drops to 0 HP, you can transfer the vow to a different creature within 30 ft.",
+        "source": "class",
+        "counterId": "channel-divinity",
+        "spend": {
+          "kind": "uses"
+        }
+      },
+      {
+        "id": "feature:divine-sense",
+        "name": "Divine Sense",
+        "castTime": "bonus",
+        "role": "utility",
+        "targets": [
+          "self"
+        ],
+        "summary": "Sense celestials, fiends and undead within 60 feet for 10 minutes. Costs a Channel Divinity use.",
+        "description": "For the next 10 min. or until you have the Incapacitated condition, you know the location of any Celestials, Fiends, and Undead within 60 ft., and you know its creature type. In the same radius, you also detect the presence of any place/object that has been consecrated or desecrated, as with the Hallow spell.",
+        "source": "class",
+        "counterId": "channel-divinity",
+        "spend": {
+          "kind": "uses"
+        }
+      },
+      {
+        "id": "feature:breath-weapon",
+        "name": "Breath Weapon",
+        "castTime": "action",
+        "timing": "replaces one attack",
+        "role": "offense",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "Replace one attack with a breath of acid in a 15-foot cone or 30-foot line.",
+        "description": "When you take the Attack action on your turn, you can replace one attack with a breath weapon that is a 15-ft. Cone or a 30-ft. Line that’s 5 ft. wide (choose the shape each time). Each creature must make a DC 15 Dex. saving throw taking 2d10 Acid damage on a failed save or half as much damage on a success.",
+        "source": "race",
+        "counterId": "breath-weapon",
+        "spend": {
+          "kind": "uses"
+        },
+        "tag": "DEX save, DC 15"
+      },
+      {
+        "id": "feature:draconic-flight",
+        "name": "Draconic Flight",
+        "castTime": "bonus",
+        "role": "utility",
+        "targets": [
+          "self"
+        ],
+        "summary": "Sprout spectral wings and fly for 10 minutes.",
+        "description": "Once per Long Rest, you gain temporary flight for 10 minutes or until you retract the wings (no action required) or have the Incapacitated condition. During that time, you have a Fly Speed equal to your Speed.",
+        "source": "race",
+        "counterId": "draconic-flight",
+        "spend": {
+          "kind": "uses"
+        }
+      },
+      {
+        "id": "feature:death-coil",
+        "name": "Death Coil",
+        "castTime": "bonus",
+        "role": "offense",
+        "targets": [
+          "enemy"
+        ],
+        "summary": "DM homebrew: spend dice from your pool to force a save for necrotic damage, or heal an undead.",
+        "description": "As a Bonus action, you can target a creature you can see within 60 feet of yourself and force it to make a Con. save, expending dice from the pool. The maximum number of dice you can expend at once equals 3. Roll the dice you expend. The target takes Necrotic damage equal to the roll’s total on a failed save or half as much damage on a successful one. If the target is an Undead, you can choose to have it regain Hit Points equal to the roll’s total instead. Your pool regains all expended dice when you finish a Long Rest.",
+        "source": "homebrew",
+        "counterId": "death-coil",
+        "spend": {
+          "kind": "pool",
+          "maxPerUse": 3
+        },
+        "tag": "CON save"
+      }
+    ]
+  },
+  "prepared": [
+    "spell:lesser-restoration",
+    "spell:bless"
+  ],
+  "seededUsed": {
+    "arbiters-ward": 5
+  },
+  "otherFeatures": [
+    {
+      "name": "Initiate a Circle Spell",
+      "text": "You take a Magic action to initiate casting a Circle spell. When you do so, choose which Circle casting option you’re using for this casting; you must also meet any of the other requirements described in that option’s text. Until the Circle spell’s casting is complete, you must maintain Concentration on the spell."
+    },
+    {
+      "name": "Circle Spell: Augment",
+      "text": "When you cast a spell with a range of at least 5 ft., you can increase the range of the spell by 1,000 ft. per secondary caster contributing to the spell, up to a max of a 1-mile increase."
+    },
+    {
+      "name": "Circle Spell: Distribute",
+      "text": "When you cast a spell that requires Concentration, you can distribute the mental load of the spell among you and the secondary casters. Once the casting is complete, you and all secondary casters can maintain Concentration on this spell. As long as at least one caster who contributed to the spell maintains this Concentration, the spell’s effects remain active."
+    },
+    {
+      "name": "Circle Spell: Expand",
+      "text": "When you cast a spell that creates an area of effect, you can increase one dimension of the spell’s area of effect for this casting by 10 ft. per secondary caster contributing to the spell. \r\nEach secondary caster contributing to the spell must expend a spell slot (no action required). If the spell fails, these spell slots aren’t expended."
+    },
+    {
+      "name": "Circle Spell: Prolong",
+      "text": "When you cast a spell that has a duration of 1 min or longer, you can increase the duration of the spell depending on the number of secondary casters contributing to the spell.\r\nEach secondary caster contributing to the spell must expend a spell slot (no action required). If the spell fails, these spell slots aren’t expended."
+    },
+    {
+      "name": "Circle Spell: Safeguard",
+      "text": "When you cast a spell that creates an area of effect, you can carve out a safe zone within that area of effect that is unaffected by the spell for its duration. This safe zone consists of a number of 5-ft. Cubes equal to 3 + the number of secondary casters contributing to the spell (min of 1 Cube). You can arrange the Cubes as you like, but each Cube must be contiguous with at least one other Cube.\r\nIf the spell’s area of effect can be moved, the safe zone moves with it."
+    },
+    {
+      "name": "Circle Spell: Supplant",
+      "text": "When you cast a spell that requires at least one Material component with a specified cost that is consumed by the spell, you can reduce the min cost of one such Material component by 50 GP per each secondary caster contributing to the spell.\r\nEach secondary caster contributing to the spell must expend a spell slot of a level greater than or equal to the spell’s level (no action required). If the spell fails, these spell slots aren’t expended."
+    },
+    {
+      "name": "Undead Steed: Ghostly Stride",
+      "text": "In addition to the benefits of the Paladin’s Faithful Steed feature, when you cast Find Steed, the Otherworldly Steed can be Undead. An Undead steed deals Necrotic damage with its Otherworldly Slam action and has this Bonus Action:\r\nGhostly Stride (Undead Only; Recharges After a Long Rest). The steed and its rider can move through other creatures and objects this turn as if they were Difficult Terrain. Both steed and rider take 5 (1d10) Force damage if they end their turn inside an object."
+    }
+  ]
+}
