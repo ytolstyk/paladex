@@ -69,6 +69,23 @@ footer stay. The gear button in `VitalsBanner` and Cmd/Ctrl+, (in `hooks/useShor
 `SettingsPage`). Cmd/Ctrl+, works even while an input has focus; `N` (new turn) is disabled on the settings page.
 `useShortcuts` treats only text-type inputs as typing targets, so a focused radio does not swallow shortcuts.
 
+## Spell cast effects
+
+- Casting a spell plays a short show from behind its card. Which effect: the player's per-spell override, else the curated
+  match in `MATCHED_EFFECTS` (`domain/effects.ts`, only where the effect clearly fits the spell), else the player's default.
+  Both choices are a view preference like the theme: `state/effectsStore.ts`, in localStorage (`paladex.effects`), never in
+  the play state.
+- `domain/particles.ts` is pure and seeded: it decides where every piece goes and hands numbers to the stylesheet as custom
+  properties (`CastEffect.tsx`); the `.fx-*` CSS only decides how pieces look and move. Pieces start on the card's edge so the
+  opaque card hides their start.
+- `FxHost` (`CastEffect.tsx`) owns the stacking, the show's state and its lifetime. Wrap one opaque box in it and call
+  `ref.play(effect)`; do not hand-roll the wrapper. A spell card's host also carries the card's entrance animation
+  (`.fx-host--card`).
+- Adding an effect: an `EFFECTS` entry, a builder in `BUILDERS` (it will not compile without one), a
+  `.fx-layer[data-effect='id'] .fx-piece` block and keyframes in `app.css` (a test fails if the CSS is missing), and
+  optionally `MATCHED_EFFECTS` entries. The CSS aura and halo must stay within `BACKDROP_MS`.
+- Features (Lay On Hands and the like) keep only the ring on the button: effects are for spells.
+
 ## Window state, layout and motion
 
 - Window geometry is a view preference: `src/main/windowState.ts` (electron-free, tested) persists it to

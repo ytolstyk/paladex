@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useUiStore } from '@/state/uiStore'
+import { EffectSettings } from './EffectSettings'
 import { Flourish } from './Ornaments'
 import { ThemePicker } from './ThemePicker'
 
@@ -27,7 +28,9 @@ export function SettingsPage(): React.JSX.Element {
       </header>
       <Flourish />
       <ThemePicker />
-      <p className="muted settings__note">Your choice is remembered on this computer and applies instantly.</p>
+      <Flourish />
+      <EffectSettings />
+      <p className="muted settings__note">Your choices are remembered on this computer and apply instantly.</p>
     </main>
   )
 }

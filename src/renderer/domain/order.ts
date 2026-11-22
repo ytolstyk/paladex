@@ -30,7 +30,7 @@ export interface SpellGroup {
 }
 
 const byName = (a: Spell, b: Spell): number => a.name.localeCompare(b.name)
-const byLevelThenName = (a: Spell, b: Spell): number => a.level - b.level || byName(a, b)
+export const byLevelThenName = (a: Spell, b: Spell): number => a.level - b.level || byName(a, b)
 
 interface Grouping {
   /** The group a spell belongs to. */
