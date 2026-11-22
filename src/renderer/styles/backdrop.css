@@ -1,0 +1,323 @@
+/*
+ * Window backdrop texture (components/Backdrop.tsx): grain, marks and worn edges seen through the gaps between panels.
+ *
+ * Every layer is an SVG used as an alpha MASK over a flat token color, so the artwork carries no colors of its own and
+ * each theme only chooses which masks to stack and which token tints them. Keep it that way: no hex or rgba literals.
+ * (Masks must be data: URIs. A file: URL fails the CORS check Chromium applies to mask-image.)
+ *
+ * Structure: three spans (.backdrop__tex material grain, __marks hand-made marks, __edge worn edges), each with a
+ * ::before and ::after, so a theme gets up to six tints. A pseudo-element with no rule for a theme paints nothing; a rule
+ * needs both a background and a mask-image (a test enforces it). Keep one selector per rule: the test reads the file that way.
+ * Large layers stretch to the window (preserveAspectRatio none); grain layers tile at a fixed size.
+ * Everything is static, so the layers are rasterized once and never repainted. Keep it that way too.
+ *
+ * Opacity guide: these sit behind everything and must stay quiet. The percentage in each color-mix() is BEFORE the mask's
+ * own alpha (soft noise, partly transparent strokes), so the page shows far less than the number. Rough ceilings:
+ * grain 45%, marks 85% (ink 60%), edges 65%. Judge by screenshot, not by the number.
+ *
+ * Gotchas:
+ * - Inside a data URI, a backslash line continuation must end the line: a trailing space after the \ silently breaks the
+ *   whole declaration (the theme just shows no texture).
+ * - mask-image, mask-size and mask-repeat are parallel lists: keep them the same length and order. A tiled mask's size in
+ *   mask-size must equal the width/height written in its SVG (480 for --tx-fibers, 600 for --tx-specks).
+ * - Marks use fixed coordinates in a 1600x1000 box stretched to the window, tuned for roughly 16:10 and for the current
+ *   rail and banner sizes. At other ratios circles turn slightly elliptical; if a layout token changes, re-check them.
+ * - Stacking: .backdrop and the hearth/vignette pseudo-elements of .app are all z-index -1, so source order decides:
+ *   hearth, then this, then the vignette.
+ * - Cost: the feTurbulence masks are the expensive part (a few hundred ms each on the CPU raster path at retina size, nothing
+ *   on GPU raster), so keep numOctaves low and do not add full-window filter layers casually.
+ * - Noise filters: feColorMatrix's last row is alpha = k * noise + b, so a pixel is kept where noise > -b / k and k is how
+ *   hard the edge is. To get more coverage raise b (towards 0); for softer edges lower k. baseFrequency is cycles per
+ *   user unit, so .0035 across a 1600-wide box is about 5 or 6 blotches. Seeds are arbitrary.
+ */
+
+:root {
+  /* Blotchy low-frequency patches: stains, mottling, soot, dapple */
+  --tx-cloud: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='none'>\
+<filter id='f' x='0' y='0' width='100%' height='100%'>\
+<feTurbulence type='fractalNoise' baseFrequency='.0035 .006' numOctaves='3' seed='3'/>\
+<feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  3 0 0 0 -1.05'/>\
+</filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
+
+  /* Long wavering streaks along the x axis: wood grain */
+  --tx-streaks: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='none'>\
+<filter id='f' x='0' y='0' width='100%' height='100%'>\
+<feTurbulence type='fractalNoise' baseFrequency='.003 .012' numOctaves='2' seed='5' result='w'/>\
+<feTurbulence type='fractalNoise' baseFrequency='.0016 .13' numOctaves='2' seed='2' result='g'/>\
+<feDisplacementMap in='g' in2='w' scale='70' xChannelSelector='R' yChannelSelector='G'/>\
+<feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  4 0 0 0 -1.7'/>\
+</filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
+
+  /* Very fine straight lines along the x axis: brushed metal */
+  --tx-brushed: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='none'>\
+<filter id='f' x='0' y='0' width='100%' height='100%'>\
+<feTurbulence type='fractalNoise' baseFrequency='.0007 .8' numOctaves='2' seed='9'/>\
+<feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  3.4 0 0 0 -1.4'/>\
+</filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
+
+  /* Short crossing fibers, 480px tile: paper and moss */
+  --tx-fibers: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='480' height='480'>\
+<filter id='f' x='0' y='0' width='100%' height='100%'>\
+<feTurbulence type='fractalNoise' baseFrequency='.012 .55' numOctaves='2' seed='4' stitchTiles='stitch' result='a'/>\
+<feTurbulence type='fractalNoise' baseFrequency='.5 .014' numOctaves='2' seed='8' stitchTiles='stitch' result='b'/>\
+<feBlend in='a' in2='b' mode='lighten'/>\
+<feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  7 0 0 0 -4.5'/>\
+</filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
+
+  /* Sparse specks, 600px tile: foxing on paper, flecks of ash or embers */
+  --tx-specks: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'>\
+<filter id='f' x='0' y='0' width='100%' height='100%'>\
+<feTurbulence type='fractalNoise' baseFrequency='.24' numOctaves='1' seed='6' stitchTiles='stitch'/>\
+<feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  22 0 0 0 -15.2'/>\
+</filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
+
+  /*
+   * Ragged, patchy bands hugging the window edge: a wide soft one (scorch, soot, shade) and a thin hard one (char).
+   * Both warp the same noise, so the char sits inside the scorch. KEEP IN SYNC: the two filters below must have the same
+   * turbulence, seed and displacement scale, or the char drifts out of the scorch. The banner and footer hide the top and bottom,
+   * so in practice it is the sides and the corners that show.
+   */
+  --tx-scorch: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='none'>\
+<filter id='w' x='-20%' y='-20%' width='140%' height='140%'>\
+<feTurbulence type='fractalNoise' baseFrequency='.008 .012' numOctaves='2' seed='11' result='n'/>\
+<feDisplacementMap in='SourceGraphic' in2='n' scale='120' xChannelSelector='R' yChannelSelector='G'/>\
+<feGaussianBlur stdDeviation='14'/>\
+</filter>\
+<path fill-rule='evenodd' filter='url(%23w)' d='M-400-400H2000V1400H-400Z M64 70H1536V930H64Z'/></svg>");
+  --tx-char: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='none'>\
+<filter id='w' x='-20%' y='-20%' width='140%' height='140%'>\
+<feTurbulence type='fractalNoise' baseFrequency='.008 .012' numOctaves='2' seed='11' result='n'/>\
+<feDisplacementMap in='SourceGraphic' in2='n' scale='120' xChannelSelector='R' yChannelSelector='G'/>\
+<feGaussianBlur stdDeviation='2.5'/>\
+</filter>\
+<path fill-rule='evenodd' filter='url(%23w)' d='M-400-400H2000V1400H-400Z M16 24H1584V976H16Z'/></svg>");
+
+  /* A coffee-cup ring */
+  --tx-ring: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='none'>\
+<filter id='j' x='-20%' y='-20%' width='140%' height='140%'>\
+<feTurbulence type='fractalNoise' baseFrequency='.02' numOctaves='3' seed='21'/>\
+<feDisplacementMap in='SourceGraphic' scale='16' xChannelSelector='R' yChannelSelector='G'/>\
+<feGaussianBlur stdDeviation='.8'/>\
+</filter>\
+<g filter='url(%23j)' fill='none' stroke='black'>\
+<circle cx='1480' cy='500' r='64' stroke-width='6' stroke-opacity='.75'/>\
+<circle cx='1483' cy='499' r='60' stroke-width='2' stroke-opacity='.4'/>\
+<path d='M1536 462a64 64 0 0 1 6 40' stroke-width='9' stroke-opacity='.35'/>\
+</g></svg>");
+
+  /* Ink: blots with drips (two hang from the banner's lower edge), splatter, a pen-test scribble and a hatched-out doodle */
+  --tx-ink: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='none'>\
+<filter id='j' x='-5%' y='-5%' width='110%' height='110%'>\
+<feTurbulence type='fractalNoise' baseFrequency='.06' numOctaves='2' seed='4'/>\
+<feDisplacementMap in='SourceGraphic' scale='5' xChannelSelector='R' yChannelSelector='G'/>\
+</filter>\
+<g filter='url(%23j)'>\
+<g transform='translate(1375 320) scale(.62) translate(-1375 -320)'>\
+<path d='M1352 300c10-14 34-16 46-4 12 10 10 30-2 40-12 10-36 12-46 2-9-10-8-28 2-38Z'/>\
+<path d='M1370 338c3 30 2 58 0 82-1 6-9 6-10 0-2-26-1-52 2-82Z'/>\
+<circle cx='1365' cy='428' r='6'/>\
+<path d='M1397 336c2 16 1 30 0 40-1 4-6 4-7 0-1-10 0-24 1-40Z'/>\
+<circle cx='1318' cy='284' r='3.5'/><circle cx='1426' cy='320' r='2.6'/><circle cx='1300' cy='338' r='2'/>\
+<circle cx='1438' cy='278' r='1.8'/><circle cx='1342' cy='260' r='1.6'/><circle cx='1412' cy='356' r='1.4'/>\
+</g>\
+<g fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round'>\
+<path stroke-width='2.4' stroke-opacity='.75' d='M1200 610c12-34 30-52 40-44 8 8-10 34-24 28-12-6 4-40 22-44 14-3 18 22 4 30-12 6 8-44 30-42 16 2 14 24 0 28-10 3 14-38 34-34 14 3 10 24-2 22'/>\
+<path stroke-width='2' stroke-opacity='.55' d='M1290 520l92-14M1286 534l96-14M1292 548l90-12M1290 562l84-10M1300 576l70-8'/>\
+<path stroke-width='1.8' stroke-opacity='.5' d='M1300 520c-6 20-4 44 4 62'/>\
+</g></g></svg>");
+
+  /* Plank seams, butt joints and knots */
+  --tx-planks: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='none'>\
+<filter id='j' x='-5%' y='-5%' width='110%' height='110%'>\
+<feTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='2' seed='13'/>\
+<feDisplacementMap in='SourceGraphic' scale='7' xChannelSelector='R' yChannelSelector='G'/>\
+</filter>\
+<g filter='url(%23j)' fill='none' stroke='black' stroke-linecap='round'>\
+<path d='M0 262C400 258 900 268 1600 262' stroke-width='2.6'/>\
+<path d='M0 870C300 876 900 864 1600 872' stroke-width='2.6'/>\
+<path d='M0 560C500 566 1000 556 1600 562' stroke-width='2.6'/>\
+<path d='M880 0V262M430 262V560M1190 560V870M700 870V1000' stroke-width='2.2'/>\
+<g stroke-width='1.6' stroke-opacity='.7'>\
+<ellipse cx='1330' cy='470' rx='38' ry='15'/><ellipse cx='1330' cy='470' rx='24' ry='9'/><ellipse cx='1330' cy='470' rx='11' ry='4'/>\
+<ellipse cx='640' cy='820' rx='30' ry='12'/><ellipse cx='640' cy='820' rx='17' ry='6.5'/>\
+<ellipse cx='1020' cy='180' rx='26' ry='10'/><ellipse cx='1020' cy='180' rx='12' ry='4.5'/>\
+</g></g></svg>");
+
+  /* Fine scratches */
+  --tx-scratches: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='none'>\
+<g fill='none' stroke='black' stroke-linecap='round'>\
+<path stroke-width='1.2' stroke-opacity='.9' d='M1060 150l180 -26M1318 330l210 -38M1100 560l56 150M700 100l120 34M1410 640l-150 70'/>\
+<path stroke-width='.8' stroke-opacity='.7' d='M1090 158l60 -8M1340 340l110 -18M1124 580l20 60M1380 620l-70 28M880 700l150 18M560 400l90 -30M1230 880l210 -18'/>\
+<path stroke-width='1' stroke-opacity='.8' d='M1500 150c-20 40-24 90-10 130M980 840c40 -18 100 -20 150 -4M760 520c30 12 70 14 100 4'/>\
+</g></svg>");
+
+  /* Vines and leaves entering from the right and top-right */
+  --tx-leaves: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='none'>\
+<defs><path id='l' d='M0 0C14-20 46-22 64 0 46 22 14 20 0 0Z'/></defs>\
+<g fill='none' stroke='black' stroke-linecap='round'>\
+<path stroke-width='3' d='M1600 270C1520 280 1450 330 1410 410S1330 560 1210 620'/>\
+<path stroke-width='2.2' d='M1600 740C1540 730 1480 760 1440 810S1370 920 1290 940'/>\
+<path stroke-width='2' d='M1180 80C1230 120 1260 170 1262 230'/>\
+</g>\
+<g>\
+<use href='%23l' transform='translate(1508 300) rotate(-70) scale(.9)'/>\
+<use href='%23l' transform='translate(1470 332) rotate(35) scale(1)'/>\
+<use href='%23l' transform='translate(1432 380) rotate(-95) scale(.8)'/>\
+<use href='%23l' transform='translate(1408 424) rotate(20) scale(1.05)'/>\
+<use href='%23l' transform='translate(1368 500) rotate(-80) scale(.85)'/>\
+<use href='%23l' transform='translate(1340 540) rotate(40) scale(.7)'/>\
+<use href='%23l' transform='translate(1270 590) rotate(-100) scale(.75)'/>\
+<use href='%23l' transform='translate(1500 758) rotate(-60) scale(.8)'/>\
+<use href='%23l' transform='translate(1456 790) rotate(50) scale(.95)'/>\
+<use href='%23l' transform='translate(1410 850) rotate(-85) scale(.75)'/>\
+<use href='%23l' transform='translate(1372 900) rotate(30) scale(.7)'/>\
+<use href='%23l' transform='translate(1210 110) rotate(-40) scale(.7)'/>\
+<use href='%23l' transform='translate(1248 170) rotate(60) scale(.8)'/>\
+<use href='%23l' transform='translate(760 920) rotate(-20) scale(.9)'/>\
+</g></svg>");
+
+  /* Hairline cracks that branch like dried mud */
+  --tx-cracks: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='none'>\
+<g fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round'>\
+<path stroke-width='2.6' d='M1560 250l-46 38 22 40-58 34 14 52-52 36 10 48-36 40'/>\
+<path stroke-width='1.6' d='M1536 330l-44 6-20 30M1478 362l-50 4-24 28M1470 440l40 14 10 36M1426 520l-44 10-20 34'/>\
+<path stroke-width='2.2' d='M1262 300l30 28-8 36 34 24-4 36'/>\
+<path stroke-width='1.4' d='M1292 328l36-6 14 22M1310 388l-34 6'/>\
+</g></svg>");
+}
+
+/* ───────── Structure ───────── */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+.backdrop > span {
+  position: absolute;
+  inset: 0;
+}
+.backdrop > span::before,
+.backdrop > span::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+}
+
+/* High Contrast stays clean: legibility is its whole purpose */
+[data-theme='contrast'] .backdrop {
+  display: none;
+}
+
+/* ───────── Candlelit Oak: wood grain, plank seams, knots, a little soot at the edges ───────── */
+[data-theme='oak'] .backdrop__tex::before {
+  background: color-mix(in srgb, var(--gold-dim) 17%, transparent);
+  mask-image: var(--tx-streaks);
+}
+[data-theme='oak'] .backdrop__tex::after {
+  background: color-mix(in srgb, var(--oak-shadow) 40%, transparent);
+  mask-image: var(--tx-cloud);
+}
+[data-theme='oak'] .backdrop__marks::before {
+  background: color-mix(in srgb, var(--oak-shadow) 85%, transparent);
+  mask-image: var(--tx-planks);
+}
+[data-theme='oak'] .backdrop__marks::after {
+  background: color-mix(in srgb, var(--gold-dim) 26%, transparent);
+  mask-image: var(--tx-planks);
+  mask-position: 0 2px; /* the lit lip of each seam: the same mask, nudged down (not a transform: no extra compositing layer) */
+}
+[data-theme='oak'] .backdrop__edge::before {
+  background: color-mix(in srgb, var(--shadow) 32%, transparent);
+  mask-image: var(--tx-scorch);
+}
+
+/* ───────── Moonlit Steel: brushed metal, fine scratches, cool patina ───────── */
+[data-theme='moon'] .backdrop__tex::before {
+  background: color-mix(in srgb, var(--gold) 9%, transparent);
+  mask-image: var(--tx-brushed);
+}
+[data-theme='moon'] .backdrop__tex::after {
+  background: color-mix(in srgb, var(--gold-dim) 16%, transparent);
+  mask-image: var(--tx-cloud);
+}
+[data-theme='moon'] .backdrop__marks::before {
+  background: color-mix(in srgb, var(--gold-bright) 30%, transparent);
+  mask-image: var(--tx-scratches);
+}
+[data-theme='moon'] .backdrop__edge::before {
+  background: color-mix(in srgb, var(--shadow) 36%, transparent);
+  mask-image: var(--tx-scorch);
+}
+
+/* ───────── Elven Glade: dappled light, moss fibers, creeping vines ───────── */
+[data-theme='glade'] .backdrop__tex::before {
+  background: color-mix(in srgb, var(--vert-lit) 11%, transparent);
+  mask-image: var(--tx-cloud);
+}
+[data-theme='glade'] .backdrop__tex::after {
+  background: color-mix(in srgb, var(--vert-lit) 7%, transparent);
+  mask-image: var(--tx-fibers);
+  mask-size: 480px 480px;
+  mask-repeat: repeat;
+}
+[data-theme='glade'] .backdrop__marks::before {
+  background: color-mix(in srgb, var(--vert-lit) 20%, transparent);
+  mask-image: var(--tx-leaves);
+}
+[data-theme='glade'] .backdrop__edge::before {
+  background: color-mix(in srgb, var(--shadow) 40%, transparent);
+  mask-image: var(--tx-scorch);
+}
+
+/* ───────── Ember Court: ash and soot, flecks of embers, cracked and scorched ───────── */
+[data-theme='ember'] .backdrop__tex::before {
+  background: color-mix(in srgb, var(--oak-shadow) 42%, transparent);
+  mask-image: var(--tx-cloud);
+}
+[data-theme='ember'] .backdrop__tex::after {
+  background: color-mix(in srgb, var(--gold-bright) 30%, transparent);
+  mask-image: var(--tx-specks);
+  mask-size: 600px 600px;
+  mask-repeat: repeat;
+}
+[data-theme='ember'] .backdrop__marks::before {
+  background: color-mix(in srgb, var(--gold) 46%, transparent);
+  mask-image: var(--tx-cracks);
+}
+[data-theme='ember'] .backdrop__edge::before {
+  background: color-mix(in srgb, var(--oak-shadow) 50%, transparent);
+  mask-image: var(--tx-scorch);
+}
+[data-theme='ember'] .backdrop__edge::after {
+  background: color-mix(in srgb, var(--gold) 34%, transparent); /* a glowing rim where it is still smoldering */
+  mask-image: var(--tx-char);
+}
+
+/* ───────── Parchment & Ink: foxed, fibrous, stained paper; ink blots and scribbles; burnt edges ───────── */
+[data-theme='parchment'] .backdrop__tex::before {
+  background: color-mix(in srgb, var(--gold-dim) 32%, transparent);
+  mask-image: var(--tx-ring), var(--tx-cloud);
+}
+[data-theme='parchment'] .backdrop__tex::after {
+  background: color-mix(in srgb, var(--bone-dim) 13%, transparent);
+  mask-image: var(--tx-fibers), var(--tx-specks);
+  mask-size: 480px 480px, 600px 600px;
+  mask-repeat: repeat;
+}
+[data-theme='parchment'] .backdrop__marks::before {
+  background: color-mix(in srgb, var(--bone) 60%, transparent);
+  mask-image: var(--tx-ink);
+}
+[data-theme='parchment'] .backdrop__edge::before {
+  background: color-mix(in srgb, var(--gold) 34%, transparent); /* the scorched amber band */
+  mask-image: var(--tx-scorch);
+}
+[data-theme='parchment'] .backdrop__edge::after {
+  background: color-mix(in srgb, var(--bone) 62%, transparent); /* the char itself */
+  mask-image: var(--tx-char);
+}

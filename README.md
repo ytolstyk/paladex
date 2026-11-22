@@ -81,7 +81,10 @@ it before the first paint so there is no flash of the default theme on launch.
 1. Add a `[data-theme='your-id']` block to `src/renderer/styles/themes.css`. Copy an existing block and change the
    values; every palette token must be present, as plain hex literals. Set `color-scheme: dark` or `light` in the block.
 2. Add `{ id, name, blurb }` to `THEMES` in `src/renderer/domain/themes.ts`.
-3. Run `npm test`. `domain/themes.test.ts` checks that the registry and CSS agree (no missing or orphaned blocks) and
+3. Give it a window texture in `src/renderer/styles/backdrop.css`: copy the closest theme's rules (the `.backdrop__tex`,
+   `__marks` and `__edge` blocks), pick masks and token tints, and check it in a screenshot. Or set `display: none` on
+   `.backdrop` for a plain theme, as High Contrast does.
+4. Run `npm test`. `domain/themes.test.ts` checks that the registry and CSS agree (no missing or orphaned blocks) and
    enforces WCAG AA contrast (4.5:1) on every text pair of every palette. Each palette needs a secondary (`--second`) and
    tertiary (`--third`) accent with hues at least 40 degrees from the gold and from each other; the test fails otherwise.
 
@@ -113,7 +116,7 @@ src/renderer/
   domain/       Pure game logic (slots, rests, turns, filters, themes) with colocated tests
   state/        zustand stores: play state (persisted), UI state (not persisted), theme (localStorage)
   components/   React components
-  styles/       tokens.css (default palette, token contract, shared tokens), themes.css (other palettes), app.css
+  styles/       tokens.css (default palette, token contract, shared tokens), themes.css (other palettes), backdrop.css (window texture), app.css
   public/       theme-boot.js, the pre-paint theme script (static, copied as-is)
 scripts/        Seeding, icon and install tooling
 data/           Seeded character JSON

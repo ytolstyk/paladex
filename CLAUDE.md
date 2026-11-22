@@ -63,7 +63,19 @@ schema, vitest for tests. See README.md for scripts and layout.
   missing a token, has an orphaned CSS block, or a text pair drops below WCAG AA (4.5:1). Candlelit Oak predates the
   check, so four of its specific pairs are allowlisted at 3:1 in `KNOWN_BELOW_AA`; do not add to that list. Palette
   values must be 3- or 6-digit hex literals (the test throws on anything else).
-- Adding a theme: CSS block, `THEMES` entry, run tests. Steps are in README.md.
+- Adding a theme: palette CSS block, `THEMES` entry, backdrop rules in `backdrop.css` (or `display: none`), run tests. Steps are in README.md.
+
+## Backdrop texture
+
+- `components/Backdrop.tsx` is a static, `aria-hidden` layer behind the content, painted by `styles/backdrop.css`. It only shows
+  through the gaps between panels (the stage, gutters, the rail's margins), so keep it quiet. The `color-mix()` percentages are
+  before each mask's own alpha, so judge by screenshot (rough ceilings: grain 45%, marks 85%, edges 65%).
+- Each layer is an SVG alpha **mask** over a `color-mix()` of palette tokens, so the artwork has no colors of its own. Masks
+  must be `data:` URIs (a `file:` URL fails Chromium's CORS check for `mask-image`). No hex or `rgba()` literals in that file
+  (a test enforces it).
+- A theme picks which `--tx-*` masks to stack on `.backdrop__tex` / `__marks` / `__edge` (each with `::before` and `::after`,
+  so up to six tints, each of which may stack several masks). Marks are placed where cards usually are not; check them in a screenshot. Everything is static: do not
+  animate these layers. A new theme needs a block here, or an explicit `display: none` like High Contrast (test enforces it).
 
 ## Settings page
 

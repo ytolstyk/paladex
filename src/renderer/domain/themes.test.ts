@@ -151,6 +151,57 @@ describe('theme registry', () => {
   })
 })
 
+describe('backdrop texture', () => {
+  const css = readCss('backdrop.css')
+  const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, '')
+
+  /** Every declaration block whose selector starts at this theme's backdrop (the element, a layer, or its pseudo-elements). */
+  function backdropRules(id: string): string[] {
+    const pattern = new RegExp(`\\[data-theme='${id}'\\]\\s+\\.backdrop[^{,]*\\{([^}]*)\\}`, 'g')
+    return [...withoutComments.matchAll(pattern)].map((m) => m[1] as string)
+  }
+
+  it.each(THEMES.map((t) => t.id))('theme "%s" paints a backdrop or explicitly hides it', (id) => {
+    const rules = backdropRules(id)
+    const hides = rules.some((r) => /display:\s*none/.test(r))
+    const paints = rules.some((r) => /mask-image:/.test(r))
+    expect(hides || paints, `no .backdrop rule for theme "${id}" in backdrop.css`).toBe(true)
+  })
+
+  it.each(THEMES.map((t) => t.id))('theme "%s" gives every painted layer both a tint and a mask', (id) => {
+    // A mask with no background, or a background with no mask (a flat full-window color), is a silent visual bug.
+    const layers = backdropRules(id).filter((r) => !/display:\s*none/.test(r))
+    for (const rule of layers) {
+      expect(/background:/.test(rule) && /mask-image:/.test(rule), `incomplete layer rule in ${id}: ${rule.trim()}`).toBe(true)
+    }
+  })
+
+  it('has no rules for themes that are not registered (no orphans)', () => {
+    const inCss = new Set([...withoutComments.matchAll(/\[data-theme='([\w-]+)'\]\s+\.backdrop/g)].map((m) => m[1]))
+    const registered = new Set<string>(THEMES.map((t) => t.id))
+    expect([...inCss].filter((id) => !registered.has(id as string))).toEqual([])
+  })
+
+  it('has no unused masks', () => {
+    const defined = [...withoutComments.matchAll(/(--tx-[\w-]+)\s*:\s*url\(/g)].map((m) => m[1] as string)
+    const used = new Set([...withoutComments.matchAll(/var\((--tx-[\w-]+)\)/g)].map((m) => m[1]))
+    expect(defined.filter((name) => !used.has(name))).toEqual([])
+  })
+
+  it('only references masks that it defines', () => {
+    const defined = new Set([...withoutComments.matchAll(/(--tx-[\w-]+)\s*:\s*url\(/g)].map((m) => m[1]))
+    const used = [...withoutComments.matchAll(/var\((--tx-[\w-]+)\)/g)].map((m) => m[1] as string)
+    expect(used.filter((name) => !defined.has(name))).toEqual([])
+  })
+
+  it('takes every color from tokens (no hex or color-function literals)', () => {
+    // The SVGs refer to their own filters as url(%23f) / href='%23l': strip those fragment refs, then forbid colors.
+    // Named `black` is allowed: masks only read alpha.
+    const noFragmentRefs = withoutComments.replace(/(url\(|href=')%23[a-z](?=['")])/g, '')
+    expect(noFragmentRefs).not.toMatch(/#[0-9a-fA-F]{3,8}\b|%23[0-9a-fA-F]{3,8}\b|\b(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(/)
+  })
+})
+
 describe.each(THEMES.map((t) => t.id))('theme "%s"', (id) => {
   const block = paletteBlock(id)
   const tokens = hexTokens(block)

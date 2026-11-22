@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Backdrop } from './components/Backdrop'
 import { FilterBar } from './components/FilterBar'
 import { DetailDrawer } from './components/DetailDrawer'
 import { Footer } from './components/Footer'
@@ -28,11 +29,18 @@ export function App(): React.JSX.Element {
     void init()
   }, [init])
 
-  if (status === 'loading') return <div className="app app--loading" aria-busy="true" />
+  if (status === 'loading') {
+    return (
+      <div className="app app--loading" aria-busy="true">
+        <Backdrop />
+      </div>
+    )
+  }
   if (status === 'unreadable') return <UnreadableState />
 
   return (
     <div className="app">
+      <Backdrop />
       <VitalsBanner />
       {view === 'settings' ? (
         <SettingsPage />
