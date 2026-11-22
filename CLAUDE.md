@@ -26,6 +26,18 @@ schema, vitest for tests. See README.md for scripts and layout.
 - Gameplay rules are the 2024 ones. Only one spell slot may be expended per turn; free casts, item charges and cantrips
   do not count. This is a soft hint in the UI, not a block.
 
+## Finding spells, and the table panel
+
+- Search, sort and filters are view state (`uiStore`), applied by pure functions in `domain/`: `filters.ts` (what passes),
+  `order.ts` (sort and headings), `search.ts` (full-text haystack), `range.ts` (range text to band and distance) and
+  `facets.ts`. A new filter group is one entry in `FACETS`; the panel, the removable chips and the filter pick it up.
+  `hooks/useResults.ts` is the one place the stage and the filter bar read the filtered list from.
+- Spell-only filters (level, range, school, save, source, ritual) hide class features on purpose, see `onlySpellsQualify`.
+- Initiative (1 to 25, or null) and Bardic Inspiration (`{ held, die }`) are persisted play state. Both fields use
+  `.default()`, so older saves load. Rests clear held inspiration (it lasts an hour) and never touch initiative.
+- The dial's geometry is in `domain/dial.ts`; the component only draws and handles input. A drag saves once, on release, so it
+  is one undo step; typed or arrow-key changes coalesce through the `initiative` undo key.
+
 ## Color themes
 
 - Every color in `app.css` comes from a CSS custom property. Do not add hex or `rgba()` literals there; use or add a

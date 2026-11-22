@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
+import { useDismiss } from '@/hooks/useDismiss'
 import { usePlayStore } from '@/state/session'
 
 /** At or below this share of maximum hit points the bar throbs. */
@@ -12,21 +13,8 @@ export function HpControl(): React.JSX.Element | null {
   const [amount, setAmount] = useState('')
   const box = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!open) return
-    const onDown = (e: MouseEvent): void => {
-      if (box.current && !box.current.contains(e.target as Node)) setOpen(false)
-    }
-    const onKey = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('mousedown', onDown)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('mousedown', onDown)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [open])
+  const close = useCallback(() => setOpen(false), [])
+  useDismiss(open, box, close)
 
   if (!vitals) return null
   const hpPct = Math.max(0, Math.min(100, (vitals.hp / vitals.hpMax) * 100))

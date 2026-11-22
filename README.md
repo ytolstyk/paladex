@@ -1,12 +1,46 @@
 # Paladex
 
 An offline spell, slot and resource tracker for a D&D 2024-rules Paladin, built with Electron, React and TypeScript.
-It tracks spell slots, prepared spells, per-turn action economy, class resources, hit points and rests, with undo.
+It tracks spell slots, prepared spells, per-turn action economy, class resources, hit points, initiative, Bardic
+Inspiration and rests, with undo.
 
 ![Paladex showing spell slots, the current turn, class resources and a grid of spell cards, mid-combat](docs/screenshot.png)
 
-*Mid-turn: Bless is being concentrated on, a level I slot is spent, and the cast buttons warn about a second slotted spell.
-Ideas for what comes next are in [ROADMAP.md](ROADMAP.md).*
+*Mid-turn: initiative is set to 17 on the dial, Bardic Inspiration (a d8) is held, Bless is being concentrated on and a
+level I slot is spent. Each spell card shows its range large, with a meter that fills with distance. Ideas for what comes
+next are in [ROADMAP.md](ROADMAP.md).*
+
+## Finding spells
+
+The bar above the spell cards has three rows: search, sort and a filter panel; quick filters; and a line saying what is
+showing ("11 spells and 6 features").
+
+- **Search** (press `/` to jump to it, Esc clears it). Every word must appear somewhere in the spell, in any order: its name,
+  summary, full description, school, range, duration, role, casting time, level and source. Apostrophes and case do not
+  matter ("hunters mark" finds Hunter's Mark). A card that matched only through text it doesn't show says "Found in the
+  full text". Search also reaches class features and the Other features list.
+- **Sort by** Level (the default), Name, Range (nearest first), Casting time, School or What it does. The headings follow the
+  sort, so under Range the cards sit under Self, Touch, Up to 30 ft, 31 to 60 ft and Over 60 ft.
+- **Quick filters**: Hurt enemies / Help allies / Utility, Action / Bonus action / Reaction, Castable now, and Show all
+  spells (to prepare spells you haven't chosen).
+- **More filters**: Level, Range, School, Save or attack, Source, Ritual only and No concentration. Within a group any chosen
+  value matches; across groups all must. What you pick shows as removable chips under the bar, and the button carries a
+  count. These describe spells, so class features are hidden while any is on.
+- When filters hide spells you haven't prepared, the status line offers them ("2 more matches among unprepared spells").
+
+Every spell card shows its **range** large, with an icon (you, a hand, an arrow), the distance, any area ("Self, 30 ft
+area") and a meter that fills with distance. Filters, search and sort are view settings: they are not saved and not undoable.
+
+## At the table
+
+The top of the left rail holds two things you carry from the table into your own turn. Both are saved with the character.
+
+- **Initiative dial.** Turn the brass knob to a number from 1 to 25: drag it, click the scale, use the arrow keys (Page
+  Up/Down step by five, Home/End jump to the ends), press −1/+1, or just type the number. Backspace or "clear" resets it. A
+  rest does not clear it.
+- **Bardic Inspiration.** A die (d6, d8, d10 or d12; a d8 to begin with) that glows while you hold it. Press Receive when a
+  Bard gives it to you, pick the size they gave, and press Use it when you spend it. Any rest ends it, since it only lasts
+  an hour. The die size is remembered, and every step is logged and undoable.
 
 ## Getting started
 

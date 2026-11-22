@@ -1,51 +1,50 @@
-import { useShallow } from 'zustand/react/shallow'
-import type { Feature, Spell } from '@shared/types'
-import { filterFeatures, filterSpells, hasActiveFilters } from '@/domain/filters'
-import { LEVEL_TITLE } from '@/domain/labels'
-import { catalog, usePlayStore } from '@/state/session'
+import { hasActiveFilters } from '@/domain/filters'
+import { useResults } from '@/hooks/useResults'
 import { useUiStore } from '@/state/uiStore'
 import { FeatureCard } from './FeatureCard'
 import { SpellCard } from './SpellCard'
 
-const NO_IDS: readonly string[] = []
-
 export function SpellGrid(): React.JSX.Element {
   const filters = useUiStore((s) => s.filters)
   const clear = useUiStore((s) => s.clear)
-  // Select ids (shallow-compared) so the grid re-renders only when the visible set actually changes.
-  const spellIds = usePlayStore(useShallow((s) => (s.play ? filterSpells(s.play, catalog, filters).map((x) => x.id) : NO_IDS)))
-  const featureIds = usePlayStore(useShallow((s) => (s.play ? filterFeatures(s.play, catalog, filters).map((x) => x.id) : NO_IDS)))
+  const setFlag = useUiStore((s) => s.setFlag)
+  const { groups, features, hiddenUnprepared } = useResults()
 
-  const spells = spellIds.map((id) => catalog.spellById(id)).filter((s): s is Spell => s !== undefined)
-  const features = featureIds.map((id) => catalog.featureById(id)).filter((f): f is Feature => f !== undefined)
-  const levels = [...new Set(spells.map((s) => s.level))]
-
-  if (spells.length === 0 && features.length === 0) {
+  if (groups.length === 0 && features.length === 0) {
+    const filtered = hasActiveFilters(filters)
     return (
       <div className="empty">
-        <p>Nothing matches.</p>
-        {hasActiveFilters(filters) ? (
-          <button type="button" className="btn" onClick={clear}>
-            Clear filters
-          </button>
-        ) : (
-          <p className="muted">Nothing is prepared. Turn on “Show all spells” to choose some.</p>
+        <p>{filtered ? 'Nothing matches.' : 'Nothing is prepared.'}</p>
+        {hiddenUnprepared > 0 && (
+          <p className="muted">
+            {hiddenUnprepared} {hiddenUnprepared === 1 ? 'spell matches' : 'spells match'} among the ones you haven't prepared.
+          </p>
         )}
+        <div className="empty__actions">
+          {filtered && (
+            <button type="button" className="btn" onClick={clear}>
+              Clear filters
+            </button>
+          )}
+          {!filters.showAll && (
+            <button type="button" className="btn" onClick={() => setFlag('showAll', true)}>
+              Show all spells
+            </button>
+          )}
+        </div>
       </div>
     )
   }
 
   return (
     <div className="spell-grid">
-      {levels.map((level) => (
-        <section key={level} className="spell-level" aria-label={LEVEL_TITLE[level]}>
-          <h2 className="spell-level__title">{LEVEL_TITLE[level] ?? `Level ${level}`}</h2>
+      {groups.map((group) => (
+        <section key={group.id} className="spell-level" aria-label={group.title}>
+          <h2 className="spell-level__title">{group.title}</h2>
           <div className="spell-level__cards">
-            {spells
-              .filter((s) => s.level === level)
-              .map((spell) => (
-                <SpellCard key={spell.id} spell={spell} />
-              ))}
+            {group.spells.map((spell) => (
+              <SpellCard key={spell.id} spell={spell} />
+            ))}
           </div>
         </section>
       ))}

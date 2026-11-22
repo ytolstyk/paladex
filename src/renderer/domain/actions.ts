@@ -8,7 +8,7 @@ import { usedAfterRest, type RestKind } from './rests'
 import { isChoosable } from './prepared'
 import { clamp, slotKey, slotsRemaining, slotsUsedAt } from './slots'
 import { applyToTurn, isTurnClear, turnWarnings, type TurnWarning } from './turn'
-import { undoKey, type UndoMeta } from './undo'
+import { COALESCE_MS, undoKey, type UndoMeta } from './undo'
 
 /**
  * Every game mutation is a pure function `(state, catalog, args, now) => ActionResult | null`.
@@ -25,8 +25,19 @@ export interface ActionResult {
   warnings?: TurnWarning[]
 }
 
-function appendLog(state: PlayState, entry: LogEntry): PlayState {
+export function appendLog(state: PlayState, entry: LogEntry): PlayState {
   return { ...state, log: [...state.log, entry].slice(-LOG_CAP) }
+}
+
+/**
+ * Like `appendLog`, but a run of the same kind of manual edit (stepping a dial) becomes one entry: when the newest entry has
+ * the same kind and is within the undo coalescing window, it is replaced. Otherwise a few seconds on the dial would push
+ * real casts and rests out of the capped log, and the footer would show "Initiative set to 3" over the last real action.
+ */
+export function appendCoalescedLog(state: PlayState, entry: LogEntry): PlayState {
+  const last = state.log.at(-1)
+  if (last?.kind !== entry.kind || entry.t - last.t > COALESCE_MS) return appendLog(state, entry)
+  return { ...state, log: [...state.log.slice(0, -1), entry] }
 }
 
 function pay(state: PlayState, payment: Payment): PlayState {
@@ -209,11 +220,15 @@ export function adjustHp(state: PlayState, catalog: Catalog, delta: number, now:
   }
 }
 
-/** Short rest: only counters whose policy says so come back. Long rest: also slots, hit points, concentration and the turn. */
+/**
+ * Short rest: only counters whose policy says so come back. Long rest: also slots, hit points, concentration and the turn.
+ * Either rest is at least an hour, which is as long as Bardic Inspiration lasts, so a held die is gone after one.
+ */
 export function takeRest(state: PlayState, catalog: Catalog, rest: RestKind, now: number): ActionResult {
   const counters = usedAfterRest(state.counters, catalog, rest)
   const entry: LogEntry = { t: now, kind: rest === 'long' ? 'long-rest' : 'short-rest' }
-  const base: PlayState = { ...state, counters }
+  const restToast = rest === 'long' ? 'Long rest: slots, resources and hit points restored' : 'Short rest taken'
+  const base: PlayState = { ...state, counters, inspiration: { ...state.inspiration, held: false } }
   const next: PlayState =
     rest === 'long'
       ? {
@@ -228,7 +243,7 @@ export function takeRest(state: PlayState, catalog: Catalog, rest: RestKind, now
     state: appendLog(next, entry),
     undo: { kind: 'rest' },
     entry,
-    toast: rest === 'long' ? 'Long rest: slots, resources and hit points restored' : 'Short rest taken'
+    toast: state.inspiration.held ? `${restToast}. Bardic Inspiration has run out` : restToast
   }
 }
 

@@ -9,7 +9,9 @@ export type UndoMeta = { kind: 'edit'; key: string } | { kind: 'cast' | 'rest' |
 export const undoKey = {
   slot: (level: number): string => `slot:${level}`,
   counter: (id: string): string => `counter:${id}`,
-  hp: 'hp'
+  hp: 'hp',
+  initiative: 'initiative',
+  inspirationDie: 'inspiration-die'
 }
 
 export interface UndoEntry {

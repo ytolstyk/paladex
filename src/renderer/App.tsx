@@ -9,6 +9,7 @@ import { SettingsPage } from './components/SettingsPage'
 import { SlotTracker } from './components/SlotTracker'
 import { SpellGrid } from './components/SpellGrid'
 import { Toast } from './components/Toast'
+import { TablePanel } from './components/TablePanel'
 import { TurnPanel } from './components/TurnPanel'
 import { UnreadableState } from './components/UnreadableState'
 import { VitalsBanner } from './components/VitalsBanner'
@@ -38,6 +39,7 @@ export function App(): React.JSX.Element {
       ) : (
         <>
           <aside className="rail">
+            <TablePanel />
             <SlotTracker />
             <TurnPanel />
             <ResourcePanel />

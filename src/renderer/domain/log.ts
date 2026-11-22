@@ -2,6 +2,8 @@ import type { LogEntry } from '@shared/schema'
 
 const amountOf = (entry: LogEntry): number => Math.abs(entry.amount ?? 0)
 
+const dieName = (entry: LogEntry): string => (entry.die === undefined ? 'a die' : `d${entry.die}`) // hand-edited entries may lack it
+
 function viaSuffix(entry: LogEntry): string {
   switch (entry.via) {
     case 'slot':
@@ -16,7 +18,7 @@ function viaSuffix(entry: LogEntry): string {
 }
 
 /** Render a structured log entry as a sentence. Wording lives here so it can change without touching saved data. */
-export function formatLog(entry: LogEntry, nameOf: (id: string) => string): string {
+export function formatLog(entry: LogEntry, nameOf: (id: string) => string = (id) => id): string {
   const name = entry.spellId ? nameOf(entry.spellId) : 'a spell'
   switch (entry.kind) {
     case 'seed':
@@ -45,6 +47,14 @@ export function formatLog(entry: LogEntry, nameOf: (id: string) => string): stri
       const used = entry.featureId ? nameOf(entry.featureId) : 'a feature'
       return (entry.amount ?? 1) > 1 ? `Used ${used} (${entry.amount})` : `Used ${used}`
     }
+    case 'initiative':
+      return entry.amount === undefined ? 'Initiative cleared' : `Initiative set to ${entry.amount}`
+    case 'inspiration-gain':
+      return `Received Bardic Inspiration (${dieName(entry)})`
+    case 'inspiration-use':
+      return `Used Bardic Inspiration (${dieName(entry)})`
+    case 'inspiration-die':
+      return `Bardic Inspiration die set to ${dieName(entry)}`
     case 'prepare':
       return `Prepared ${name}`
     case 'unprepare':

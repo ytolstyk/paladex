@@ -1,4 +1,4 @@
-import { emptyTurn, SCHEMA_VERSION } from './constants'
+import { DEFAULT_INSPIRATION_DIE, emptyTurn, SCHEMA_VERSION } from './constants'
 import type { PlayState } from './schema'
 import type { CounterDef } from './types'
 
@@ -24,6 +24,8 @@ export function createInitialPlayState(input: InitialStateInput, now: number): P
     prepared: input.prepared ?? [],
     roleOverrides: {},
     turn: emptyTurn(),
+    initiative: null,
+    inspiration: { held: false, die: DEFAULT_INSPIRATION_DIE },
     log: [{ t: now, kind: 'seed' }]
   }
 }

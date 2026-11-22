@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { usePlayStore } from '@/state/session'
-import { useUiStore } from '@/state/uiStore'
+import { SEARCH_INPUT_ID, useUiStore } from '@/state/uiStore'
 
 /** Inputs that take typed text. Radios, checkboxes and buttons are inputs too, but typing never edits them. */
 const TEXT_INPUT_TYPES = new Set(['text', 'search', 'number', 'email', 'url', 'tel', 'password'])
@@ -12,9 +12,9 @@ function isTypingTarget(el: EventTarget | null): boolean {
 }
 
 /**
- * Cmd/Ctrl+, toggles settings; Cmd/Ctrl+Z undoes; N starts a new turn. Held-key auto-repeat is ignored (a held key
- * must not fire dozens of actions). Z and N are also ignored while typing; the settings toggle is not, since a comma
- * with a modifier is never text. N does nothing on the settings page, where it would be a hidden side effect; Undo stays
+ * Cmd/Ctrl+, toggles settings; Cmd/Ctrl+Z undoes; N starts a new turn; / jumps to the search box. Held-key auto-repeat is
+ * ignored (a held key must not fire dozens of actions). Z, N and / are also ignored while typing; the settings toggle is
+ * not, since a comma with a modifier is never text. N does nothing on the settings page, where it would be a hidden side effect; Undo stays
  * live there because it is visible in the footer and the toast, which both remain on screen.
  * The Edit menu deliberately has no Undo item, so Cmd+Z reaches us.
  */
@@ -34,7 +34,14 @@ export function useShortcuts(): void {
         return
       }
       if (isTypingTarget(e.target)) return
-      if (hasCommandKey && !e.shiftKey && key === 'z') {
+      if (!hasCommandKey && !e.altKey && key === '/') {
+        // Only the sheet has a search field; elsewhere the key is left alone.
+        const search = document.getElementById(SEARCH_INPUT_ID)
+        if (search) {
+          e.preventDefault()
+          search.focus()
+        }
+      } else if (hasCommandKey && !e.shiftKey && key === 'z') {
         e.preventDefault()
         undoLast()
       } else if (!hasCommandKey && !e.altKey && key === 'n' && useUiStore.getState().view !== 'settings') {

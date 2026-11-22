@@ -3,6 +3,7 @@ import { useShallow } from 'zustand/react/shallow'
 import type { Feature } from '@shared/types'
 import { featureSpendCap, usesLeft } from '@/domain/cost'
 import { ROLE_LABEL } from '@/domain/labels'
+import { featureFoundBeyondCard, searchTokens } from '@/domain/search'
 import { NO_WARNINGS, turnWarnings, warningText } from '@/domain/turn'
 import { catalog, usePlayStore } from '@/state/session'
 import { useUiStore } from '@/state/uiStore'
@@ -18,6 +19,7 @@ export const FeatureCard = memo(function FeatureCard({ feature }: { feature: Fea
   )
   const activateFeature = usePlayStore((s) => s.activateFeature)
   const openDetail = useUiStore((s) => s.openDetail)
+  const foundInText = useUiStore((s) => featureFoundBeyondCard(feature, searchTokens(s.filters.query)))
   const [amount, setAmount] = useState('1')
 
   const isPool = feature.spend.kind === 'pool'
@@ -44,6 +46,11 @@ export const FeatureCard = memo(function FeatureCard({ feature }: { feature: Fea
           {feature.tag && <span>{feature.tag}</span>}
         </p>
         <p className="spell-card__summary">{feature.summary}</p>
+        {foundInText && (
+          <p className="spell-card__found" title="Your search matched this feature's full text, which the card doesn't show">
+            Found in the full text
+          </p>
+        )}
       </div>
       <div className="feature-card__use">
         {isPool && usable && (

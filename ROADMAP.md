@@ -10,15 +10,14 @@ Size: **S** is an afternoon, **M** is a few days, **L** is a project. Items mark
 
 ## 1. Find things faster (spells, features, abilities)
 
-Today: three intent chips, three cast-time chips, "No concentration", "Castable now", "Show all spells" and a search box over
-spell name, summary and school. Spells are always grouped by level in catalog order. Filters reset on every launch.
+Today: search (full text), sort, quick chips (intent, casting time, castable now, show all) and a "More filters" panel
+(level, range, school, save or attack, source, ritual, no concentration). Filters reset on every launch.
 
-- [ ] **Sort** the grid: by name, cast time, range, school, or "most useful right now" (castable first). Keep level grouping
-      as the default, and add a "no grouping" mode so a sort across levels is possible. **S**
-- [ ] **More facets**: spell level, school, ritual, range (self / touch / 30 ft+), duration, save type (CHA save, melee hit). **S**
-- [ ] **Search the full text**, not just the one-line summary, and search class features the same way. Today the
-      "Other features" list at the bottom cannot be searched or filtered at all. **S**
-- [ ] **Focus search with `/`** (and Esc to clear it), so the whole find-a-spell loop works without the mouse. **S**
+- [x] **Sort** the grid by level, name, range, casting time, school or role, with headings that follow the sort. *(done)*
+      Still open: "most useful right now" (castable first) and a reversed order.
+- [x] **More facets**: level, range, school, save or attack, source and ritual. *(done)* Duration is still open. **S**
+- [x] **Search the full text** of spells, class features and the Other features list. *(done)*
+- [x] **Focus search with `/`** and clear it with Esc. *(done)*
 - [ ] **Hide or collapse sections**: a "Spells / Features" toggle, and collapsible level groups, for turns when you only want one. **S**
 - [ ] **Remember filters** across launches (view preference, so `localStorage` like the theme, not play state). **S**
 - [ ] **Saved filter sets**: "Combat", "Exploring", "Downtime", one click each, with a "last used" default. **M**
@@ -66,7 +65,8 @@ Today: ability scores are stored but only used to compute spell save DC and atta
 outside spellcasting.
 
 - [ ] **Abilities, saving throws and skills** panel with modifiers and proficiency markers. Needs skill data in the seed. **M**
-- [ ] **Quick numbers** in the banner or a tooltip: initiative, speed, passive Perception. **S**
+- [ ] **Quick numbers** in the banner or a tooltip: speed, passive Perception, and an initiative *modifier* (the initiative
+      dial in the rail holds the rolled result, not the bonus). **S**
 - [ ] **Notes**: one free-text session scratchpad, plus an optional note per spell or feature ("Bless: Mira, Tor, me"). *(play state)* **M**
 - [ ] **Inventory and attunement**: item list with charges (Protection from Evil and Good is already an item charge), weight,
       attunement slots (max 3). *(play state)* **L**

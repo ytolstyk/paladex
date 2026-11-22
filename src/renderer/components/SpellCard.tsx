@@ -5,10 +5,12 @@ import { defaultPayment } from '@/domain/cost'
 import { roman } from '@/domain/derived'
 import { ROLE_LABEL } from '@/domain/labels'
 import { isChoosable, isInDefaultView } from '@/domain/prepared'
+import { spellFoundBeyondCard, searchTokens } from '@/domain/search'
 import { NO_WARNINGS, turnWarnings, warningText } from '@/domain/turn'
 import { catalog, usePlayStore } from '@/state/session'
 import { useUiStore } from '@/state/uiStore'
 import { CastButton, CastRoundel } from './CardParts'
+import { RangeBadge } from './RangeBadge'
 
 function paymentLabel(payment: Payment): string | null {
   switch (payment.kind) {
@@ -31,6 +33,8 @@ export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): R
   const cast = usePlayStore((s) => s.cast)
   const togglePrepared = usePlayStore((s) => s.togglePrepared)
   const openDetail = useUiStore((s) => s.openDetail)
+  // A search can match text the card doesn't show (the full description); say so, or the card looks like a false hit.
+  const foundInText = useUiStore((s) => spellFoundBeyondCard(spell, searchTokens(s.filters.query)))
   // Turn-economy hints come from the same rules the actions use, and only change for cards they affect.
   const warnings = usePlayStore(
     useShallow((s) =>
@@ -55,19 +59,26 @@ export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): R
         </h3>
         <p className="spell-card__meta">
           <span className="spell-card__role">{ROLE_LABEL[spell.role]}</span>
+          <span>{spell.school}</span>
           {spell.concentration && <span className="spell-card__conc">concentration</span>}
           {spell.castingNote && <span>{spell.castingNote} to cast</span>}
           {spell.ritual && <span>ritual</span>}
-          <span>{spell.range}</span>
-          <span>{spell.duration}</span>
-          {spell.tag && <span>{spell.tag}</span>}
           {isChoosable(spell) && (
             <button type="button" className="prep-toggle" aria-pressed={chosen} onClick={() => togglePrepared(spell.id)}>
               {chosen ? 'Prepared' : 'Prepare'}
             </button>
           )}
         </p>
+        <p className="spell-card__facts">
+          <RangeBadge range={spell.range} />
+          <span className="spell-card__duration">{spell.tag ? `${spell.duration} · ${spell.tag}` : spell.duration}</span>
+        </p>
         <p className="spell-card__summary">{spell.summary}</p>
+        {foundInText && (
+          <p className="spell-card__found" title="Your search matched this spell's full text, which the card doesn't show">
+            Found in the full text
+          </p>
+        )}
       </div>
       <CastButton
         verb="Cast"

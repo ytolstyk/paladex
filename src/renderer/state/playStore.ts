@@ -1,8 +1,10 @@
 import { create } from 'zustand'
+import type { InspirationDie } from '@shared/constants'
 import type { PaladexApi } from '@shared/ipc'
 import type { PlayState } from '@shared/schema'
 import type { Payment } from '@shared/types'
 import * as actions from '@/domain/actions'
+import * as table from '@/domain/tableActions'
 import type { Catalog } from '@/domain/catalog'
 import { formatLog } from '@/domain/log'
 import { warningText } from '@/domain/turn'
@@ -46,6 +48,11 @@ export interface PaladexStore {
   /** Damage (negative) or healing (positive). */
   adjustHp(delta: number): void
   takeRest(rest: RestKind): void
+  /** Set this combat's initiative (1 to 25), or clear it with null. */
+  setInitiative(value: number | null): void
+  /** Receive (true) or spend (false) Bardic Inspiration. */
+  setInspirationHeld(held: boolean): void
+  setInspirationDie(die: InspirationDie): void
   dropConcentration(): void
   undoLast(): void
   dismissToast(): void
@@ -164,6 +171,21 @@ export function createPlayStore({ port, catalog, now = Date.now }: StoreDeps) {
       takeRest(rest) {
         const play = current()
         if (play) apply(actions.takeRest(play, catalog, rest, now()))
+      },
+
+      setInitiative(value) {
+        const play = current()
+        if (play) apply(table.setInitiative(play, value, now()))
+      },
+
+      setInspirationHeld(held) {
+        const play = current()
+        if (play) apply(table.setInspirationHeld(play, held, now()))
+      },
+
+      setInspirationDie(die) {
+        const play = current()
+        if (play) apply(table.setInspirationDie(play, die, now()))
       },
 
       dropConcentration() {

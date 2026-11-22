@@ -23,8 +23,21 @@ export const LOG_KINDS = [
   'long-rest',
   'counter',
   'hp',
-  'feature'
+  'feature',
+  'initiative',
+  'inspiration-gain',
+  'inspiration-use',
+  'inspiration-die'
 ] as const
+
+/** The dial covers a d20 roll plus modifiers: a 1 is the lowest anyone acts, 25 is a generous ceiling. */
+export const INITIATIVE_MIN = 1
+export const INITIATIVE_MAX = 25
+
+/** Bardic Inspiration die sizes, in the order a Bard grows through them (levels 1, 5, 10 and 15). */
+export const INSPIRATION_DICE = [6, 8, 10, 12] as const
+export type InspirationDie = (typeof INSPIRATION_DICE)[number]
+export const DEFAULT_INSPIRATION_DIE: InspirationDie = 8
 
 export interface TurnState {
   /**

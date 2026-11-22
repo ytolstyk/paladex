@@ -1,4 +1,4 @@
-import type { CastTime, Role } from '@shared/types'
+import type { CastTime, Role, SpellSource } from '@shared/types'
 
 /** Display vocabulary, defined once. Typed as Records so a new role or cast time is a compile error until it is named. */
 export const CAST_LABEL: Record<CastTime, string> = {
@@ -17,5 +17,17 @@ export const ROLE_LABEL: Record<Role, string> = {
   support: 'Support',
   utility: 'Utility'
 }
+
+/** Where a spell comes from, as a player says it. */
+export const SOURCE_LABEL: Record<SpellSource, string> = {
+  class: 'Class',
+  oath: 'Oath',
+  feature: 'Feature',
+  item: 'Item',
+  cantrip: 'Cantrip'
+}
+
+/** The short form of a level, for chips. */
+export const LEVEL_CHIP = ['Cantrip', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th']
 
 export const LEVEL_TITLE = ['Cantrips', 'First level', 'Second level', 'Third level', 'Fourth level', 'Fifth level']
