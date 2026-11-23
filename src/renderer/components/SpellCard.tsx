@@ -1,36 +1,32 @@
-import { memo, useRef } from 'react'
+import { memo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import type { Payment, Spell } from '@shared/types'
-import { defaultPayment } from '@/domain/cost'
-import { roman } from '@/domain/derived'
-import { ROLE_LABEL } from '@/domain/labels'
+import { availableCosts, paymentOptions, samePaymentOptions, type PaymentOptions } from '@/domain/cost'
+import { paymentLabel, ROLE_LABEL } from '@/domain/labels'
 import { isChoosable, isInDefaultView } from '@/domain/prepared'
 import { spellFoundBeyondCard, searchTokens } from '@/domain/search'
 import { NO_WARNINGS, turnWarnings, warningText } from '@/domain/turn'
 import { catalog, usePlayStore } from '@/state/session'
 import { selectEffectFor, useEffectsStore } from '@/state/effectsStore'
 import { useUiStore } from '@/state/uiStore'
-import { CastButton, CastRoundel, ComponentMarks } from './CardParts'
+import { CastButton, CastRoundel, ComponentMarks, PaymentStepper } from './CardParts'
 import { FxHost, type FxHandle } from './CastEffect'
 import { opensDetail } from './detailTrigger'
 import { RangeBadge } from './RangeBadge'
 
-function paymentLabel(payment: Payment): string | null {
-  switch (payment.kind) {
-    case 'slot':
-      return `level ${roman(payment.level)}`
-    case 'free':
-      return 'free cast'
-    case 'charge':
-      return 'item charge'
-    case 'none':
-      return null
-  }
-}
-
 export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): React.JSX.Element {
-  // Select only this card's own result so a slot change re-renders just the cards it affects.
-  const payment = usePlayStore(useShallow((s) => (s.play ? defaultPayment(s.play, spell, catalog) : null)))
+  // The player's pick (an upcast level, or a slot instead of the free cast). View state of this card, dropped after each cast.
+  // It is kept while the pick is unavailable (the card shows the fallback), so it returns if the slot comes back.
+  const [picked, setPicked] = useState<Payment | null>(null)
+  // One selector for what the button pays with and what the arrows offer, so the label and the cast cannot disagree.
+  // Payments are fresh objects on every call, so the previous result is handed back while it is equal in value.
+  const last = useRef<PaymentOptions | null>(null)
+  const { current: payment, lower, higher } = usePlayStore((s): PaymentOptions => {
+    const next = paymentOptions(s.play ? availableCosts(s.play, spell, catalog) : [], picked)
+    if (last.current && samePaymentOptions(last.current, next)) return last.current
+    last.current = next
+    return next
+  })
   const active = usePlayStore((s) => s.play?.concentration === spell.id)
   const chosen = usePlayStore((s) => s.play?.prepared.includes(spell.id) ?? false)
   const cast = usePlayStore((s) => s.cast)
@@ -52,7 +48,7 @@ export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): R
   const castable = payment !== null
   // Spells payable with an item charge work without being prepared; everything else needs preparing first.
   const dimmed = !usePlayStore((s) => (s.play ? isInDefaultView(s.play, spell) : true))
-  const label = payment ? paymentLabel(payment) : dimmed ? 'not prepared' : 'no slot'
+  const label = payment ? (payment.kind === 'none' ? null : paymentLabel(payment)) : dimmed ? 'not prepared' : 'no slot'
 
   return (
     <FxHost ref={fx} role={spell.role} className="fx-host--card">
@@ -95,17 +91,21 @@ export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): R
             </p>
           )}
         </div>
-        <CastButton
-          verb="Cast"
-          detail={label}
-          disabled={!castable}
-          warn={castable && warnings.length > 0}
-          title={castable ? warningText(warnings) || undefined : dimmed ? 'Prepare this spell to cast it' : 'Nothing left to pay for this spell'}
-          onActivate={() => {
-            cast(spell.id)
-            fx.current?.play(effect)
-          }}
-        />
+        <div className="cast-stack">
+          <CastButton
+            verb="Cast"
+            detail={label}
+            disabled={!castable}
+            warn={castable && warnings.length > 0}
+            title={castable ? warningText(warnings) || undefined : dimmed ? 'Prepare this spell to cast it' : 'Nothing left to pay for this spell'}
+            onActivate={() => {
+              setPicked(null)
+              // A refused cast (the store moved on since this render) must not look like a cast.
+              if (cast(spell.id, payment ?? undefined)) fx.current?.play(effect)
+            }}
+          />
+          {(lower || higher) && <PaymentStepper lower={lower} higher={higher} onPick={setPicked} />}
+        </div>
       </article>
     </FxHost>
   )

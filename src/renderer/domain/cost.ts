@@ -53,8 +53,32 @@ export function availableCosts(state: PlayState, spell: Spell, catalog: Catalog)
   return options
 }
 
-export function defaultPayment(state: PlayState, spell: Spell, catalog: Catalog): Payment | null {
-  return availableCosts(state, spell, catalog)[0] ?? null
+/** What a card's Cast button will pay with, and the options on either side of it in the stepper. */
+export interface PaymentOptions {
+  current: Payment | null
+  /** The previous / next option in the spell's preference order (the free cast, then slot levels up). Null at either end. */
+  lower: Payment | null
+  higher: Payment | null
+}
+
+/**
+ * `current` is the payment the player picked (an upcast level, say) if it is still available, otherwise the spell's preferred
+ * one: a pick that stopped being available (the slot was spent, a rest changed things) falls back. Unlike `castSpell`, which
+ * refuses an unavailable request outright, this is for showing a sensible default.
+ */
+export function paymentOptions(choices: Payment[], picked: Payment | null): PaymentOptions {
+  const found = picked ? choices.findIndex((c) => samePayment(c, picked)) : -1
+  const index = found < 0 ? 0 : found // nothing picked, or the pick is gone: the spell's preferred option
+  return { current: choices[index] ?? null, lower: choices[index - 1] ?? null, higher: choices[index + 1] ?? null }
+}
+
+function samePaymentOrNull(a: Payment | null, b: Payment | null): boolean {
+  return a === null || b === null ? a === b : samePayment(a, b)
+}
+
+/** Value equality, so a selector can hand back the previous result and the card skips a render. */
+export function samePaymentOptions(a: PaymentOptions, b: PaymentOptions): boolean {
+  return samePaymentOrNull(a.current, b.current) && samePaymentOrNull(a.lower, b.lower) && samePaymentOrNull(a.higher, b.higher)
 }
 
 export function samePayment(a: Payment, b: Payment): boolean {

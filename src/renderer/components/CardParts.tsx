@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import type { CastTime, SpellComponents } from '@shared/types'
+import type { CastTime, Payment, SpellComponents } from '@shared/types'
 import { COMPONENT_KINDS, componentsTitle, componentWords } from '@/domain/components'
-import { CAST_LABEL, CAST_LETTER } from '@/domain/labels'
+import { CAST_LABEL, CAST_LETTER, paymentLabel } from '@/domain/labels'
 
 /** The round badge on a card: A, B, R or T for the action it takes. Bonus actions are filled so they stand out. */
 export function CastRoundel({ castTime }: { castTime: CastTime }): React.JSX.Element {
@@ -60,5 +60,40 @@ export function CastButton({ verb, detail, disabled, warn, title, onActivate }: 
       {detail && <span className="cast-button__level">{detail}</span>}
       {burst > 0 && <span key={burst} className="cast-burst" aria-hidden="true" onAnimationEnd={() => setBurst(0)} />}
     </button>
+  )
+}
+
+const STEP_GLYPH = { lower: '‹', higher: '›' } as const
+
+interface StepButtonProps {
+  side: keyof typeof STEP_GLYPH
+  /** The option this arrow switches to, or null when there is none on that side. */
+  target: Payment | null
+  onPick(payment: Payment): void
+}
+
+function StepButton({ side, target, onPick }: StepButtonProps): React.JSX.Element {
+  const text = target ? `Cast with ${paymentLabel(target)}` : `No ${side} option`
+  return (
+    <button
+      type="button"
+      className="step"
+      disabled={!target}
+      aria-label={text}
+      title={target ? text : undefined}
+      onClick={() => target && onPick(target)} // the guard narrows the type; a disabled button never fires it
+    >
+      {STEP_GLYPH[side]}
+    </button>
+  )
+}
+
+/** Two small arrows under the Cast button to pay with another option: a higher slot (upcasting), or a slot instead of a free cast. */
+export function PaymentStepper({ lower, higher, onPick }: { lower: Payment | null; higher: Payment | null; onPick(payment: Payment): void }): React.JSX.Element {
+  return (
+    <span className="payment-stepper">
+      <StepButton side="lower" target={lower} onPick={onPick} />
+      <StepButton side="higher" target={higher} onPick={onPick} />
+    </span>
   )
 }

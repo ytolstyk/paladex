@@ -67,7 +67,8 @@ function swapConcentration(state: PlayState, spell: Spell): { state: PlayState; 
 
 /**
  * Cast a spell. `requested` picks a specific payment (e.g. an upcast level); without it the spell's own
- * preference order wins (free casts before slots). A payment that isn't currently available is refused.
+ * preference order wins (free casts before slots). A payment that isn't currently available is refused (this is the strict
+ * check; `paymentOptions` in `cost.ts` is the lenient one that falls back, for what a card shows).
  */
 export function castSpell(
   state: PlayState,

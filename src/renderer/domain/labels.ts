@@ -1,4 +1,5 @@
-import type { CastTime, Role, SpellSource } from '@shared/types'
+import type { CastTime, Payment, Role, SpellSource } from '@shared/types'
+import { roman } from './derived'
 
 /** Display vocabulary, defined once. Typed as Records so a new role or cast time is a compile error until it is named. */
 export const CAST_LABEL: Record<CastTime, string> = {
@@ -31,3 +32,17 @@ export const SOURCE_LABEL: Record<SpellSource, string> = {
 export const LEVEL_CHIP = ['Cantrip', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th']
 
 export const LEVEL_TITLE = ['Cantrips', 'First level', 'Second level', 'Third level', 'Fourth level', 'Fifth level']
+
+/** What a payment is called on a Cast button or in a tooltip: "level III", "free cast", "item charge". */
+export function paymentLabel(payment: Payment): string {
+  switch (payment.kind) {
+    case 'slot':
+      return `level ${roman(payment.level)}`
+    case 'free':
+      return 'free cast'
+    case 'charge':
+      return 'item charge'
+    case 'none':
+      return 'no cost'
+  }
+}

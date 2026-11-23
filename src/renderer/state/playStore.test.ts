@@ -91,6 +91,15 @@ describe('actions through the store', () => {
     expect(port.saved.at(-1)?.slotsUsed).toEqual({})
   })
 
+  it('cast reports whether it happened, and upcasts at the level asked for', async () => {
+    const { store } = await readyStore()
+    expect(store.getState().cast(bless.id, { kind: 'slot', level: 2 })).toBe(true)
+    expect(store.getState().play?.slotsUsed).toEqual({ '2': 1 })
+    expect(store.getState().cast('spell:nope')).toBe(false)
+    expect(store.getState().cast(bless.id, { kind: 'slot', level: 9 })).toBe(false)
+    expect(store.getState().play?.slotsUsed).toEqual({ '2': 1 })
+  })
+
   it('Smite spends the free cast first, then a slot', async () => {
     const { store } = await readyStore()
     store.getState().cast(smite.id)

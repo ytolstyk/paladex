@@ -34,8 +34,8 @@ export interface PaladexStore {
 
   /** Idempotent: safe to call twice (React StrictMode does in dev). */
   init(): Promise<void>
-  /** Cast a spell. Omit `payment` to use the spell's preferred option (free casts before slots). */
-  cast(spellId: string, payment?: Payment): void
+  /** Cast a spell. Omit `payment` to use the spell's preferred option (free casts before slots). False when it was refused. */
+  cast(spellId: string, payment?: Payment): boolean
   /** Manual gem correction: spend or restore one slot. */
   adjustSlot(level: number, direction: 'spend' | 'restore'): void
   newTurn(): void
@@ -82,9 +82,10 @@ export function createPlayStore({ port, catalog, now = Date.now }: StoreDeps) {
       )
     }
 
-    const apply = (result: actions.ActionResult | null): void => {
+    /** True when the action changed something. */
+    const apply = (result: actions.ActionResult | null): boolean => {
       const { play, undo } = get()
-      if (!play || !result) return
+      if (!play || !result) return false
       // A stale toast must never offer to undo something other than the latest action, so non-cast actions clear it.
       const base =
         result.toast ?? (result.entry.kind === 'cast' || result.entry.kind === 'feature' ? formatLog(result.entry, catalog.nameOf) : null)
@@ -93,6 +94,7 @@ export function createPlayStore({ port, catalog, now = Date.now }: StoreDeps) {
       const toast: Toast | null = message ? { id: ++toastSeq, msg: message, undoable: true } : null
       set({ play: result.state, undo: pushUndo(undo, play, result.undo, result.entry.t), toast })
       persist(result.state)
+      return true
     }
 
     const load = async (): Promise<void> => {
@@ -135,7 +137,7 @@ export function createPlayStore({ port, catalog, now = Date.now }: StoreDeps) {
 
       cast(spellId, payment) {
         const play = current()
-        if (play) apply(actions.castSpell(play, catalog, spellId, payment, now()))
+        return play ? apply(actions.castSpell(play, catalog, spellId, payment, now())) : false
       },
 
       adjustSlot(level, direction) {

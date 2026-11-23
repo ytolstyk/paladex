@@ -27,11 +27,12 @@ Today: search (full text), sort, quick chips (intent, casting time, castable now
 
 ## 2. Casting and the turn
 
-Today: Cast always pays with the first available option (a free cast, else the lowest slot). The store's `cast()` already
-accepts a payment, but the card has no way to pick one. One slotted spell and one bonus action per turn are soft hints.
+Today: Cast pays with the first available option (a free cast, else the lowest slot) unless you step the card's ‹ › arrows
+to another one (a higher slot level, or a slot instead of the free cast). One slotted spell and one bonus action per turn
+are soft hints.
 
-- [ ] **Choose the slot level when casting (upcasting)**: a small stepper or menu on the Cast button, using the payment list
-      `availableCosts()` already produces. **M**
+- [x] **Choose the slot level when casting (upcasting)**: a ‹ › stepper under the Cast button, using the payment list
+      `availableCosts()` produces. The pick is per-card view state and resets after each cast. **M**
 - [ ] **Reaction and action tracking** next to the existing slot and bonus-action lines, plus a "turn N / round N" counter. *(play state)* **S**
 - [ ] **Duration timers**: when you cast Bless or Hunter's Mark, count rounds (1 minute = 10) and tell you when it ends. *(play state)* **M**
 - [ ] **Concentration target note**: "Hunter's Mark on the ogre". A one-line field on the active concentration. *(play state)* **S**
