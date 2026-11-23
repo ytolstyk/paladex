@@ -85,6 +85,35 @@ describe('groupSpells', () => {
     expect(spells.map((s) => s.id)).toEqual(before)
   })
 
+  describe('favorites', () => {
+    const starred = { ...state, favorites: [zone.id, guidance.id, cure.id] }
+
+    it('pins starred spells in a Favorites group above the sort, by level then name', () => {
+      const groups = groupSpells(starred, spells, 'level')
+      expect(groups.map((g) => g.title)).toEqual(['Favorites', 'First level', 'Second level'])
+      expect(groups[0]?.spells.map((s) => s.name)).toEqual(['Guidance', 'Cure Wounds', 'Zone of Truth'])
+      expect(groups[1]?.spells.map((s) => s.name)).toEqual(['Wrathful Smite', 'Detect Magic', 'Shield of Faith', 'Ceremony'])
+    })
+
+    it('goes above A to Z, and the Cantrips heading disappears when its only spell is starred', () => {
+      expect(groupSpells(starred, spells, 'name').map((g) => g.title)).toEqual(['Favorites', 'A to Z'])
+      expect(groupSpells(starred, spells, 'level').map((g) => g.title)).not.toContain('Cantrips')
+    })
+
+    it('shows only the starred spells that are in the list, and nothing when all are filtered away', () => {
+      expect(groupSpells(starred, [zone, aid], 'level').map((g) => g.title)).toEqual(['Favorites', 'Second level'])
+      expect(groupSpells({ ...state, favorites: [zone.id] }, [aid], 'level').map((g) => g.title)).toEqual(['Second level'])
+    })
+
+    it('never drops or repeats a spell, and keeps ids distinct, under every sort', () => {
+      for (const sort of SORT_KEYS) {
+        const groups = groupSpells(starred, spells, sort)
+        expect(groups.flatMap((g) => g.spells.map((s) => s.id)).sort()).toEqual(spells.map((s) => s.id).sort())
+        expect(new Set(groups.map((g) => g.id)).size).toBe(groups.length)
+      }
+    })
+  })
+
   it('every sort has a label', () => {
     for (const sort of SORT_KEYS) expect(SORT_LABEL[sort]).toBeTruthy()
   })

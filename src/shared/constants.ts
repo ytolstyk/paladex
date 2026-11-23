@@ -19,6 +19,8 @@ export const LOG_KINDS = [
   'drop-concentration',
   'prepare',
   'unprepare',
+  'favorite',
+  'unfavorite',
   'short-rest',
   'long-rest',
   'counter',

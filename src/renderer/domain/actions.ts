@@ -148,6 +148,15 @@ export function togglePrepared(state: PlayState, catalog: Catalog, spellId: stri
   return { state: appendLog({ ...state, prepared }, entry), undo: { kind: 'toggle' }, entry }
 }
 
+/** Star or unstar a spell. Any spell in the catalog can be a favorite, prepared or not. */
+export function toggleFavorite(state: PlayState, catalog: Catalog, spellId: string, now: number): ActionResult | null {
+  if (!catalog.spellById(spellId)) return null
+  const isStarred = state.favorites.includes(spellId)
+  const favorites = isStarred ? state.favorites.filter((id) => id !== spellId) : [...state.favorites, spellId]
+  const entry: LogEntry = { t: now, kind: isStarred ? 'unfavorite' : 'favorite', spellId }
+  return { state: appendLog({ ...state, favorites }, entry), undo: { kind: 'toggle' }, entry }
+}
+
 export function dropConcentration(state: PlayState, now: number): ActionResult | null {
   if (!state.concentration) return null
   const entry: LogEntry = { t: now, kind: 'drop-concentration', spellId: state.concentration }

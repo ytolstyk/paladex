@@ -31,6 +31,15 @@ describe('reconcile', () => {
     expect(state.prepared).toEqual([bless.id, cure.id])
   })
 
+  it('drops favorites that are unknown or duplicated, and keeps unprepared and cantrip ones', () => {
+    const { state, repaired } = reconcile(
+      { ...healthy, favorites: [guidance.id, 'spell:removed', guidance.id, smite.id, cure.id] },
+      catalog
+    )
+    expect(repaired).toBe(true)
+    expect(state.favorites).toEqual([guidance.id, smite.id, cure.id])
+  })
+
   it('ends concentration on a spell that no longer exists', () => {
     const { state } = reconcile({ ...healthy, concentration: 'spell:removed' }, catalog)
     expect(state.concentration).toBeNull()

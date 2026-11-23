@@ -35,7 +35,15 @@ name ("blood") finds spells by what they need. A few spells list a material comp
 D&D Beyond pages could not be read; check those spells' pages.
 
 Every spell card shows its **range** large, with an icon (you, a hand, an arrow), the distance, any area ("Self, 30 ft
-area") and a meter that fills with distance. Filters, search and sort are view settings: they are not saved and not undoable.
+area") and a meter that fills with distance. Filters, search and sort are view settings: they are never undoable and are not
+part of the saved character.
+
+- **Favorites.** The star on a spell card pins it: starred spells sit in a "Favorites" group above the rest, whatever the sort
+  (level, then name inside it), and filters still apply to them. Any spell can be starred, prepared or not. Stars belong to the
+  character, so they are saved with it, exported, logged ("Starred Bless") and undoable.
+- **Remembered filters.** The filters (chips, the filter panel, Castable now, Show all spells) and the sort come back as you
+  left them on the next launch. The search text does not: a forgotten word would greet you with an empty list. Clear filters
+  clears what is remembered too. They live in the renderer's `localStorage` (key `paladex.view`), like the theme.
 
 ## At the table
 
@@ -120,7 +128,7 @@ src/preload/    The `window.paladex` bridge
 src/shared/     Types, zod schema and constants shared by every process
 src/renderer/
   domain/       Pure game logic (slots, rests, turns, filters, themes) with colocated tests
-  state/        zustand stores: play state (persisted), UI state (not persisted), theme (localStorage)
+  state/        zustand stores: play state (persisted), UI state (filters and sort remembered in localStorage), theme (localStorage)
   components/   React components
   styles/       tokens.css (default palette, token contract, shared tokens), themes.css (other palettes), backdrop.css (window texture), app.css
   public/       theme-boot.js, the pre-paint theme script (static, copied as-is)

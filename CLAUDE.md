@@ -33,6 +33,11 @@ schema, vitest for tests. See README.md for scripts and layout.
   `facets.ts`. A new filter group is one entry in `FACETS`; the panel, the removable chips and the filter pick it up.
   `hooks/useResults.ts` is the one place the stage and the filter bar read the filtered list from.
 - Spell-only filters (level, range, school, save, source, ritual) hide class features on purpose, see `onlySpellsQualify`.
+- Remembered view: `domain/viewPrefs.ts` (pure) parses and serializes the filters and sort; `uiStore` reads it once at load and writes
+  on change (`paladex.view`). The search text is deliberately not kept. A new filter field must be added to `parseViewPrefs`, or it
+  silently resets on launch (`uiStore.test.ts` and `viewPrefs.test.ts` cover the round trip).
+- Favorites are play state (`favorites: string[]` of spell ids, `.default([])`, cleaned by `reconcile`). `groupSpells` pulls starred
+  spells into a leading `favorites` group before the sort groups them, so no spell appears twice. Spells only, not features.
 - Initiative (1 to 25, or null) and Bardic Inspiration (`{ held, die }`) are persisted play state. Both fields use
   `.default()`, so older saves load. Rests clear held inspiration (it lasts an hour) and never touch initiative.
 - The dial's geometry is in `domain/dial.ts`; the component only draws and handles input. A drag saves once, on release, so it

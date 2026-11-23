@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { LOG_CAP } from '@shared/constants'
-import { activateFeature, adjustSlot, castSpell, dropConcentration, startNewTurn, togglePrepared } from './actions'
+import { activateFeature, adjustSlot, castSpell, dropConcentration, startNewTurn, toggleFavorite, togglePrepared } from './actions'
 import { formatLog } from './log'
 import { bless, cure, mistyStep, cappedPool, freshState, guidance, holdPerson, layOnHands, protection, smite, testCatalog, vowOfEnmity } from './testing'
 
@@ -168,6 +168,29 @@ describe('log', () => {
       if (next) s = next.state
     }
     expect(s.log.length).toBeLessThanOrEqual(LOG_CAP)
+  })
+})
+
+describe('toggleFavorite', () => {
+  it('stars and unstars a spell, as an undoable toggle that logs both ways', () => {
+    const on = toggleFavorite(state0, catalog, bless.id, 1)!
+    expect(on.state.favorites).toEqual([bless.id])
+    expect(on.undo).toEqual({ kind: 'toggle' })
+    expect(formatLog(on.entry, catalog.nameOf)).toBe('Starred Bless')
+    const off = toggleFavorite(on.state, catalog, bless.id, 2)!
+    expect(off.state.favorites).toEqual([])
+    expect(formatLog(off.entry, catalog.nameOf)).toBe('Unstarred Bless')
+  })
+
+  it('works for any spell, prepared or not, cantrips and always-prepared included, and keeps the order starred', () => {
+    let state = state0
+    for (const id of [guidance.id, smite.id, protection.id]) state = toggleFavorite(state, catalog, id, 1)!.state
+    expect(state.favorites).toEqual([guidance.id, smite.id, protection.id])
+  })
+
+  it('refuses an unknown id and a feature id', () => {
+    expect(toggleFavorite(state0, catalog, 'spell:nope', 1)).toBeNull()
+    expect(toggleFavorite(state0, catalog, layOnHands.id, 1)).toBeNull()
   })
 })
 

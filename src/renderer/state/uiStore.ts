@@ -2,8 +2,12 @@ import { create } from 'zustand'
 import type { CastTime } from '@shared/types'
 import type { FacetId } from '@/domain/facets'
 import { NO_FILTERS, type Filters, type Intent } from '@/domain/filters'
-import { DEFAULT_SORT, type SortKey } from '@/domain/order'
+import type { SortKey } from '@/domain/order'
 import type { RestKind } from '@/domain/rests'
+import { DEFAULT_VIEW_PREFS, parseViewPrefs, serializeViewPrefs, type ViewPrefs } from '@/domain/viewPrefs'
+
+/** localStorage key for the remembered filters and sort. A view preference like the theme: never in the play state. */
+export const VIEW_STORAGE_KEY = 'paladex.view'
 
 export type ViewId = 'sheet' | 'settings'
 
@@ -43,9 +47,20 @@ interface UiStore {
   clear(): void
 }
 
+function readStoredView(): ViewPrefs {
+  try {
+    return parseViewPrefs(localStorage.getItem(VIEW_STORAGE_KEY))
+  } catch {
+    // Storage unavailable (blocked or corrupt profile): start with nothing filtered.
+    return DEFAULT_VIEW_PREFS
+  }
+}
+
 export function toggleIn<T>(list: readonly T[], item: T): T[] {
   return list.includes(item) ? list.filter((x) => x !== item) : [...list, item]
 }
+
+const initialView = readStoredView()
 
 export const useUiStore = create<UiStore>((set) => ({
   view: 'sheet',
@@ -59,8 +74,8 @@ export const useUiStore = create<UiStore>((set) => ({
   restGlow: null,
   glowRest: (kind) => set((s) => ({ restGlow: { kind, n: (s.restGlow?.n ?? 0) + 1 } })),
   clearRestGlow: () => set({ restGlow: null }),
-  filters: { ...NO_FILTERS },
-  sort: DEFAULT_SORT,
+  filters: { ...initialView.filters },
+  sort: initialView.sort,
   setSort: (sort) => set({ sort }),
   toggleIntent: (intent) => set((s) => ({ filters: { ...s.filters, intents: toggleIn(s.filters.intents, intent) } })),
   toggleCastTime: (time) => set((s) => ({ filters: { ...s.filters, castTimes: toggleIn(s.filters.castTimes, time) } })),
@@ -72,3 +87,17 @@ export const useUiStore = create<UiStore>((set) => ({
   setQuery: (query) => set((s) => ({ filters: { ...s.filters, query } })),
   clear: () => set((s) => ({ filters: { ...NO_FILTERS, showAll: s.filters.showAll } }))
 }))
+
+// Remember the filters and sort. Keystrokes in the search box replace `filters` too, but the search text is not kept, so
+// comparing the serialized form skips those and writes only when a remembered choice changed.
+let remembered = serializeViewPrefs(useUiStore.getState().filters, useUiStore.getState().sort)
+useUiStore.subscribe((s) => {
+  const next = serializeViewPrefs(s.filters, s.sort)
+  if (next === remembered) return
+  remembered = next
+  try {
+    localStorage.setItem(VIEW_STORAGE_KEY, next)
+  } catch {
+    // Storage unavailable: the choices still apply for this session.
+  }
+})

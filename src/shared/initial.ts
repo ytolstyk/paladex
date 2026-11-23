@@ -23,6 +23,7 @@ export function createInitialPlayState(input: InitialStateInput, now: number): P
     counters,
     prepared: input.prepared ?? [],
     roleOverrides: {},
+    favorites: [],
     turn: emptyTurn(),
     initiative: null,
     inspiration: { held: false, die: DEFAULT_INSPIRATION_DIE },

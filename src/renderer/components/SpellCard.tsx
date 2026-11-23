@@ -34,6 +34,8 @@ export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): R
   const effect = useEffectsStore(selectEffectFor(spell.id))
   const fx = useRef<FxHandle>(null)
   const togglePrepared = usePlayStore((s) => s.togglePrepared)
+  const favorite = usePlayStore((s) => s.play?.favorites.includes(spell.id) ?? false)
+  const toggleFavorite = usePlayStore((s) => s.toggleFavorite)
   const openDetail = useUiStore((s) => s.openDetail)
   // A search can match text the card doesn't show (the full description); say so, or the card looks like a false hit.
   const foundInText = useUiStore((s) => spellFoundBeyondCard(spell, searchTokens(s.filters.query)))
@@ -73,11 +75,25 @@ export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): R
             {spell.concentration && <span className="spell-card__conc">concentration</span>}
             {spell.castingNote && <span>{spell.castingNote} to cast</span>}
             {spell.ritual && <span>ritual</span>}
-            {isChoosable(spell) && (
-              <button type="button" className="prep-toggle" aria-pressed={chosen} onClick={() => togglePrepared(spell.id)}>
-                {chosen ? 'Prepared' : 'Prepare'}
+            <span className="spell-card__tools">
+              {isChoosable(spell) && (
+                <button type="button" className="prep-toggle" aria-pressed={chosen} onClick={() => togglePrepared(spell.id)}>
+                  {chosen ? 'Prepared' : 'Prepare'}
+                </button>
+              )}
+              <button
+                type="button"
+                className="fav-toggle"
+                aria-pressed={favorite}
+                aria-label={`Favorite ${spell.name}`}
+                title={favorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                onClick={() => toggleFavorite(spell.id)}
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                  <path d="M12 3.2l2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.5l6-.8z" />
+                </svg>
               </button>
-            )}
+            </span>
           </p>
           <p className="spell-card__facts">
             <RangeBadge range={spell.range} />

@@ -59,6 +59,10 @@ export function formatLog(entry: LogEntry, nameOf: (id: string) => string = (id)
       return `Prepared ${name}`
     case 'unprepare':
       return `Unprepared ${name}`
+    case 'favorite':
+      return `Starred ${name}`
+    case 'unfavorite':
+      return `Unstarred ${name}`
     case 'drop-concentration':
       return `Dropped concentration on ${name}`
   }

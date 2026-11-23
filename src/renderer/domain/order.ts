@@ -80,8 +80,25 @@ function groupingFor(state: PlayState, sort: Exclude<SortKey, 'name'>): Grouping
   }
 }
 
-/** Order `spells` for display and split them under headings. Never drops or repeats a spell. */
+/** The group of starred spells, which sits above whatever the sort produces. */
+export const FAVORITES_GROUP_ID = 'favorites'
+const FAVORITES_GROUP_TITLE = 'Favorites'
+
+/**
+ * Order `spells` for display and split them under headings. Never drops or repeats a spell. Starred spells that are in
+ * `spells` are pulled out into a "Favorites" group first (level, then name), so a spell is never shown twice and the
+ * sort only orders the rest.
+ */
 export function groupSpells(state: PlayState, spells: readonly Spell[], sort: SortKey): SpellGroup[] {
+  if (state.favorites.length === 0) return groupBySort(state, spells, sort)
+  const starred = new Set(state.favorites)
+  const favorites = spells.filter((spell) => starred.has(spell.id)).sort(byLevelThenName)
+  if (favorites.length === 0) return groupBySort(state, spells, sort)
+  const rest = spells.filter((spell) => !starred.has(spell.id))
+  return [{ id: FAVORITES_GROUP_ID, title: FAVORITES_GROUP_TITLE, spells: favorites }, ...groupBySort(state, rest, sort)]
+}
+
+function groupBySort(state: PlayState, spells: readonly Spell[], sort: SortKey): SpellGroup[] {
   if (spells.length === 0) return []
   if (sort === 'name') return [{ id: 'name', title: 'A to Z', spells: [...spells].sort(byName) }]
 

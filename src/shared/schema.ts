@@ -54,6 +54,8 @@ export const PlayStateSchema = z.object({
   /** Chosen (non-always-prepared) spell ids. */
   prepared: z.array(z.string()).max(200).default([]),
   roleOverrides: z.record(z.string(), z.enum(ROLES)).default({}),
+  /** Spell ids the player starred. The grid pins them in a "Favorites" group, ordered by level then name (the order here is only the order they were starred in). */
+  favorites: z.array(z.string().max(100)).max(200).default([]),
   turn: z
     .object({
       slotSpellCast: z.boolean().default(false),

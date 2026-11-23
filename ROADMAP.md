@@ -11,7 +11,7 @@ Size: **S** is an afternoon, **M** is a few days, **L** is a project. Items mark
 ## 1. Find things faster (spells, features, abilities)
 
 Today: search (full text), sort, quick chips (intent, casting time, castable now, show all) and a "More filters" panel
-(level, range, school, save or attack, source, ritual, no concentration). Filters reset on every launch.
+(level, range, school, save or attack, source, ritual, no concentration). Filters and sort are remembered across launches; the search text is not.
 
 - [x] **Sort** the grid by level, name, range, casting time, school or role, with headings that follow the sort. *(done)*
       Still open: "most useful right now" (castable first) and a reversed order.
@@ -19,9 +19,9 @@ Today: search (full text), sort, quick chips (intent, casting time, castable now
 - [x] **Search the full text** of spells, class features and the Other features list. *(done)*
 - [x] **Focus search with `/`** and clear it with Esc. *(done)*
 - [ ] **Hide or collapse sections**: a "Spells / Features" toggle, and collapsible level groups, for turns when you only want one. **S**
-- [ ] **Remember filters** across launches (view preference, so `localStorage` like the theme, not play state). **S**
-- [ ] **Saved filter sets**: "Combat", "Exploring", "Downtime", one click each, with a "last used" default. **M**
-- [ ] **Favorites / pins**: star the five spells you actually cast and float them to the top or to a "Pinned" group. *(play state)* **M**
+- [x] **Remember filters** across launches (view preference, so `localStorage` like the theme, not play state). *(done)* The search text is deliberately not kept.
+- [ ] **Saved filter sets**: "Combat", "Exploring", "Downtime", one click each. The "last used" default now exists (remembered filters). **M**
+- [x] **Favorites / pins**: a star on each spell card pins it in a "Favorites" group above the sort. *(play state, done)* Still open: starring class features, and a "favorites only" quick filter.
 - [ ] **Recently cast**: a short row of the last few spells and features, for repeating a turn. Data is already in the log. **S**
 - [ ] **Command palette (Cmd/Ctrl+K)**: type a spell, feature, rest or setting and jump to it or run it. **M**
 

@@ -43,6 +43,8 @@ export interface PaladexStore {
   activateFeature(featureId: string, amount?: number): void
   /** Choose or un-choose a spell as prepared. */
   togglePrepared(spellId: string): void
+  /** Star or unstar a spell, which pins it in the "Favorites" group. */
+  toggleFavorite(spellId: string): void
   /** Spend (negative) or restore (positive) part of a resource. */
   adjustCounter(counterId: string, delta: number): void
   /** Damage (negative) or healing (positive). */
@@ -158,6 +160,11 @@ export function createPlayStore({ port, catalog, now = Date.now }: StoreDeps) {
       togglePrepared(spellId) {
         const play = current()
         if (play) apply(actions.togglePrepared(play, catalog, spellId, now()))
+      },
+
+      toggleFavorite(spellId) {
+        const play = current()
+        if (play) apply(actions.toggleFavorite(play, catalog, spellId, now()))
       },
 
       adjustCounter(counterId, delta) {
