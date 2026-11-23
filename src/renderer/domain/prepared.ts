@@ -30,7 +30,7 @@ export function isPrepared(state: Pick<PlayState, 'prepared'>, spell: Spell): bo
 }
 
 /** Shown in the default grid (as opposed to only under "Show all spells"). */
-export function isInDefaultView(state: PlayState, spell: Spell): boolean {
+export function isInDefaultView(state: Pick<PlayState, 'prepared'>, spell: Spell): boolean {
   return isPrepared(state, spell) || isUsableUnprepared(spell)
 }
 

@@ -31,6 +31,13 @@ interface UiStore {
   toggleSettings(): void
   stageTab: StageTab
   setStageTab(tab: StageTab): void
+  /**
+   * The turn chart, docked beside the stage. In-session view state: it is not remembered between launches, and it is kept (not
+   * shown) while the settings page is up. Not part of `toggleSettings`: the chart is meant to stay open while you play.
+   */
+  chartOpen: boolean
+  toggleChart(): void
+  closeChart(): void
   /** The spell, feature or weapon shown in the detail drawer, by id (`spell:...` / `feature:...` / `weapon:...`). */
   detailId: string | null
   openDetail(id: string): void
@@ -75,6 +82,9 @@ export const useUiStore = create<UiStore>((set) => ({
     set((s) => (s.view === 'settings' ? { view: 'sheet' } : { view: 'settings', detailId: null })),
   stageTab: 'spells',
   setStageTab: (stageTab) => set({ stageTab }),
+  chartOpen: false,
+  toggleChart: () => set((s) => ({ chartOpen: !s.chartOpen })),
+  closeChart: () => set({ chartOpen: false }),
   detailId: null,
   openDetail: (id) => set({ detailId: id }),
   closeDetail: () => set({ detailId: null }),

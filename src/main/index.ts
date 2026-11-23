@@ -189,7 +189,7 @@ function createWindow(): void {
 }
 
 /**
- * Dev-only verification aid: PALADEX_SHOT=<png path> [PALADEX_EVAL=<js file>] captures the window and quits.
+ * Dev-only verification aid: PALADEX_SHOT=<png path> [PALADEX_EVAL=<js file>] [PALADEX_SIZE=WxH] captures the window and quits.
  * Disabled in packaged builds.
  */
 function attachDevScreenshotHook(win: BrowserWindow): void {
@@ -198,6 +198,13 @@ function attachDevScreenshotHook(win: BrowserWindow): void {
   const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
   win.webContents.once('did-finish-load', async () => {
     await wait(1500)
+    // PALADEX_SIZE=960x640 checks a narrow or short window (the media queries follow the real viewport).
+    const size = /^(\d{3,4})x(\d{3,4})$/.exec(process.env['PALADEX_SIZE'] ?? '')
+    if (size) {
+      win.setMinimumSize(1, 1)
+      win.setSize(Number(size[1]), Number(size[2]))
+      await wait(400)
+    }
     const evalFile = process.env['PALADEX_EVAL']
     if (evalFile) {
       await win.webContents.executeJavaScript(readFileSync(evalFile, 'utf8'))

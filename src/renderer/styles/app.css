@@ -1786,6 +1786,212 @@ button.vital:hover .vital__value {
   font-weight: 700;
 }
 
+/* ───────── Turn steps (the rail) ───────── */
+.turn-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin: var(--space-2) 0;
+}
+.turn-step {
+  display: grid;
+  gap: 1px;
+  justify-items: start;
+  padding: 4px var(--space-2);
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+  color: var(--bone);
+  text-align: left;
+  cursor: pointer;
+}
+.turn-step:hover {
+  border-color: var(--second-lit);
+}
+.turn-step__name {
+  font-size: 0.9rem;
+}
+.turn-step__state {
+  color: var(--bone-dim);
+  font-size: 0.78rem;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+}
+/* Used reads as a word and a struck name, not only a color */
+.turn-step[data-used] {
+  background: var(--tint-dim);
+  border-color: var(--third-lit);
+}
+.turn-step[data-used] .turn-step__name {
+  text-decoration: line-through;
+  color: var(--bone-dim);
+}
+.turn-step[data-used] .turn-step__state {
+  color: var(--third-lit);
+  font-weight: 700;
+}
+.turn-chart-toggle {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+.turn-chart-toggle[aria-expanded='true'] {
+  border-color: var(--second-lit);
+  color: var(--second-lit);
+}
+
+/* ───────── The turn chart (docked beside the stage) ───────── */
+.app[data-chart] {
+  grid-template-columns: var(--rail-width) minmax(0, 1fr) var(--chart-width);
+}
+/* With the chart open the writer of the steps goes first, so it is never scrolled out of the rail */
+.app[data-chart] .rail > .turn-panel {
+  order: -1;
+}
+.turn-chart {
+  grid-column: 3;
+  grid-row: 2;
+  overflow-y: auto;
+  padding: var(--space-4);
+  background: var(--grain), var(--vellum-deep);
+  border-left: 1px solid var(--gold-dim);
+  outline: none; /* focus lands on the heading and the box for Esc; the heading shows it */
+}
+.turn-chart__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.turn-chart__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--step-1);
+  color: var(--second-lit);
+}
+.turn-chart__title:focus-visible {
+  outline: 2px solid var(--second-lit);
+  outline-offset: 2px;
+}
+.chart-root,
+.chart-children,
+.chart-leaves {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chart-node {
+  position: relative;
+  padding-bottom: var(--space-3);
+}
+.chart-root > .chart-node::before {
+  /* the spine the steps hang from */
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 14px;
+  bottom: -4px;
+  width: 1px;
+  background: var(--rule-strong);
+}
+.chart-root > .chart-node:last-child::before {
+  display: none;
+}
+.chart-node__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-3);
+  padding-left: var(--space-4);
+}
+.chart-root > .chart-node > .chart-node__head::before {
+  content: '';
+  position: absolute;
+  left: 1px;
+  top: 6px;
+  width: 9px;
+  height: 9px;
+  transform: rotate(45deg);
+  background: var(--second);
+}
+.chart-node__label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--step-0);
+  color: var(--bone);
+}
+.chart-node__status {
+  color: var(--second-lit);
+  font-size: 0.82rem;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+}
+.chart-node[data-used] > .chart-node__head .chart-node__label {
+  text-decoration: line-through;
+  color: var(--bone-dim);
+}
+.chart-node__status[data-used] {
+  color: var(--third-lit);
+  font-weight: 700;
+}
+.chart-node__hint {
+  padding-left: var(--space-4);
+  color: var(--bone-dim);
+  font-size: 0.88rem;
+  line-height: 1.3;
+}
+.chart-node__link {
+  margin: var(--space-2) 0 0 var(--space-4);
+}
+.chart-leaves {
+  margin: 4px 0 0 var(--space-4);
+}
+.chart-leaf {
+  padding: 1px 0 1px var(--space-3);
+  border-left: 2px solid var(--rule-strong);
+  font-size: 0.9rem;
+}
+.chart-leaf[data-ready='false'] {
+  color: var(--bone-dim);
+  font-style: italic;
+}
+.chart-children {
+  margin: var(--space-2) 0 0 var(--space-4);
+  padding-left: var(--space-3);
+  border-left: 1px dashed var(--rule-strong);
+}
+.chart-children .chart-node {
+  padding-bottom: var(--space-2);
+}
+.chart-children .chart-node__head,
+.chart-children .chart-node__hint {
+  padding-left: 0;
+}
+.chart-children .chart-node__link {
+  margin-left: 0;
+}
+/* A window too narrow for a third column: the chart overlays the stage's right edge, and the stage keeps clear of it */
+@media (max-width: 1179px) {
+  .app[data-chart] {
+    --chart-width: var(--chart-width-narrow);
+    grid-template-columns: var(--rail-width) minmax(0, 1fr);
+  }
+  .app[data-chart] .stage {
+    padding-right: calc(var(--chart-width) + var(--space-3));
+  }
+  .app[data-chart] .stage-tab__more {
+    display: none; /* "Spells", "Weapons": the full names do not fit beside the chart */
+  }
+  .turn-chart {
+    position: fixed;
+    z-index: 3; /* the detail drawer (4) still covers it; it comes after the stage in the page so it wins a tie with the tab strip */
+    top: var(--banner-height);
+    right: 0;
+    bottom: var(--footer-height);
+    width: var(--chart-width);
+    box-shadow: -12px 0 28px var(--shadow-md);
+  }
+}
+
 /* ───────── Detail drawer ───────── */
 .drawer {
   position: fixed;

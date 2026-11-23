@@ -1,3 +1,4 @@
+import type { TurnStep } from '@shared/constants'
 import type { PlayState } from '@shared/schema'
 
 /**
@@ -11,7 +12,9 @@ export const undoKey = {
   counter: (id: string): string => `counter:${id}`,
   hp: 'hp',
   initiative: 'initiative',
-  inspirationDie: 'inspiration-die'
+  inspirationDie: 'inspiration-die',
+  /** A mis-tap on a turn step and its undo are one history step, like a run of ± taps. */
+  turnStep: (step: TurnStep): string => `turn-step:${step}`
 }
 
 export interface UndoEntry {

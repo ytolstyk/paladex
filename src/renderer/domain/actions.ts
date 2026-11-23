@@ -1,4 +1,4 @@
-import { emptyTurn, LOG_CAP } from '@shared/constants'
+import { emptyTurn, LOG_CAP, type TurnStep } from '@shared/constants'
 import type { LogEntry, PlayState } from '@shared/schema'
 import type { Payment, Spell } from '@shared/types'
 import type { Catalog } from './catalog'
@@ -7,7 +7,7 @@ import { abilityMod, concentrationDc, signed } from './derived'
 import { usedAfterRest, type RestKind } from './rests'
 import { isChoosable } from './prepared'
 import { clamp, slotKey, slotsRemaining, slotsUsedAt } from './slots'
-import { applyToTurn, isTurnClear, turnWarnings, type TurnWarning } from './turn'
+import { applyToTurn, isTurnClear, turnActionOf, turnWarnings, TURN_STEP_FLAG, withStep, type TurnWarning } from './turn'
 import { COALESCE_MS, undoKey, type UndoMeta } from './undo'
 
 /**
@@ -38,6 +38,16 @@ export function appendCoalescedLog(state: PlayState, entry: LogEntry): PlayState
   const last = state.log.at(-1)
   if (last?.kind !== entry.kind || entry.t - last.t > COALESCE_MS) return appendLog(state, entry)
   return { ...state, log: [...state.log.slice(0, -1), entry] }
+}
+
+/**
+ * Like `appendCoalescedLog`, but for one turn step. A toggle always flips the step, so a second tap on the same step within the undo
+ * window only undoes the first (a mis-tap and its correction): both entries go. Another step's entry is never touched.
+ */
+function appendTurnStepLog(state: PlayState, entry: LogEntry): PlayState {
+  const last = state.log.at(-1)
+  const isCorrection = last?.kind === 'turn-step' && last.step === entry.step && entry.t - last.t <= COALESCE_MS
+  return isCorrection ? { ...state, log: state.log.slice(0, -1) } : appendLog(state, entry)
 }
 
 function pay(state: PlayState, payment: Payment): PlayState {
@@ -92,7 +102,7 @@ export function castSpell(
     ...(payment.kind === 'slot' ? { level: payment.level } : {}),
     ...(concentration.ended ? { endedSpellId: concentration.ended } : {})
   }
-  const action = { castTime: spell.castTime, spendsSlot: payment.kind === 'slot' }
+  const action = turnActionOf(spell, payment.kind === 'slot')
   const warnings = turnWarnings(state.turn, action)
   return {
     state: appendLog({ ...concentration.state, turn: applyToTurn(state.turn, { ...action, isSpellCast: true }) }, entry),
@@ -136,6 +146,16 @@ export function startNewTurn(state: PlayState, now: number): ActionResult | null
   if (isTurnClear(state.turn)) return null
   const entry: LogEntry = { t: now, kind: 'new-turn' }
   return { state: appendLog({ ...state, turn: emptyTurn() }, entry), undo: { kind: 'turn' }, entry }
+}
+
+/**
+ * Mark a turn step used, or clear it again. Always changes something, so it never returns null. A run of taps on one step is one
+ * undo step (a mis-tap and its correction should not push real casts out of the 10-step history).
+ */
+export function toggleTurnStep(state: PlayState, step: TurnStep, now: number): ActionResult {
+  const on = !state.turn[TURN_STEP_FLAG[step]]
+  const entry: LogEntry = { t: now, kind: 'turn-step', step, on }
+  return { state: appendTurnStepLog({ ...state, turn: withStep(state.turn, step, on) }, entry), undo: { kind: 'edit', key: undoKey.turnStep(step) }, entry }
 }
 
 /** Choose or un-choose a spell for today. Cantrips and always-prepared spells have nothing to toggle. */
@@ -273,7 +293,7 @@ export function activateFeature(state: PlayState, catalog: Catalog, featureId: s
   const spent = isPool ? clamp(Math.floor(amount), 1, cap) : 1
 
   const entry: LogEntry = { t: now, kind: 'feature', featureId, amount: spent }
-  const action = { castTime: feature.castTime, spendsSlot: false }
+  const action = turnActionOf(feature, false)
   const warnings = turnWarnings(state.turn, action)
   const next: PlayState = {
     ...state,

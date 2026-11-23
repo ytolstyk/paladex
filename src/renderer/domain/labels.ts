@@ -1,3 +1,4 @@
+import type { TurnStep } from '@shared/constants'
 import type { CastTime, Payment, Role, SpellSource, Weapon } from '@shared/types'
 import { roman } from './derived'
 
@@ -27,6 +28,20 @@ export const SOURCE_LABEL: Record<SpellSource, string> = {
   item: 'Item',
   cantrip: 'Cantrip'
 }
+
+/**
+ * A turn step in the words used everywhere (the rail's buttons, the chart, the log): `name`; `on` / `off` as a phrase ("Action used");
+ * `short` as the one word on a button. `Move` is "Moved": speed is not a pool.
+ */
+export const TURN_STEP_LABEL: Record<TurnStep, { name: string; on: string; off: string; short: { on: string; off: string } }> = {
+  action: { name: 'Action', on: 'Action used', off: 'Action ready', short: { on: 'Used', off: 'Ready' } },
+  move: { name: 'Move', on: 'Moved', off: 'Not moved', short: { on: 'Moved', off: 'Ready' } },
+  bonus: { name: 'Bonus action', on: 'Bonus action used', off: 'Bonus action ready', short: { on: 'Used', off: 'Ready' } },
+  reaction: { name: 'Reaction', on: 'Reaction used', off: 'Reaction ready', short: { on: 'Used', off: 'Ready' } }
+}
+
+/** The turn's one spell slot, as the rail and the chart both say it. */
+export const SLOT_TURN_LABEL = { spent: 'Spell slot spent', free: 'Spell slot free' } as const
 
 /** A weapon that requires attunement: whether the character has it. */
 export const ATTUNEMENT_LABEL: Record<NonNullable<Weapon['attunement']>, string> = {

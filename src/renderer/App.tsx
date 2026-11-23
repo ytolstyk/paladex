@@ -13,6 +13,7 @@ import { SpellGrid } from './components/SpellGrid'
 import { STAGE_PANEL_ID, StageTabs, stageTabId } from './components/StageTabs'
 import { Toast } from './components/Toast'
 import { TablePanel } from './components/TablePanel'
+import { TurnChart } from './components/TurnChart'
 import { TurnPanel } from './components/TurnPanel'
 import { UnreadableState } from './components/UnreadableState'
 import { VitalsBanner } from './components/VitalsBanner'
@@ -23,6 +24,7 @@ import { useUiStore } from './state/uiStore'
 export function App(): React.JSX.Element {
   const view = useUiStore((s) => s.view)
   const stageTab = useUiStore((s) => s.stageTab)
+  const chartOpen = useUiStore((s) => s.chartOpen)
   const status = usePlayStore((s) => s.status)
   const init = usePlayStore((s) => s.init)
   const recovered = usePlayStore((s) => s.recoveredFromBackup)
@@ -42,7 +44,8 @@ export function App(): React.JSX.Element {
   if (status === 'unreadable') return <UnreadableState />
 
   return (
-    <div className="app">
+    // The chart is drawn beside the stage on the sheet only; its open state is kept while settings is up.
+    <div className="app" data-chart={(chartOpen && view === 'sheet') || undefined}>
       <Backdrop />
       <VitalsBanner />
       {view === 'settings' ? (
@@ -75,6 +78,8 @@ export function App(): React.JSX.Element {
           </main>
         </>
       )}
+      {/* Beside the stage on the sheet; kept mounted (hidden) on the settings page so its focus and state survive the round trip. */}
+      {chartOpen && <TurnChart hidden={view !== 'sheet'} />}
       <Footer />
       <DetailDrawer />
       <Toast />

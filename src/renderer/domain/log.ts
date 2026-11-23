@@ -1,4 +1,5 @@
 import type { LogEntry } from '@shared/schema'
+import { TURN_STEP_LABEL } from './labels'
 
 const amountOf = (entry: LogEntry): number => Math.abs(entry.amount ?? 0)
 
@@ -15,6 +16,12 @@ function viaSuffix(entry: LogEntry): string {
     default:
       return ''
   }
+}
+
+/** "Reaction used" / "Reaction ready". Hand-edited entries may lack either field. */
+function turnStepText(entry: LogEntry): string {
+  if (!entry.step) return 'A turn step changed'
+  return TURN_STEP_LABEL[entry.step][entry.on === false ? 'off' : 'on']
 }
 
 /** Render a structured log entry as a sentence. Wording lives here so it can change without touching saved data. */
@@ -55,6 +62,8 @@ export function formatLog(entry: LogEntry, nameOf: (id: string) => string = (id)
       return `Used Bardic Inspiration (${dieName(entry)})`
     case 'inspiration-die':
       return `Bardic Inspiration die set to ${dieName(entry)}`
+    case 'turn-step':
+      return turnStepText(entry)
     case 'prepare':
       return `Prepared ${name}`
     case 'unprepare':

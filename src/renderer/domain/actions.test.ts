@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { LOG_CAP } from '@shared/constants'
-import { activateFeature, adjustSlot, castSpell, dropConcentration, startNewTurn, toggleFavorite, togglePrepared } from './actions'
+import { emptyTurn, LOG_CAP } from '@shared/constants'
+import { activateFeature, adjustSlot, castSpell, dropConcentration, startNewTurn, toggleFavorite, togglePrepared, toggleTurnStep } from './actions'
 import { formatLog } from './log'
-import { bless, cure, mistyStep, cappedPool, freshState, guidance, holdPerson, layOnHands, protection, smite, testCatalog, vowOfEnmity } from './testing'
+import { bless, cure, mistyStep, cappedPool, freshState, guidance, holdPerson, layOnHands, protection, smite, spell, testCatalog, vowOfEnmity } from './testing'
 
 const catalog = testCatalog()
 const state0 = freshState(catalog)
@@ -95,7 +95,8 @@ describe('castSpell: concentration and turn', () => {
       const first = castSpell(state0, catalog, bless.id, undefined, 1)!
       expect(first.warnings).toBeUndefined()
       const second = castSpell(first.state, catalog, holdPerson.id, undefined, 2)!
-      expect(second.warnings).toEqual(['second-slot-spell'])
+      // Bless and Hold Person are both Actions, so it is a second action as well as a second slot.
+      expect(second.warnings).toEqual(['second-slot-spell', 'second-action'])
       expect(second.state.slotsUsed).toEqual({ '1': 1, '2': 1 })
     })
 
@@ -147,7 +148,7 @@ describe('startNewTurn / dropConcentration', () => {
   it('new turn clears the turn flags', () => {
     const cast = castSpell(state0, catalog, smite.id, undefined, 1)!.state
     const next = startNewTurn(cast, 2)!
-    expect(next.state.turn).toEqual({ slotSpellCast: false, bonusActionSpent: false, castsSinceNewTurn: 0 })
+    expect(next.state.turn).toEqual(emptyTurn())
     expect(next.undo).toEqual({ kind: 'turn' })
   })
 
@@ -285,5 +286,101 @@ describe('activateFeature', () => {
     expect(result.state.turn.slotSpellCast).toBe(false)
     expect(result.state.turn.castsSinceNewTurn).toBe(0)
     expect(result.state.slotsUsed).toEqual({})
+  })
+})
+
+describe('the action and the reaction', () => {
+  const reactionSpell = spell({ id: 'spell:shield', name: 'Shield', level: 1, castTime: 'reaction' })
+  const rider = { ...vowOfEnmity, attackRider: true }
+  const cat = testCatalog([bless, smite, reactionSpell], [layOnHands, rider])
+  const fresh = freshState(cat)
+
+  it('casting an action spell marks the action; a second one is flagged but allowed', () => {
+    const first = castSpell(fresh, cat, bless.id, undefined, 1)!
+    expect(first.state.turn.actionSpent).toBe(true)
+    const again = castSpell(first.state, cat, bless.id, undefined, 2)!
+    expect(again.warnings).toContain('second-action')
+  })
+
+  it('a bonus action spell does not mark the action', () => {
+    expect(castSpell(fresh, cat, smite.id, undefined, 1)!.state.turn.actionSpent).toBe(false)
+  })
+
+  it('a rider (Vow of Enmity) marks the action but never warns about it, even after the action was marked by hand', () => {
+    const marked = toggleTurnStep(fresh, 'action', 1).state
+    const used = activateFeature(marked, cat, rider.id, 1, 2)!
+    expect(used.warnings).toBeUndefined()
+    expect(used.state.turn.actionSpent).toBe(true)
+  })
+
+  it('a reaction spell marks the reaction, not your turn: no slot flag, no cast count', () => {
+    const cast = castSpell(fresh, cat, reactionSpell.id, undefined, 1)!
+    expect(cast.state.turn).toMatchObject({ reactionSpent: true, slotSpellCast: false, castsSinceNewTurn: 0 })
+    expect(cast.state.slotsUsed).toEqual({ '1': 1 }) // the slot is still spent
+    const own = castSpell(cast.state, cat, bless.id, undefined, 2)!
+    expect(own.warnings).toBeUndefined() // not a second slot spell: the reaction was another turn's
+  })
+
+  it('a second reaction is flagged', () => {
+    const first = castSpell(fresh, cat, reactionSpell.id, undefined, 1)!
+    expect(castSpell(first.state, cat, reactionSpell.id, undefined, 2)!.warnings).toContain('second-reaction')
+  })
+})
+
+describe('toggleTurnStep', () => {
+  it('marks a step used and clears it again, logging both ways', () => {
+    const on = toggleTurnStep(state0, 'reaction', 1)
+    expect(on.state.turn.reactionSpent).toBe(true)
+    expect(formatLog(on.entry)).toBe('Reaction used')
+    const off = toggleTurnStep(on.state, 'reaction', 2)
+    expect(off.state.turn.reactionSpent).toBe(false)
+    expect(formatLog(off.entry)).toBe('Reaction ready')
+  })
+
+  it.each([
+    ['action', 'actionSpent'],
+    ['move', 'moved'],
+    ['bonus', 'bonusActionSpent'],
+    ['reaction', 'reactionSpent']
+  ] as const)('%s sets %s and nothing else', (step, flag) => {
+    const turn = toggleTurnStep(state0, step, 1).state.turn
+    expect(turn).toEqual({ ...emptyTurn(), [flag]: true })
+  })
+
+  it('is one undo step for a run of taps on a step, and its own step for another', () => {
+    expect(toggleTurnStep(state0, 'move', 1).undo).toEqual({ kind: 'edit', key: 'turn-step:move' })
+    expect(toggleTurnStep(state0, 'action', 1).undo).toEqual({ kind: 'edit', key: 'turn-step:action' })
+  })
+
+  it('new turn clears every step, and is no longer a no-op when only a step was marked', () => {
+    const marked = toggleTurnStep(toggleTurnStep(state0, 'move', 1).state, 'reaction', 2).state
+    const next = startNewTurn(marked, 3)
+    expect(next).not.toBeNull()
+    expect(next!.state.turn).toEqual(emptyTurn())
+  })
+
+  it('does not touch slots, counters or concentration', () => {
+    const next = toggleTurnStep(state0, 'bonus', 1).state
+    expect({ ...next, turn: state0.turn, log: state0.log }).toEqual(state0)
+  })
+})
+
+describe('the log of turn steps', () => {
+  const steps = (state: typeof state0) => state.log.filter((e) => e.kind === 'turn-step')
+
+  it('a mis-tap and its correction leave no entry, and no real action is pushed out for them', () => {
+    const on = toggleTurnStep(state0, 'move', 1000).state
+    expect(steps(on)).toHaveLength(1)
+    const off = toggleTurnStep(on, 'move', 1500).state
+    expect(steps(off)).toHaveLength(0)
+    expect(off.log).toEqual(state0.log)
+  })
+
+  it('different steps each keep their entry, and a step tapped much later is a new entry', () => {
+    const a = toggleTurnStep(state0, 'move', 1000).state
+    const b = toggleTurnStep(a, 'reaction', 1200).state
+    expect(steps(b).map((e) => e.step)).toEqual(['move', 'reaction'])
+    const later = toggleTurnStep(b, 'reaction', 1200 + 60_000).state
+    expect(steps(later).map((e) => [e.step, e.on])).toEqual([['move', true], ['reaction', true], ['reaction', false]])
   })
 })

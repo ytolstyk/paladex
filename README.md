@@ -75,6 +75,29 @@ the spells tab only (so `/` does nothing on the other one), and the tab you are 
   Hunter's Mark, Divine Favor, Magic Weapon, Vow of Enmity and Breath Weapon (the list is `scripts/data/attack-riders.ts`).
   Spells you have not prepared are left out and counted in a line under the cards. These cards ignore the spell filters.
 
+## The turn and the turn chart
+
+The **This turn** panel (top of the left rail) tracks what you have used this turn. Four buttons, **Action**, **Move**, **Bonus
+action** and **Reaction**, show *Ready* or *Used* (a used one is also struck through, so it never relies on color); press one to
+mark it or clear it again. Casting a spell or using a feature marks its own step for you (an Action spell marks Action, a
+Bonus action spell Bonus action, a Reaction spell Reaction). **Move** and the Attack action are only ever marked by hand,
+because speed is spent in pieces and a weapon attack has no button. **New turn** (`N`) is for the moment your turn begins: it
+clears all four, the spell slot and the cast count, which is also when your reaction comes back. Everything is saved with the
+character, undoable, and logged ("Reaction used"). Rules are soft hints: a second action, bonus action, reaction or slotted spell
+in one turn is flagged but never blocked. A reaction spell counts against the reaction, not your turn's slot.
+
+**Turn chart** (button under the panel, or `T`) docks a chart of the turn beside the spell grid and stays open while you play:
+
+- Your turn begins, Move, Action (Attack with its count and a button to the Weapons & attacks tab, Cast a spell with the slot
+  state, Skill check, Something else), Bonus action, Free, Reaction, and End of turn.
+- Steps you track show their state in words. The **Bonus action** and **Reaction** lists are your own prepared spells and features
+  that take them (dimmed when nothing is left to pay for them); press one for its details.
+- **End of turn** says what is still available: the bonus action when something could use it, and the reaction. It never nags about
+  the Action or Move.
+- A detail opened from the chart covers it (same edge, same width) until you close it. `Esc` closes the detail first, then the chart.
+  In a window narrower than 1180 px the chart floats over the right edge instead of taking a column, with the spell list kept clear of it.
+- Whether the chart is open is not remembered between launches.
+
 ## Getting started
 
 ```bash

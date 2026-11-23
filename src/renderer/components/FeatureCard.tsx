@@ -4,7 +4,7 @@ import type { Feature } from '@shared/types'
 import { featureSpendCap, usesLeft } from '@/domain/cost'
 import { ROLE_LABEL } from '@/domain/labels'
 import { featureFoundBeyondCard, searchTokens } from '@/domain/search'
-import { NO_WARNINGS, turnWarnings, warningText } from '@/domain/turn'
+import { NO_WARNINGS, turnActionOf, turnWarnings, warningText } from '@/domain/turn'
 import { catalog, usePlayStore } from '@/state/session'
 import { useUiStore } from '@/state/uiStore'
 import { CastButton, CastRoundel } from './CardParts'
@@ -16,7 +16,7 @@ export const FeatureCard = memo(function FeatureCard({ feature }: { feature: Fea
   const left = usePlayStore((s) => (counter && s.play ? usesLeft(counter, s.play.counters) : 0))
   const cap = usePlayStore((s) => (counter && s.play ? featureSpendCap(feature, counter, s.play.counters) : 0))
   const warnings = usePlayStore(
-    useShallow((s) => (s.play ? turnWarnings(s.play.turn, { castTime: feature.castTime, spendsSlot: false }) : NO_WARNINGS))
+    useShallow((s) => (s.play ? turnWarnings(s.play.turn, turnActionOf(feature, false)) : NO_WARNINGS))
   )
   const activateFeature = usePlayStore((s) => s.activateFeature)
   const openDetail = useUiStore((s) => s.openDetail)

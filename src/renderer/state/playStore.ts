@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { InspirationDie } from '@shared/constants'
+import type { InspirationDie, TurnStep } from '@shared/constants'
 import type { PaladexApi } from '@shared/ipc'
 import type { PlayState } from '@shared/schema'
 import type { Payment } from '@shared/types'
@@ -39,6 +39,8 @@ export interface PaladexStore {
   /** Manual gem correction: spend or restore one slot. */
   adjustSlot(level: number, direction: 'spend' | 'restore'): void
   newTurn(): void
+  /** Mark one of the hand-tracked turn steps (action, move, bonus action, reaction) used, or clear it. */
+  toggleTurnStep(step: TurnStep): void
   /** Use a class/race feature. `amount` only matters for pool features (Lay On Hands). */
   activateFeature(featureId: string, amount?: number): void
   /** Choose or un-choose a spell as prepared. */
@@ -150,6 +152,11 @@ export function createPlayStore({ port, catalog, now = Date.now }: StoreDeps) {
       newTurn() {
         const play = current()
         if (play) apply(actions.startNewTurn(play, now()))
+      },
+
+      toggleTurnStep(step) {
+        const play = current()
+        if (play) apply(actions.toggleTurnStep(play, step, now()))
       },
 
       activateFeature(featureId, amount = 1) {

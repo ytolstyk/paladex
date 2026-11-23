@@ -33,7 +33,7 @@ are soft hints.
 
 - [x] **Choose the slot level when casting (upcasting)**: a ‹ › stepper under the Cast button, using the payment list
       `availableCosts()` produces. The pick is per-card view state and resets after each cast. **M**
-- [ ] **Reaction and action tracking** next to the existing slot and bonus-action lines, plus a "turn N / round N" counter. *(play state)* **S**
+- [x] **Reaction and action tracking** next to the slot and bonus-action lines, with a turn chart beside the stage. *(play state, done)* Still open: a "turn N / round N" counter, and an `R` shortcut.
 - [ ] **Duration timers**: when you cast Bless or Hunter's Mark, count rounds (1 minute = 10) and tell you when it ends. *(play state)* **M**
 - [ ] **Concentration target note**: "Hunter's Mark on the ogre". A one-line field on the active concentration. *(play state)* **S**
 - [ ] **Concentration check helper** when taking damage: show the DC (10, or half the damage if higher) and your save bonus. **S**

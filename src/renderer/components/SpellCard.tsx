@@ -5,7 +5,7 @@ import { availableCosts, paymentOptions, samePaymentOptions, type PaymentOptions
 import { paymentLabel, ROLE_LABEL } from '@/domain/labels'
 import { isChoosable, isInDefaultView } from '@/domain/prepared'
 import { spellFoundBeyondCard, searchTokens } from '@/domain/search'
-import { NO_WARNINGS, turnWarnings, warningText } from '@/domain/turn'
+import { NO_WARNINGS, turnActionOf, turnWarnings, warningText } from '@/domain/turn'
 import { catalog, usePlayStore } from '@/state/session'
 import { selectEffectFor, useEffectsStore } from '@/state/effectsStore'
 import { useUiStore } from '@/state/uiStore'
@@ -43,7 +43,7 @@ export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): R
   const warnings = usePlayStore(
     useShallow((s) =>
       s.play && payment
-        ? turnWarnings(s.play.turn, { castTime: spell.castTime, spendsSlot: payment.kind === 'slot' })
+        ? turnWarnings(s.play.turn, turnActionOf(spell, payment.kind === 'slot'))
         : NO_WARNINGS
     )
   )

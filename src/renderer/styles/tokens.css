@@ -151,6 +151,8 @@
   /* Layout: the rail, drawer and card columns grow with the window instead of sitting at a fixed width */
   --rail-width: clamp(336px, 22vw, 480px);
   --drawer-width: clamp(380px, 28vw, 560px);
+  --chart-width-narrow: clamp(260px, 30vw, 300px); /* the chart floating over a window too narrow for a column */
+  --chart-width: var(--drawer-width); /* the turn chart and a detail drawer share an edge, so the drawer covers the chart exactly */
   --card-min: clamp(290px, 17vw, 380px);
   --panel-width: clamp(420px, 46vw, 760px); /* the filter panel's popover */
   --banner-height: 64px;

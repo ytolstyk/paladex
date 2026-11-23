@@ -8,7 +8,8 @@ import {
   LOG_KINDS,
   PAYMENT_KINDS,
   ROLES,
-  SCHEMA_VERSION
+  SCHEMA_VERSION,
+  TURN_STEPS
 } from './constants'
 
 // Runtime (zod) consumers: main process only. Renderer and preload use `import type` from here,
@@ -28,7 +29,10 @@ const LogEntrySchema = z.object({
   /** Signed: negative = spent / damage taken, positive = restored / healed. For `initiative`, the value set. */
   amount: z.number().int().optional(),
   /** Bardic Inspiration die size. */
-  die: z.number().int().optional()
+  die: z.number().int().optional(),
+  /** The turn step a `turn-step` entry changed, and whether it is now marked (true) or cleared (false). */
+  step: z.enum(TURN_STEPS).optional(),
+  on: z.boolean().optional()
 })
 
 /** Spelled out (not built from INSPIRATION_DICE) so the inferred type is the literal union 6 | 8 | 10 | 12. */
@@ -60,6 +64,9 @@ export const PlayStateSchema = z.object({
     .object({
       slotSpellCast: z.boolean().default(false),
       bonusActionSpent: z.boolean().default(false),
+      actionSpent: z.boolean().default(false),
+      moved: z.boolean().default(false),
+      reactionSpent: z.boolean().default(false),
       castsSinceNewTurn: z.number().int().min(0).default(0)
     })
     .default(() => emptyTurn()),

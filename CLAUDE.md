@@ -59,6 +59,26 @@ schema, vitest for tests. See README.md for scripts and layout.
   closing). Weapon ids (`weapon:<slug>`, repeats get `-2`) go through `detailId` like spells and features.
 - DDB's reference tags (`[rules]x[/rules]`, `[wprop]Thrown[/wprop]`, `[action]A;B[/action]`) are flattened by `htmlToText`.
 
+## The turn, and the turn chart
+
+- `TurnState` (`shared/constants.ts`) is `slotSpellCast`, `bonusActionSpent`, `actionSpent`, `moved`, `reactionSpent`, `castsSinceNewTurn`. The three
+  newest use `.default(false)` in the zod `turn` object, so older saves load. All turn rules are in `domain/turn.ts`; `turnActionOf(thing, spendsSlot)`
+  is the one place a `TurnAction` is built (toast, card hint and state change all use it). Casting or using something with an `action` / `bonus` /
+  `reaction` casting time marks that step. A `reaction` spell neither sets nor warns `slotSpellCast` and is not one of the turn's casts. An `attackRider`
+  feature (Vow of Enmity, Breath Weapon) marks the action but never warns (a soft gap, documented in `turn.ts`).
+- The four steps are marked by hand in `TurnPanel` only (`toggleTurnStep`, step names in `TURN_STEPS`): it is the one writer. Each toggle is one
+  undo `edit` key per step (a mis-tap and its correction are one step) and a `turn-step` log entry. `New turn` clears everything; `isTurnClear`
+  must list every flag or it silently does nothing. A save with `turn-step` log entries is unreadable to a build from before it (rollback only).
+- `TurnChart` only reads. `domain/turnChart.ts` (`buildTurnChart`, pure) is a skeleton of short prompt lines, with no rules prose and no skill numbers;
+  the Bonus action and Reaction leaves come from `domain/turnOptions.ts` by casting time, independent of the spell filters (like `attackRiders`).
+  The End of turn line lists only the bonus action and reaction on purpose: the Attack action cannot be auto-marked, and speed is not a pool.
+- Layout: `.app[data-chart]` adds a third grid column (`--chart-width` = `--drawer-width`) from 1180 px up; below that the chart is `position: fixed`
+  at 300 px and the stage gets matching right padding. The detail drawer shares the chart's edge and width and simply stacks over it (the chart goes
+  `inert` meanwhile). The chart does not use `useDismiss`: its own Esc runs when focus is inside it, and with a detail open the chart is `inert`, so the
+  detail's Esc closes it first and the chart takes focus back for the next one. While the chart is open the `This turn` panel is `order: -1` in the rail so the writer is never scrolled away.
+  `chartOpen` is in `uiStore`, in-session, and kept (not drawn) on the settings page. `T` toggles it.
+- `PALADEX_SIZE=960x640` (with `PALADEX_SHOT`) sizes the window for a screenshot, so the 1180 px breakpoint and a short window can be checked.
+
 ## Spell components
 
 - `Spell.components` is `{ verbal, somatic, material, materialText? }`, data not play state. `scripts/components.ts` is the only place

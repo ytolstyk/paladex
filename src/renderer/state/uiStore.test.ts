@@ -109,3 +109,27 @@ describe('stage tab', () => {
     expect(useUiStore.getState().stageTab).toBe('attacks')
   })
 })
+
+describe('turn chart', () => {
+  it('starts closed, toggles, closes, and is never written to storage', async () => {
+    const storage = fakeStorage()
+    const { useUiStore } = await loadStore(storage)
+    expect(useUiStore.getState().chartOpen).toBe(false)
+    useUiStore.getState().toggleChart()
+    expect(useUiStore.getState().chartOpen).toBe(true)
+    useUiStore.getState().toggleChart()
+    expect(useUiStore.getState().chartOpen).toBe(false)
+    useUiStore.getState().toggleChart()
+    useUiStore.getState().closeChart()
+    expect(useUiStore.getState().chartOpen).toBe(false)
+    expect(storage.writes).toEqual([])
+  })
+
+  it('stays open through the settings page: opening settings does not close it', async () => {
+    const { useUiStore } = await loadStore(fakeStorage())
+    useUiStore.getState().toggleChart()
+    useUiStore.getState().toggleSettings()
+    useUiStore.getState().toggleSettings()
+    expect(useUiStore.getState().chartOpen).toBe(true)
+  })
+})

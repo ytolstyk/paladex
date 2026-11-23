@@ -4,6 +4,9 @@ import type { Catalog } from './catalog'
 import { isPrepared } from './prepared'
 import { slotsRemaining } from './slots'
 
+/** The parts of the play state that decide what can be paid for. Narrower than `PlayState`, so a view can subscribe to just these. */
+export type CostState = Pick<PlayState, 'prepared' | 'slotsUsed' | 'counters'>
+
 /** Uses left on a counter (never negative). */
 export function usesLeft(def: CounterDef, used: Record<string, number>): number {
   return Math.max(0, def.max - (used[def.id] ?? 0))
@@ -16,8 +19,14 @@ export function featureSpendCap(feature: Feature, counter: CounterDef, used: Rec
   return Math.min(left, perUse)
 }
 
+/** A feature can be used right now: its counter has something left to spend. The card and the turn chart both read this. */
+export function canUseFeature(feature: Feature, catalog: Catalog, used: Record<string, number>): boolean {
+  const counter = catalog.counterById(feature.counterId)
+  return counter !== undefined && featureSpendCap(feature, counter, used) > 0
+}
+
 /** Uses left by counter id. Unknown counters have none. */
-export function remainingUses(state: PlayState, catalog: Catalog, counterId: string): number {
+export function remainingUses(state: Pick<PlayState, 'counters'>, catalog: Catalog, counterId: string): number {
   const def = catalog.counterById(counterId)
   return def ? usesLeft(def, state.counters) : 0
 }
@@ -27,7 +36,7 @@ export function remainingUses(state: PlayState, catalog: Catalog, counterId: str
  * (e.g. Divine Smite: its free cast first, then each slot level from lowest up).
  * The single source of truth for "castable now": the card, the upcast stepper and the filters all use it.
  */
-export function availableCosts(state: PlayState, spell: Spell, catalog: Catalog): Payment[] {
+export function availableCosts(state: CostState, spell: Spell, catalog: Catalog): Payment[] {
   const options: Payment[] = []
   const prepared = isPrepared(state, spell)
   for (const cost of spell.costs) {

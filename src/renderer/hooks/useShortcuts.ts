@@ -12,9 +12,9 @@ function isTypingTarget(el: EventTarget | null): boolean {
 }
 
 /**
- * Cmd/Ctrl+, toggles settings; Cmd/Ctrl+Z undoes; N starts a new turn; / jumps to the search box. Held-key auto-repeat is
- * ignored (a held key must not fire dozens of actions). Z, N and / are also ignored while typing; the settings toggle is
- * not, since a comma with a modifier is never text. N does nothing on the settings page, where it would be a hidden side effect; Undo stays
+ * Cmd/Ctrl+, toggles settings; Cmd/Ctrl+Z undoes; N starts a new turn; T shows or hides the turn chart; / jumps to the search box. Held-key auto-repeat is
+ * ignored (a held key must not fire dozens of actions). Z, N, T and / are also ignored while typing; the settings toggle is
+ * not, since a comma with a modifier is never text. N and T do nothing on the settings page, where it would be a hidden side effect; Undo stays
  * live there because it is visible in the footer and the toast, which both remain on screen.
  * The Edit menu deliberately has no Undo item, so Cmd+Z reaches us.
  */
@@ -46,6 +46,9 @@ export function useShortcuts(): void {
         undoLast()
       } else if (!hasCommandKey && !e.altKey && key === 'n' && useUiStore.getState().view !== 'settings') {
         newTurn()
+      } else if (!hasCommandKey && !e.altKey && key === 't' && useUiStore.getState().view !== 'settings') {
+        // Only where the chart is drawn: the sheet, with a readable save.
+        if (usePlayStore.getState().status === 'ready') useUiStore.getState().toggleChart()
       }
     }
     window.addEventListener('keydown', onKey)

@@ -1,9 +1,10 @@
 import { tabIndexForKey } from '@/domain/tabs'
 import { useUiStore, type StageTab } from '@/state/uiStore'
 
-const TABS: { id: StageTab; label: string }[] = [
-  { id: 'spells', label: 'Spells & features' },
-  { id: 'attacks', label: 'Weapons & attacks' }
+/** `more` is the part of the label a narrow window can drop ("Spells" / "Weapons") when the turn chart takes room from the stage. */
+const TABS: { id: StageTab; label: string; more: string }[] = [
+  { id: 'spells', label: 'Spells', more: ' & features' },
+  { id: 'attacks', label: 'Weapons', more: ' & attacks' }
 ]
 
 export const stageTabId = (tab: StageTab): string => `stage-tab-${tab}`
@@ -40,6 +41,7 @@ export function StageTabs(): React.JSX.Element {
           onKeyDown={(e) => move(e, index)}
         >
           {tab.label}
+          <span className="stage-tab__more">{tab.more}</span>
         </button>
       ))}
     </div>

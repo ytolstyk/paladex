@@ -29,7 +29,8 @@ export const LOG_KINDS = [
   'initiative',
   'inspiration-gain',
   'inspiration-use',
-  'inspiration-die'
+  'inspiration-die',
+  'turn-step'
 ] as const
 
 /** The dial covers a d20 roll plus modifiers: a 1 is the lowest anyone acts, 25 is a generous ceiling. */
@@ -41,6 +42,10 @@ export const INSPIRATION_DICE = [6, 8, 10, 12] as const
 export type InspirationDie = (typeof INSPIRATION_DICE)[number]
 export const DEFAULT_INSPIRATION_DIE: InspirationDie = 8
 
+/** What a player tracks by hand through a turn. `move` is "I moved", not a pool: speed is spent in pieces on both sides of the action. */
+export const TURN_STEPS = ['action', 'move', 'bonus', 'reaction'] as const
+export type TurnStep = (typeof TURN_STEPS)[number]
+
 export interface TurnState {
   /**
    * A spell was cast this turn by expending a spell slot. The 2024 rules ("One Spell with a Spell Slot per Turn",
@@ -51,9 +56,18 @@ export interface TurnState {
   slotSpellCast: boolean
   /** Any bonus action (a bonus-action spell or a feature like Lay On Hands) was used this turn: only one is allowed. */
   bonusActionSpent: boolean
+  /**
+   * The action was used: a spell or feature with an action casting time marks it, and the player marks it by hand for anything
+   * else (weapon attacks have no button, so the Attack action is never marked for them).
+   */
+  actionSpent: boolean
+  /** The player says they moved. Only ever set by hand. */
+  moved: boolean
+  /** The reaction was used since the turn began (2024: it comes back at the start of your turn, which is "New turn"). */
+  reactionSpent: boolean
   castsSinceNewTurn: number
 }
 
 export function emptyTurn(): TurnState {
-  return { slotSpellCast: false, bonusActionSpent: false, castsSinceNewTurn: 0 }
+  return { slotSpellCast: false, bonusActionSpent: false, actionSpent: false, moved: false, reactionSpent: false, castsSinceNewTurn: 0 }
 }
