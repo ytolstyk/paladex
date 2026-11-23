@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react'
 import { CAST_TIMES } from '@shared/constants'
 import { FACETS } from '@/domain/facets'
 import { hasActiveFilters, panelFilterCount, type Intent } from '@/domain/filters'
+import { plural } from '@/domain/describe'
 import { CAST_LABEL } from '@/domain/labels'
 import { SORT_KEYS, SORT_LABEL, type SortKey } from '@/domain/order'
 import { chosenCount, paladinPreparedLimit } from '@/domain/prepared'
@@ -20,8 +21,6 @@ const INTENTS: { id: Intent; label: string; hint: string }[] = [
 // The long casting times (rituals, 10 minutes) are not a combat choice, so they get no chip.
 const CAST_TIME_CHIPS = CAST_TIMES.filter((t) => t !== 'long').map((id) => ({ id, label: CAST_LABEL[id] }))
 const PANEL_ID = 'filter-panel'
-
-const plural = (n: number, one: string, many: string): string => `${n} ${n === 1 ? one : many}`
 
 /** What the player has chosen in the panel, as chips that can each be taken off without opening it. */
 function ActiveFilters(): React.JSX.Element | null {

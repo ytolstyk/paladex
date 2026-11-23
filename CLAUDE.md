@@ -43,6 +43,22 @@ schema, vitest for tests. See README.md for scripts and layout.
 - The dial's geometry is in `domain/dial.ts`; the component only draws and handles input. A drag saves once, on release, so it
   is one undo step; typed or arrow-key changes coalesce through the `initiative` undo key.
 
+## Weapons tab
+
+- `uiStore.stageTab` (`'spells' | 'attacks'`) picks the stage's view; it is in-session view state, not in `viewPrefs`. FilterBar, SpellGrid
+  and OtherFeatures render only on the spells tab. The tab strip (`StageTabs`) is sticky; `.filter-bar` sticks below it by
+  `--tabs-height`, so change that token if the strip's height changes.
+- Weapons are seed data (`Character.weapons`, from the sheet's inventory by `buildWeapons` in `scripts/normalize.ts`). Attack numbers are
+  never stored: `domain/attacks.ts` derives them from abilities, so they are BASE numbers (no spell or magic bonus). There is no
+  "equipped" flag on purpose. `Weapon.mastery.known` and `magic` are as of the last import.
+- A mastery counts as known when a feat action named "<Mastery> (<kind>)" exists; kinds match regardless of word order
+  ("Crossbow, Heavy" is "Heavy Crossbow"). "Graze (Greatsword)" is on the sheet with no Greatsword carried: fine.
+- Which spells and features appear under "Attack options" is `scripts/data/attack-riders.ts` (sets `attackRider` on them), never string
+  matching. A listed id the sheet lacks makes the importer throw. Decide each new spell there.
+- `WeaponCard` keeps the `spell-card` class so `opensDetail` treats a press on it like a spell card press (the drawer switches instead of
+  closing). Weapon ids (`weapon:<slug>`, repeats get `-2`) go through `detailId` like spells and features.
+- DDB's reference tags (`[rules]x[/rules]`, `[wprop]Thrown[/wprop]`, `[action]A;B[/action]`) are flattened by `htmlToText`.
+
 ## Spell components
 
 - `Spell.components` is `{ verbal, somatic, material, materialText? }`, data not play state. `scripts/components.ts` is the only place

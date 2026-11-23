@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { AttacksPage } from './components/AttacksPage'
 import { Backdrop } from './components/Backdrop'
 import { FilterBar } from './components/FilterBar'
 import { DetailDrawer } from './components/DetailDrawer'
@@ -9,6 +10,7 @@ import { RestGlow } from './components/RestGlow'
 import { SettingsPage } from './components/SettingsPage'
 import { SlotTracker } from './components/SlotTracker'
 import { SpellGrid } from './components/SpellGrid'
+import { STAGE_PANEL_ID, StageTabs, stageTabId } from './components/StageTabs'
 import { Toast } from './components/Toast'
 import { TablePanel } from './components/TablePanel'
 import { TurnPanel } from './components/TurnPanel'
@@ -20,6 +22,7 @@ import { useUiStore } from './state/uiStore'
 
 export function App(): React.JSX.Element {
   const view = useUiStore((s) => s.view)
+  const stageTab = useUiStore((s) => s.stageTab)
   const status = usePlayStore((s) => s.status)
   const init = usePlayStore((s) => s.init)
   const recovered = usePlayStore((s) => s.recoveredFromBackup)
@@ -53,12 +56,22 @@ export function App(): React.JSX.Element {
             <ResourcePanel />
           </aside>
           <main className="stage">
+            <StageTabs />
             {recovered && (
               <p className="notice">Your latest save was damaged, so the previous backup was loaded. Check your slots and HP.</p>
             )}
-            <FilterBar />
-            <SpellGrid />
-            <OtherFeatures />
+            {/* Search, sort and filters describe spells, so they and the features list belong to the spells view only. */}
+            <div id={STAGE_PANEL_ID} className="stage-panel" role="tabpanel" aria-labelledby={stageTabId(stageTab)}>
+              {stageTab === 'spells' ? (
+                <>
+                  <FilterBar />
+                  <SpellGrid />
+                  <OtherFeatures />
+                </>
+              ) : (
+                <AttacksPage />
+              )}
+            </div>
           </main>
         </>
       )}

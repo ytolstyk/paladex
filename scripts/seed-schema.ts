@@ -65,6 +65,7 @@ const spell = z
     costs: z.array(costOption).min(1),
     tag: z.string().optional(),
     alwaysPrepared: z.boolean().optional(),
+    attackRider: z.boolean().optional(),
     verified: z.boolean()
   })
   .strict()
@@ -85,7 +86,32 @@ const feature = z
       z.object({ kind: z.literal('uses') }).strict(),
       z.object({ kind: z.literal('pool'), maxPerUse: z.number().int().positive().optional() }).strict()
     ]),
-    tag: z.string().optional()
+    tag: z.string().optional(),
+    attackRider: z.boolean().optional()
+  })
+  .strict()
+
+/** Dice as the sheet prints them: "1d8". Shared with the importer, which parses the same text. */
+export const DICE_PATTERN = /^\d+d\d+$/
+
+const weaponProperty = z.object({ name: z.string().min(1), text: z.string() }).strict()
+
+const weapon = z
+  .object({
+    id: z.string().regex(/^weapon:[a-z0-9-]+$/),
+    name: z.string().min(1),
+    baseType: z.string().min(1),
+    melee: z.boolean(),
+    proficient: z.boolean(),
+    magic: z.boolean(),
+    attunement: z.enum(['attuned', 'not-attuned']).optional(),
+    damage: z
+      .object({ dice: z.string().regex(DICE_PATTERN), type: z.string().min(1), versatile: z.string().regex(DICE_PATTERN).optional() })
+      .strict(),
+    range: z.object({ normal: z.number().int().min(0), long: z.number().int().min(0).optional() }).strict(),
+    properties: z.array(weaponProperty),
+    mastery: z.object({ name: z.string().min(1), text: z.string(), known: z.boolean() }).strict().optional(),
+    description: z.string().min(1).optional()
   })
   .strict()
 
@@ -105,7 +131,8 @@ const character = z
     ac: z.number().int().positive(),
     spells: z.array(spell),
     counters: z.array(counter),
-    features: z.array(feature)
+    features: z.array(feature),
+    weapons: z.array(weapon)
   })
   .strict()
 

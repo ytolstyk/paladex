@@ -65,6 +65,7 @@ Today: damage and heal from the HP popover. Temp HP is stored and absorbs damage
 Today: ability scores are stored but only used to compute spell save DC and attack bonus. There is no place for anything
 outside spellcasting.
 
+- [x] **Weapons and attacks** view: to-hit, damage, reach and mastery per weapon, Extra Attack, Unarmed Strike and the spells that ride an attack. *(done; base numbers only, no magic bonus or Savage Attacker yet)*
 - [ ] **Abilities, saving throws and skills** panel with modifiers and proficiency markers. Needs skill data in the seed. **M**
 - [ ] **Quick numbers** in the banner or a tooltip: speed, passive Perception, and an initiative *modifier* (the initiative
       dial in the rail holds the rolled result, not the bonus). **S**

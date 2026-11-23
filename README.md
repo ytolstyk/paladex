@@ -56,6 +56,25 @@ The top of the left rail holds two things you carry from the table into your own
   Bard gives it to you, pick the size they gave, and press Use it when you spend it. Any rest ends it, since it only lasts
   an hour. The die size is remembered, and every step is logged and undoable.
 
+## Weapons and attacks
+
+The strip above the stage has two tabs: **Spells & features** and **Weapons & attacks**. The search bar, sort and filters belong to
+the spells tab only (so `/` does nothing on the other one), and the tab you are on is not remembered between launches.
+
+- **Weapons.** Every weapon on the D&D Beyond sheet, magic first, each with its to-hit, damage, reach or range, properties and
+  weapon mastery. Click one for the rules text of each property. The numbers come from your ability scores and proficiency (hover
+  one for what it is made of) and are **base numbers**: add Magic Weapon, Bless or a magic bonus yourself. A Heavy weapon you
+  are too weak or clumsy for (Strength 13 for melee, Dexterity 13 for ranged) is flagged "Disadvantage". Reach counts the Reach
+  property (a Halberd reaches 10 ft).
+- **Mastery.** The mastery property is lit when the sheet says you chose it for that kind of weapon ("Cleave (Halberd)" covers the
+  Halberd and a magic Halberd), and struck through ("Push, not mastered") when you did not. Masteries and a magic weapon's state can
+  change, and the app only knows them as of the last import (`npm run seed`).
+- **Attack action and Unarmed Strike.** How many attacks one Attack action gives (Extra Attack), and your Unarmed Strike's to-hit,
+  damage and Grapple or Shove DC.
+- **Attack options.** The spells and features that go with an attack, as ordinary cards you can cast or use right there: Smites,
+  Hunter's Mark, Divine Favor, Magic Weapon, Vow of Enmity and Breath Weapon (the list is `scripts/data/attack-riders.ts`).
+  Spells you have not prepared are left out and counted in a line under the cards. These cards ignore the spell filters.
+
 ## Getting started
 
 ```bash

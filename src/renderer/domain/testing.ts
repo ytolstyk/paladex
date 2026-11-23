@@ -1,6 +1,6 @@
 // Shared test fixtures. Not imported by app code.
 import type { PlayState } from '@shared/schema'
-import type { CounterDef, Feature, SeedData, Spell } from '@shared/types'
+import type { CounterDef, Feature, SeedData, Spell, Weapon } from '@shared/types'
 import { createCatalog, type Catalog } from './catalog'
 import { seedPlayState } from './hydrate'
 import { isChoosable } from './prepared'
@@ -96,9 +96,26 @@ export const protection = spell({
 })
 export const guidance = spell({ id: 'spell:guidance', name: 'Guidance', level: 0, source: 'cantrip', costs: [{ kind: 'none' }] })
 
+/** A melee weapon with Havel's proficiency; override what the test is about. */
+export function weapon(over: Partial<Weapon> = {}): Weapon {
+  return {
+    id: 'weapon:test',
+    name: 'Test',
+    baseType: 'Test',
+    melee: true,
+    proficient: true,
+    magic: false,
+    damage: { dice: '1d8', type: 'Slashing' },
+    range: { normal: 5 },
+    properties: [],
+    ...over
+  }
+}
+
 export function testCatalog(
   spells: Spell[] = [smite, bless, holdPerson, protection, guidance, cure, mistyStep],
-  features: Feature[] = [layOnHands, vowOfEnmity]
+  features: Feature[] = [layOnHands, vowOfEnmity],
+  weapons: Weapon[] = []
 ): Catalog {
   const seed: SeedData = {
     character: {
@@ -114,7 +131,8 @@ export function testCatalog(
       ac: 16,
       spells,
       counters: testCounters,
-      features
+      features,
+      weapons
     },
     // Like the real sheet: choosable spells start chosen, except the item-granted one (it is cast from the Ward instead).
     prepared: spells.filter((s) => isChoosable(s) && s.source !== 'item').map((s) => s.id),

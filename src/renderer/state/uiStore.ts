@@ -11,6 +11,9 @@ export const VIEW_STORAGE_KEY = 'paladex.view'
 
 export type ViewId = 'sheet' | 'settings'
 
+/** Which view of the sheet's stage is showing. In-session only: like the settings page it is not a filter, so it is not remembered. */
+export type StageTab = 'spells' | 'attacks'
+
 /** The id of the search field, so a keyboard shortcut (`/`) can focus it without reaching into a component. */
 export const SEARCH_INPUT_ID = 'spell-search'
 
@@ -26,7 +29,9 @@ interface UiStore {
   view: ViewId
   closeSettings(): void
   toggleSettings(): void
-  /** The spell or feature shown in the detail drawer, by id (`spell:...` / `feature:...`). */
+  stageTab: StageTab
+  setStageTab(tab: StageTab): void
+  /** The spell, feature or weapon shown in the detail drawer, by id (`spell:...` / `feature:...` / `weapon:...`). */
   detailId: string | null
   openDetail(id: string): void
   closeDetail(): void
@@ -68,6 +73,8 @@ export const useUiStore = create<UiStore>((set) => ({
   toggleSettings: () =>
     // Opening settings also closes the detail drawer, so it cannot linger behind the page.
     set((s) => (s.view === 'settings' ? { view: 'sheet' } : { view: 'settings', detailId: null })),
+  stageTab: 'spells',
+  setStageTab: (stageTab) => set({ stageTab }),
   detailId: null,
   openDetail: (id) => set({ detailId: id }),
   closeDetail: () => set({ detailId: null }),

@@ -359,6 +359,7 @@
             "kind": "slot"
           }
         ],
+        "attackRider": true,
         "verified": true
       },
       {
@@ -394,6 +395,7 @@
         ],
         "tag": "on melee hit",
         "alwaysPrepared": true,
+        "attackRider": true,
         "verified": true
       },
       {
@@ -451,6 +453,7 @@
           }
         ],
         "alwaysPrepared": true,
+        "attackRider": true,
         "verified": true
       },
       {
@@ -541,6 +544,7 @@
           }
         ],
         "tag": "on melee hit",
+        "attackRider": true,
         "verified": true
       },
       {
@@ -597,6 +601,7 @@
           }
         ],
         "tag": "STR save",
+        "attackRider": true,
         "verified": true
       },
       {
@@ -653,6 +658,7 @@
           }
         ],
         "tag": "WIS save",
+        "attackRider": true,
         "verified": true
       },
       {
@@ -917,6 +923,7 @@
             "kind": "slot"
           }
         ],
+        "attackRider": true,
         "verified": true
       },
       {
@@ -1085,6 +1092,7 @@
           }
         ],
         "tag": "on melee hit",
+        "attackRider": true,
         "verified": true
       },
       {
@@ -1253,7 +1261,8 @@
         "counterId": "channel-divinity",
         "spend": {
           "kind": "uses"
-        }
+        },
+        "attackRider": true
       },
       {
         "id": "feature:divine-sense",
@@ -1287,7 +1296,8 @@
         "spend": {
           "kind": "uses"
         },
-        "tag": "DEX save, DC 15"
+        "tag": "DEX save, DC 15",
+        "attackRider": true
       },
       {
         "id": "feature:draconic-flight",
@@ -1303,6 +1313,148 @@
         "counterId": "draconic-flight",
         "spend": {
           "kind": "uses"
+        }
+      }
+    ],
+    "weapons": [
+      {
+        "id": "weapon:the-arbiters-ward",
+        "name": "The Arbiter’s Ward",
+        "baseType": "Halberd",
+        "melee": true,
+        "proficient": true,
+        "magic": true,
+        "attunement": "not-attuned",
+        "damage": {
+          "dice": "1d10",
+          "type": "Slashing"
+        },
+        "range": {
+          "normal": 5
+        },
+        "properties": [
+          {
+            "name": "Heavy",
+            "text": "You have Disadvantage on attack rolls with a Heavy weapon if it’s a Melee weapon and your Strength score isn’t at least 13 or if it’s a Ranged weapon and your Dexterity score isn’t at least 13."
+          },
+          {
+            "name": "Reach",
+            "text": "A Reach weapon adds 5 feet to your reach when you attack with it, as well as when determining your reach for Opportunity Attacks with it."
+          },
+          {
+            "name": "Two-Handed",
+            "text": "A Two-Handed weapon requires two hands when you attack with it."
+          }
+        ],
+        "mastery": {
+          "name": "Cleave",
+          "text": "If you hit a creature with a melee attack roll using this weapon, you can make a melee attack roll with the weapon against a second creature within 5 feet of the first that is also within your reach. On a hit, the second creature takes the weapon's damage, but don't add your ability modifier to that damage unless that modifier is negative. You can make this extra attack only once per turn.",
+          "known": true
+        },
+        "description": "This halberd is made of a patterned steel, with a haft of reddish bronzewood. The swirling pattern on the axe head seems to glimmer in the sunlight.\n This item has 6 charges. You can take the Magic action and expend 1 charge to cast the Protection from Evil and Good spell. You must Concentrate on the spell like normal.\n Once the last charge has been expended, the halberd ceases to be magical. It can be re-enchanted with the Protection from Evil and Good spell at a lower cost than is usual for crafting magical items.\n Protection from Evil and Good\nLevel 1 Abjuration\nCasting Time: Action\nRange: Touch\nComponents: V, S, M (a flask of Holy Water worth 25+ GP, which the spell consumes)\nDuration: Concentration up to 10 minutes\nUntil the spell ends, one willing creature you touch is protected against creatures that are Aberrations, Celestials, Elementals, Fey, Fiends, or Undead. The protection grants several benefits.\nCreatures of those types have Disadvantage on attack rolls against the target.\nThe target also can’t be possessed by or gain the Charmed or Frightened conditions from them.\nIf the target is already possessed, Charmed, or Frightened by such a creature, the target has Advantage on any new saving throw against the relevant effect."
+      },
+      {
+        "id": "weapon:crossbow-heavy",
+        "name": "Crossbow, Heavy",
+        "baseType": "Crossbow, Heavy",
+        "melee": false,
+        "proficient": true,
+        "magic": false,
+        "damage": {
+          "dice": "1d10",
+          "type": "Piercing"
+        },
+        "range": {
+          "normal": 100,
+          "long": 400
+        },
+        "properties": [
+          {
+            "name": "Ammunition",
+            "text": "You can use a weapon that has the Ammunition property to make a ranged attack only if you have ammunition to fire from it. The type of ammunition required is specified with the weapon’s range. Each attack expends one piece of ammunition. Drawing the ammunition is part of the attack (you need a free hand to load a one-handed weapon). After a fight, you can spend 1 minute to recover half the ammunition (round down) you used in the fight; the rest is lost."
+          },
+          {
+            "name": "Heavy",
+            "text": "You have Disadvantage on attack rolls with a Heavy weapon if it’s a Melee weapon and your Strength score isn’t at least 13 or if it’s a Ranged weapon and your Dexterity score isn’t at least 13."
+          },
+          {
+            "name": "Loading",
+            "text": "You can fire only one piece of ammunition from a Loading weapon when you use an action, a Bonus Action, or a Reaction to fire it, regardless of the number of attacks you can normally make."
+          },
+          {
+            "name": "Range",
+            "text": "A Range weapon has a range in parentheses after the Ammunition or Thrown property. The range lists two numbers. The first is the weapon’s normal range in feet, and the second is the weapon’s long range. When attacking a target beyond normal range, you have Disadvantage on the attack roll. You can’t attack a target beyond the long range."
+          },
+          {
+            "name": "Two-Handed",
+            "text": "A Two-Handed weapon requires two hands when you attack with it."
+          }
+        ],
+        "mastery": {
+          "name": "Push",
+          "text": "If you hit a creature with this weapon, you can push the creature up to 10 feet straight away from yourself if it is Large or smaller.",
+          "known": false
+        }
+      },
+      {
+        "id": "weapon:halberd",
+        "name": "Halberd",
+        "baseType": "Halberd",
+        "melee": true,
+        "proficient": true,
+        "magic": false,
+        "damage": {
+          "dice": "1d10",
+          "type": "Slashing"
+        },
+        "range": {
+          "normal": 5
+        },
+        "properties": [
+          {
+            "name": "Heavy",
+            "text": "You have Disadvantage on attack rolls with a Heavy weapon if it’s a Melee weapon and your Strength score isn’t at least 13 or if it’s a Ranged weapon and your Dexterity score isn’t at least 13."
+          },
+          {
+            "name": "Reach",
+            "text": "A Reach weapon adds 5 feet to your reach when you attack with it, as well as when determining your reach for Opportunity Attacks with it."
+          },
+          {
+            "name": "Two-Handed",
+            "text": "A Two-Handed weapon requires two hands when you attack with it."
+          }
+        ],
+        "mastery": {
+          "name": "Cleave",
+          "text": "If you hit a creature with a melee attack roll using this weapon, you can make a melee attack roll with the weapon against a second creature within 5 feet of the first that is also within your reach. On a hit, the second creature takes the weapon's damage, but don't add your ability modifier to that damage unless that modifier is negative. You can make this extra attack only once per turn.",
+          "known": true
+        }
+      },
+      {
+        "id": "weapon:warhammer",
+        "name": "Warhammer",
+        "baseType": "Warhammer",
+        "melee": true,
+        "proficient": true,
+        "magic": false,
+        "damage": {
+          "dice": "1d8",
+          "type": "Bludgeoning",
+          "versatile": "1d10"
+        },
+        "range": {
+          "normal": 5
+        },
+        "properties": [
+          {
+            "name": "Versatile",
+            "text": "A Versatile weapon can be used with one or two hands. A damage value in parentheses appears with the property. The weapon deals that damage when used with two hands to make a melee attack. Two-handed damage: 1d10."
+          }
+        ],
+        "mastery": {
+          "name": "Push",
+          "text": "If you hit a creature with this weapon, you can push the creature up to 10 feet straight away from yourself if it is Large or smaller.",
+          "known": false
         }
       }
     ]

@@ -3,7 +3,8 @@ import { existsSync, readFileSync } from 'node:fs'
 import type { SeedData } from '../src/shared/types'
 import { createCatalog } from '../src/renderer/domain/catalog'
 import { abilityMod, proficiencyForLevel } from '../src/renderer/domain/derived'
-import { evalArithmetic, htmlToText, normalizeDdb, resolvePlaceholder, resolvePlaceholders, slugify } from './normalize'
+import { evalArithmetic, htmlToText, normalizeDdb, resolvePlaceholder, resolvePlaceholders, slugify, weaponKindKey } from './normalize'
+import { ATTACK_RIDER_FEATURES, ATTACK_RIDER_SPELLS } from './data/attack-riders'
 import { SeedSchema } from './seed-schema'
 
 const SEED_PATH = 'data/havel.character.json'
@@ -211,10 +212,98 @@ describe('feature tiles', () => {
 
 // Regeneration check: only runs where the (gitignored) raw payload exists.
 describe.skipIf(!existsSync(RAW_PATH))('regeneration from the raw payload', () => {
+  it('gives a second weapon of the same name its own id, so the catalog accepts the seed', () => {
+    const raw = JSON.parse(readFileSync(RAW_PATH, 'utf8'))
+    const warhammer = raw.data.inventory.find((i: { definition: { name: string } }) => i.definition.name === 'Warhammer')
+    raw.data.inventory.push(structuredClone(warhammer))
+    const { seed: twice } = normalizeDdb(raw)
+    expect(twice.character.weapons.filter((w) => w.name === 'Warhammer').map((w) => w.id)).toEqual(['weapon:warhammer', 'weapon:warhammer-2'])
+  })
+
   it('reproduces the committed seed exactly, with no warnings', () => {
     const { seed: fresh, warnings } = normalizeDdb(JSON.parse(readFileSync(RAW_PATH, 'utf8')))
     expect(warnings).toEqual([])
     expect(fresh).toEqual(seed)
+  })
+})
+
+describe('weapons', () => {
+  const weapon = (name: string) => seed.character.weapons.find((w) => w.name === name)
+
+  it('lists the four carried weapons, the magic one first', () => {
+    expect(seed.character.weapons.map((w) => w.name)).toEqual(['The Arbiter’s Ward', 'Crossbow, Heavy', 'Halberd', 'Warhammer'])
+    expect(seed.character.weapons.map((w) => w.id)).toEqual([
+      'weapon:the-arbiters-ward',
+      'weapon:crossbow-heavy',
+      'weapon:halberd',
+      'weapon:warhammer'
+    ])
+  })
+
+  it('reads melee or ranged, damage and range from the sheet', () => {
+    expect(weapon('Warhammer')).toMatchObject({ melee: true, damage: { dice: '1d8', type: 'Bludgeoning', versatile: '1d10' }, range: { normal: 5 } })
+    expect(weapon('Crossbow, Heavy')).toMatchObject({ melee: false, damage: { dice: '1d10', type: 'Piercing' }, range: { normal: 100, long: 400 } })
+    expect(weapon('Halberd')).toMatchObject({ melee: true, baseType: 'Halberd', damage: { dice: '1d10', type: 'Slashing' } })
+  })
+
+  it('the Arbiter’s Ward is a magic Halberd that needs attunement and has not got it', () => {
+    expect(weapon('The Arbiter’s Ward')).toMatchObject({ baseType: 'Halberd', magic: true, attunement: 'not-attuned' })
+    expect(weapon('Halberd')?.attunement).toBeUndefined()
+    expect(weapon('The Arbiter’s Ward')?.description).toContain('6 charges')
+    expect(weapon('Warhammer')?.description).toBeUndefined()
+  })
+
+  it('every weapon is proficient (the class modifiers list simple and martial weapons)', () => {
+    expect(seed.character.weapons.every((w) => w.proficient)).toBe(true)
+  })
+
+  it('masteries: only the Halberd kind is chosen on the sheet, so the Ward and Halberd have Cleave and Push is not available', () => {
+    expect(weapon('Halberd')?.mastery).toMatchObject({ name: 'Cleave', known: true })
+    expect(weapon('The Arbiter’s Ward')?.mastery).toMatchObject({ name: 'Cleave', known: true })
+    expect(weapon('Warhammer')?.mastery).toMatchObject({ name: 'Push', known: false })
+    expect(weapon('Crossbow, Heavy')?.mastery).toMatchObject({ name: 'Push', known: false })
+    // The mastery is a field of its own, not also an ordinary property.
+    expect(weapon('Halberd')?.properties.map((p) => p.name)).toEqual(['Heavy', 'Reach', 'Two-Handed'])
+  })
+
+  it('a level 5 Paladin knows at most two kinds of mastery', () => {
+    const kinds = new Set(seed.character.weapons.filter((w) => w.mastery?.known).map((w) => weaponKindKey(w.baseType)))
+    expect(kinds.size).toBeLessThanOrEqual(2)
+  })
+
+  it('"Graze (Greatsword)" is chosen on the sheet but no Greatsword is carried: a deliberate tripwire, so a new Greatsword shows Graze as known', () => {
+    expect(seed.character.weapons.some((w) => weaponKindKey(w.baseType) === weaponKindKey('Greatsword'))).toBe(false)
+  })
+
+  it('the Versatile property carries its two-handed dice, and rules text has no markup or reference tags', () => {
+    expect(weapon('Warhammer')?.properties[0]).toMatchObject({ name: 'Versatile' })
+    expect(weapon('Warhammer')?.properties[0]?.text).toContain('1d10')
+    expect(JSON.stringify(seed.character.weapons)).not.toMatch(/\[\/?[a-z]+\]|<\/?[a-z]/i)
+    expect(weapon('Halberd')?.properties.find((p) => p.name === 'Heavy')?.text).toContain('Disadvantage on attack rolls')
+  })
+
+  it('kinds compare regardless of word order, so "Crossbow, Heavy" is the Heavy Crossbow', () => {
+    expect(weaponKindKey('Crossbow, Heavy')).toBe(weaponKindKey('Heavy Crossbow'))
+    expect(weaponKindKey('Halberd')).not.toBe(weaponKindKey('Glaive'))
+  })
+
+  it('every rider id the importer is told about exists and is flagged, and only those', () => {
+    const flaggedSpells = seed.character.spells.filter((s) => s.attackRider).map((s) => s.id)
+    const flaggedFeatures = seed.character.features.filter((f) => f.attackRider).map((f) => f.id)
+    expect(flaggedSpells.sort()).toEqual([...ATTACK_RIDER_SPELLS].sort())
+    expect(flaggedFeatures.sort()).toEqual([...ATTACK_RIDER_FEATURES].sort())
+  })
+
+  it('strips D&D Beyond reference tags, keeping the display text after a semicolon', () => {
+    expect(htmlToText('<p>[rules]Disadvantage[/rules] and [action]Opportunity Attack;Opportunity Attacks[/action] ([wprop]Thrown[/wprop])</p>')).toBe(
+      'Disadvantage and Opportunity Attacks (Thrown)'
+    )
+  })
+
+  it('the schema rejects a weapon with a malformed damage die', () => {
+    const bad = structuredClone(seed)
+    bad.character.weapons[0]!.damage.dice = 'lots'
+    expect(SeedSchema.safeParse(bad).success).toBe(false)
   })
 })
 

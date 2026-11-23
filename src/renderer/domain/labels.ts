@@ -1,4 +1,4 @@
-import type { CastTime, Payment, Role, SpellSource } from '@shared/types'
+import type { CastTime, Payment, Role, SpellSource, Weapon } from '@shared/types'
 import { roman } from './derived'
 
 /** Display vocabulary, defined once. Typed as Records so a new role or cast time is a compile error until it is named. */
@@ -26,6 +26,12 @@ export const SOURCE_LABEL: Record<SpellSource, string> = {
   feature: 'Feature',
   item: 'Item',
   cantrip: 'Cantrip'
+}
+
+/** A weapon that requires attunement: whether the character has it. */
+export const ATTUNEMENT_LABEL: Record<NonNullable<Weapon['attunement']>, string> = {
+  attuned: 'Attuned',
+  'not-attuned': 'Needs attunement (not attuned)'
 }
 
 /** The short form of a level, for chips. */

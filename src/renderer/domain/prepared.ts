@@ -25,7 +25,7 @@ export function isUsableUnprepared(spell: Spell): boolean {
 }
 
 /** Cantrips and always-prepared spells need no preparing; everything else must be in the chosen set. */
-export function isPrepared(state: PlayState, spell: Spell): boolean {
+export function isPrepared(state: Pick<PlayState, 'prepared'>, spell: Spell): boolean {
   return spell.level === 0 || spell.alwaysPrepared === true || state.prepared.includes(spell.id)
 }
 

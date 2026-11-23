@@ -1,4 +1,4 @@
-import type { Feature, Spell } from '@shared/types'
+import type { Feature, Spell, Weapon, WeaponMastery } from '@shared/types'
 import type { Catalog } from './catalog'
 import { CAST_LABEL } from './labels'
 
@@ -49,3 +49,31 @@ export function describeCastTime(thing: Pick<Spell, 'castTime' | 'castingNote'> 
   if ('timing' in thing && thing.timing) return `${base}, ${thing.timing}`
   return base
 }
+
+/** "Magic melee weapon, Halberd". */
+export function describeWeaponKind(weapon: Weapon): string {
+  const reach = weapon.melee ? 'melee' : 'ranged'
+  const label = weapon.magic ? `Magic ${reach}` : weapon.melee ? 'Melee' : 'Ranged'
+  return `${label} weapon, ${weapon.baseType}`
+}
+
+export type MasteryTone = 'mastery' | 'muted'
+
+/** How a weapon's mastery reads: lit when the character chose it, struck through ("not mastered") when not. Never hidden. */
+export function describeMastery(mastery: WeaponMastery): { tone: MasteryTone; label: string; tooltip: string } {
+  return mastery.known
+    ? { tone: 'mastery', label: mastery.name, tooltip: mastery.text }
+    : {
+        tone: 'muted',
+        label: `${mastery.name}, not mastered`,
+        tooltip: `You have not chosen the ${mastery.name} mastery for this kind of weapon. ${mastery.text}`
+      }
+}
+
+/** The non-empty lines of a multi-line text, one paragraph each. */
+export function paragraphsOf(text: string | undefined): string[] {
+  return text ? text.split('\n').filter((line) => line.trim() !== '') : []
+}
+
+/** "1 spell" / "3 spells". */
+export const plural = (n: number, one: string, many: string): string => `${n} ${n === 1 ? one : many}`

@@ -90,3 +90,22 @@ describe('remembered filters', () => {
     expect(useUiStore.getState().filters.intents).toEqual(['enemies'])
   })
 })
+
+describe('stage tab', () => {
+  it('opens on the spells tab every launch and is never written to storage', async () => {
+    const storage = fakeStorage()
+    const { useUiStore } = await loadStore(storage)
+    expect(useUiStore.getState().stageTab).toBe('spells')
+    useUiStore.getState().setStageTab('attacks')
+    expect(useUiStore.getState().stageTab).toBe('attacks')
+    expect(storage.writes).toEqual([])
+  })
+
+  it('keeps the chosen tab and the filters when settings is opened and closed', async () => {
+    const { useUiStore } = await loadStore(fakeStorage())
+    useUiStore.getState().setStageTab('attacks')
+    useUiStore.getState().toggleSettings()
+    useUiStore.getState().toggleSettings()
+    expect(useUiStore.getState().stageTab).toBe('attacks')
+  })
+})

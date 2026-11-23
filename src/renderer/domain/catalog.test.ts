@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { SeedData } from '@shared/types'
 import { seed } from '@/data/character'
 import { createCatalog } from './catalog'
-import { bless, guidance, layOnHands, protection, spell, testCounters } from './testing'
+import { bless, guidance, layOnHands, protection, spell, testCounters, weapon } from './testing'
 
 function seedWith(spells: SeedData['character']['spells'], seededUsed: Record<string, number> = {}): SeedData {
   const base = createCatalog({ ...seed }).character
@@ -69,5 +69,35 @@ describe('createCatalog', () => {
 
   it('rejects seededUsed for an unknown counter', () => {
     expect(() => createCatalog(seedWith([guidance, protection], { ghost: 1 }))).toThrow(/seededUsed/)
+  })
+})
+
+describe('weapons', () => {
+  const withWeapons = (weapons: SeedData['character']['weapons']): SeedData => {
+    const base = seedWith([bless])
+    return { ...base, character: { ...base.character, weapons } }
+  }
+
+  it('looks a weapon up by id, and names it', () => {
+    const halberd = weapon({ id: 'weapon:halberd', name: 'Halberd' })
+    const catalog = createCatalog(withWeapons([halberd]))
+    expect(catalog.weaponById('weapon:halberd')).toBe(halberd)
+    expect(catalog.weaponById('weapon:nope')).toBeUndefined()
+    expect(catalog.nameOf('weapon:halberd')).toBe('Halberd')
+    expect(catalog.weapons).toEqual([halberd])
+  })
+
+  it('rejects duplicate weapon ids', () => {
+    expect(() => createCatalog(withWeapons([weapon(), weapon()]))).toThrow(/duplicate weapon id/)
+  })
+
+  it('rejects a weapon whose data is malformed, so a stale seed fails at startup and not in a card', () => {
+    const noProperties = { ...weapon(), properties: undefined } as unknown as ReturnType<typeof weapon>
+    expect(() => createCatalog(withWeapons([noProperties]))).toThrow(/malformed/)
+    expect(() => createCatalog(withWeapons([weapon({ damage: { dice: 'lots', type: 'Slashing' } })]))).toThrow(/malformed/)
+  })
+
+  it('the real seed carries its weapons', () => {
+    expect(createCatalog(seed).weapons.map((w) => w.name)).toContain('Warhammer')
   })
 })

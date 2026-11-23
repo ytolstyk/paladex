@@ -1,12 +1,13 @@
 import { createCatalog } from '../src/renderer/domain/catalog'
 import { abilityMod, proficiencyForLevel } from '../src/renderer/domain/derived'
 import { isChoosable } from '../src/renderer/domain/prepared'
-import type { Character, CounterDef, Feature, OtherFeature, SeedData, Spell } from '../src/shared/types'
+import type { Character, CounterDef, Feature, OtherFeature, SeedData, Spell, Weapon } from '../src/shared/types'
 import { componentsFromCode, componentsFromDdb } from './components'
+import { ATTACK_RIDER_FEATURES, ATTACK_RIDER_SPELLS } from './data/attack-riders'
 import { AUTHORED_SPELLS } from './data/authored-spells'
 import { FEATURE_OVERLAYS } from './data/feature-overlay'
 import { SPELL_OVERLAY, type SpellOverlay } from './data/spell-overlay'
-import { SeedSchema } from './seed-schema'
+import { DICE_PATTERN, SeedSchema } from './seed-schema'
 
 // The DDB payload is large, undocumented and changes shape; this module reads only what it needs and is tolerant of the rest.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -141,8 +142,17 @@ export function resolvePlaceholders(text: string, ctx: PlaceholderContext): stri
 
 const ENTITIES: Record<string, string> = { '&nbsp;': ' ', '&amp;': '&', '&rsquo;': '’', '&lsquo;': '‘', '&quot;': '"', '&ndash;': '–', '&mdash;': '—', '&times;': '×', '&lt;': '<', '&gt;': '>' }
 
+/**
+ * D&D Beyond marks cross-references in text as `[rules]Disadvantage[/rules]`, `[wprop]Thrown[/wprop]` or
+ * `[action]Opportunity Attack;Opportunity Attacks[/action]` (the part after `;` is what is displayed). Any such pair is
+ * replaced by its display text.
+ */
+function stripDdbTags(text: string): string {
+  return text.replace(/\[([a-z]{1,20})\]([^[\]]{0,200})\[\/\1\]/gi, (_match, _tag: string, inner: string) => inner.slice(inner.lastIndexOf(';') + 1))
+}
+
 export function htmlToText(html: string): string {
-  return html
+  return stripDdbTags(html)
     .replace(/<\/(p|li|h\d|div|tr)>/gi, '\n')
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<[^<>]{0,2000}>/g, '')
@@ -438,6 +448,143 @@ function buildFeatures(data: Json, ctx: PlaceholderContext, warnings: string[]):
   return features
 }
 
+// ───────────────────────── weapons ─────────────────────────
+
+/** The 2024 weapon mastery properties. The sheet lists the one a weapon has among its ordinary properties. */
+const MASTERY_NAMES = ['Cleave', 'Graze', 'Nick', 'Push', 'Sap', 'Slow', 'Topple', 'Vex']
+/** DDB's `attackType` on a weapon definition. */
+const DDB_ATTACK_TYPE = { melee: 1, ranged: 2 } as const
+/** DDB weapon category ids. Only martial (2) is seen in the reference sheet; an id outside this list is warned about. */
+const WEAPON_CATEGORY_PROFICIENCY: Record<number, string> = { 1: 'simple-weapons', 2: 'martial-weapons' }
+/** A melee weapon prints 5 ft on the sheet; a ranged one prints its distances. */
+const DEFAULT_WEAPON_RANGE_FT = 5
+
+/** Compares weapon kinds regardless of word order or punctuation: "Crossbow, Heavy" and "Heavy Crossbow" are one kind. */
+export function weaponKindKey(name: string): string {
+  return name.toLowerCase().split(/[^a-z]+/).filter(Boolean).sort().join(' ')
+}
+
+/** One chosen mastery for one kind of weapon. Built here and read in `parseWeaponProperties`, so both sides agree. */
+const masteryKey = (mastery: string, kind: string): string => `${mastery}|${weaponKindKey(kind)}`
+
+/** The masteries the sheet lists as chosen: feat actions named like "Cleave (Halberd)". */
+function chosenMasteries(data: Json): Set<string> {
+  const chosen = new Set<string>()
+  for (const action of data.actions?.feat ?? []) {
+    const match = /^([A-Za-z]+) \((.+)\)$/.exec(action.name ?? '')
+    const [, mastery, kind] = match ?? []
+    if (mastery && kind && MASTERY_NAMES.includes(mastery)) chosen.add(masteryKey(mastery, kind))
+  }
+  return chosen
+}
+
+/** Proficiency ids the character has (`martial-weapons`, `heavy-armor`...), from every source that applies. */
+function proficiencyIds(data: Json): Set<string> {
+  return new Set(
+    activeModifiers(data)
+      .filter((modifier) => modifier.type === 'proficiency')
+      .map((modifier) => modifier.subType as string)
+  )
+}
+
+interface WeaponDamage {
+  dice: string
+  type: string
+  melee: boolean
+}
+
+function parseWeaponDamage(def: Json, warnings: string[]): WeaponDamage | null {
+  const dice: unknown = def.damage?.diceString
+  const melee = def.attackType === DDB_ATTACK_TYPE.melee
+  if (typeof dice !== 'string' || !DICE_PATTERN.test(dice) || !def.damageType || (!melee && def.attackType !== DDB_ATTACK_TYPE.ranged)) {
+    warnings.push(`Weapon "${def.name}" skipped: it has no usable damage or attack type`)
+    return null
+  }
+  return { dice, type: def.damageType, melee }
+}
+
+interface WeaponProperties {
+  properties: Weapon['properties']
+  mastery?: Weapon['mastery']
+  /** Two-handed dice of a Versatile weapon. */
+  versatile?: string
+}
+
+/** Splits the sheet's property list into ordinary properties, the mastery (with whether it was chosen), and Versatile's dice. */
+function parseWeaponProperties(def: Json, ctx: PlaceholderContext, chosen: Set<string>, warnings: string[]): WeaponProperties {
+  const result: WeaponProperties = { properties: [] }
+  for (const prop of def.properties ?? []) {
+    const text = htmlToText(resolvePlaceholders(prop.description ?? '', ctx))
+    if (MASTERY_NAMES.includes(prop.name)) {
+      result.mastery = { name: prop.name, text, known: chosen.has(masteryKey(prop.name, def.type ?? def.name)) }
+    } else if (prop.name === 'Versatile' && typeof prop.notes === 'string' && DICE_PATTERN.test(prop.notes)) {
+      result.versatile = prop.notes
+      result.properties.push({ name: prop.name, text: `${text} Two-handed damage: ${prop.notes}.` })
+    } else {
+      if (prop.name === 'Versatile') warnings.push(`Weapon "${def.name}" has a Versatile property without valid damage dice in its notes`)
+      result.properties.push({ name: prop.name, text })
+    }
+  }
+  return result
+}
+
+/** A repeated name (two Daggers) still needs a unique id, or the catalog check would refuse the whole seed. */
+function uniqueWeaponId(slug: string, seen: Map<string, number>): string {
+  const count = (seen.get(slug) ?? 0) + 1
+  seen.set(slug, count)
+  return count === 1 ? `weapon:${slug}` : `weapon:${slug}-${count}`
+}
+
+function buildWeapons(data: Json, ctx: PlaceholderContext, warnings: string[]): Weapon[] {
+  const chosen = chosenMasteries(data)
+  const proficiencies = proficiencyIds(data)
+  const seenSlugs = new Map<string, number>()
+  const weapons: Weapon[] = []
+
+  for (const item of data.inventory ?? []) {
+    const def = item.definition
+    if (def?.filterType !== 'Weapon') continue
+    const damage = parseWeaponDamage(def, warnings)
+    if (!damage) continue
+    const { properties, mastery, versatile } = parseWeaponProperties(def, ctx, chosen, warnings)
+
+    const category = WEAPON_CATEGORY_PROFICIENCY[def.categoryId as number]
+    if (!category) warnings.push(`Weapon "${def.name}" has an unknown category ${String(def.categoryId)}: shown as not proficient`)
+    const normal: number = def.range ?? DEFAULT_WEAPON_RANGE_FT
+    const description = def.magic || def.isHomebrew ? htmlToText(resolvePlaceholders(def.description ?? '', ctx)) : ''
+
+    weapons.push({
+      id: uniqueWeaponId(slugify(def.name), seenSlugs),
+      name: def.name,
+      baseType: def.type ?? def.name,
+      melee: damage.melee,
+      proficient: category !== undefined && proficiencies.has(category),
+      magic: Boolean(def.magic),
+      ...(def.canAttune ? { attunement: item.isAttuned ? ('attuned' as const) : ('not-attuned' as const) } : {}),
+      damage: { dice: damage.dice, type: damage.type, ...(versatile ? { versatile } : {}) },
+      range: { normal, ...(def.longRange && def.longRange !== normal ? { long: def.longRange as number } : {}) },
+      properties,
+      ...(mastery ? { mastery } : {}),
+      ...(description ? { description } : {})
+    })
+  }
+  // Magic first (the item you would reach for), then by name.
+  return weapons.sort((a, b) => Number(b.magic) - Number(a.magic) || a.name.localeCompare(b.name))
+}
+
+/** Flags what `attack-riders.ts` lists. A listed id the sheet does not produce is an error: a rename must not drop a rider silently. */
+function markAttackRiders(spells: Spell[], features: Feature[]): { spells: Spell[]; features: Feature[] } {
+  const missing = [
+    ...ATTACK_RIDER_SPELLS.filter((id) => !spells.some((s) => s.id === id)),
+    ...ATTACK_RIDER_FEATURES.filter((id) => !features.some((f) => f.id === id))
+  ]
+  if (missing.length > 0) throw new Error(`scripts/data/attack-riders.ts lists ids the sheet does not produce: ${missing.join(', ')}`)
+  return {
+    spells: spells.map((s) => (ATTACK_RIDER_SPELLS.includes(s.id) ? { ...s, attackRider: true } : s)),
+    features: features.map((f) => (ATTACK_RIDER_FEATURES.includes(f.id) ? { ...f, attackRider: true } : f))
+  }
+}
+
 // ───────────────────────── other features ─────────────────────────
 
 // Homebrew with no tile. This is an allowlist: a new action on the sheet is not shown until it is listed here.
@@ -477,7 +624,8 @@ export function normalizeDdb(payload: Json): NormalizeResult {
   const ctx: PlaceholderContext = { level, proficiency, mods }
 
   const { counters, seededUsed } = buildCounters(data, level, proficiency, mods)
-  const { spells, prepared } = buildSpells(data, ctx, warnings)
+  const { spells: builtSpells, prepared } = buildSpells(data, ctx, warnings)
+  const { spells, features } = markAttackRiders(builtSpells, buildFeatures(data, ctx, warnings))
 
   const character: Character = {
     name: data.name,
@@ -492,7 +640,8 @@ export function normalizeDdb(payload: Json): NormalizeResult {
     ac: armorClass(data, abilities),
     spells,
     counters,
-    features: buildFeatures(data, ctx, warnings)
+    features,
+    weapons: buildWeapons(data, ctx, warnings)
   }
   // Parsing our own output means any drift between the importer and the types fails here, not at runtime in the app.
   const seed = SeedSchema.parse({ character, prepared, seededUsed, otherFeatures: buildOtherFeatures(data, ctx) })

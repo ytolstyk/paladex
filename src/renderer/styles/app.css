@@ -461,6 +461,127 @@ button {
   animation: pip-kindle 0.5s var(--ease-out);
 }
 
+/* ───────── Stage tabs and the Weapons & attacks view ───────── */
+.stage-tabs {
+  position: sticky;
+  top: calc(-1 * var(--space-4));
+  z-index: 3; /* above the filter bar (2) and its panel's anchor */
+  box-sizing: border-box;
+  height: var(--tabs-height);
+  margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-5)) 0 calc(-1 * var(--space-3));
+  padding: var(--space-3) var(--space-5) 0 var(--space-3);
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  background: var(--oak);
+  border-bottom: 1px solid var(--rule);
+}
+.stage-tab {
+  min-height: 30px;
+  padding: 0 var(--space-4);
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  color: var(--bone-dim);
+  font-family: var(--font-display);
+  font-size: var(--step-0);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.stage-tab:hover {
+  color: var(--bone);
+}
+.stage-tab[aria-selected='true'] {
+  margin-bottom: -1px; /* sits on the strip's rule, so the chosen tab opens into the view below */
+  background: var(--vellum);
+  border-color: var(--rule-strong);
+  border-top: 2px solid var(--second-lit);
+  color: var(--second-lit);
+  font-weight: 700;
+}
+.stage-tabs ~ .notice {
+  margin-top: var(--space-3);
+  margin-bottom: 0;
+}
+.stage-panel {
+  padding-top: var(--space-4);
+}
+.attack-strip {
+  display: grid;
+  gap: 2px;
+  margin-bottom: var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  background: var(--tint-dim);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--second-lit);
+}
+/* Two classes: `.spell-level__cards` is declared later and would win a tie. */
+.spell-level__cards.weapon-cards {
+  /* wider than a spell card: a weapon shows two big numbers and a row of properties */
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
+}
+.weapon-card {
+  align-items: center;
+}
+.card-stat {
+  display: grid;
+  justify-items: center;
+  min-width: 3.2em;
+  line-height: 1.1;
+  cursor: help;
+}
+.card-stat__label {
+  color: var(--bone-dim);
+  font-size: 0.72rem;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+}
+.card-stat__value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--step-1);
+  color: var(--tincture-lit);
+}
+.card-stat__sub {
+  display: block;
+  color: var(--bone-dim);
+  font-size: 0.78rem;
+  text-align: center;
+}
+.weapon-card__magic {
+  color: var(--third-lit);
+  font-style: italic;
+}
+.weapon-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.weapon-prop {
+  padding: 0 6px;
+  border: 1px solid var(--rule-strong);
+  color: var(--bone-dim);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  cursor: help;
+}
+.weapon-prop[data-tone='mastery'] {
+  border-color: var(--second-lit);
+  background: var(--tint-dim);
+  color: var(--second-lit);
+  font-weight: 600;
+}
+.weapon-prop[data-tone='muted'] {
+  border-style: dashed;
+  text-decoration: line-through;
+}
+.weapon-prop[data-tone='warn'] {
+  border-color: var(--gules-lit);
+  color: var(--gules-lit);
+  font-weight: 600;
+}
+
 /* ───────── Spells ───────── */
 .stage {
   overflow-y: auto;
@@ -1191,6 +1312,11 @@ button {
 }
 .tag:hover {
   background: var(--third-lit);
+}
+/* The filter bar sticks just below the tab strip. Its usual pull into the stage's padding is the tab strip's job now. */
+.stage-panel .filter-bar {
+  top: calc(var(--tabs-height) - var(--space-4));
+  margin-top: 0;
 }
 /* Anchored to the (sticky) filter bar, not to its button: the button can wrap onto another row in a narrow window */
 .filter-panel {

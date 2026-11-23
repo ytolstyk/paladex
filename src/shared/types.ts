@@ -63,6 +63,8 @@ export interface Spell {
   /** Short save/attack tag, e.g. "CHA save", "on melee hit". */
   tag?: string
   alwaysPrepared?: boolean
+  /** Works with a weapon attack (a Smite, Hunter's Mark): the Weapons & attacks tab lists it. Set from `scripts/data/attack-riders.ts`. */
+  attackRider?: boolean
   /** Mechanics checked against the DDB spell page. */
   verified: boolean
 }
@@ -108,6 +110,51 @@ export interface Feature {
   /** `uses`: one use per activation. `pool`: you choose an amount, up to `maxPerUse` (default: all that is left). The importer sets no cap today; it is set by hand in the seed. */
   spend: { kind: 'uses' } | { kind: 'pool'; maxPerUse?: number }
   tag?: string
+  /** Works with an attack (Vow of Enmity, Breath Weapon): the Weapons & attacks tab lists it. Set from `scripts/data/attack-riders.ts`. */
+  attackRider?: boolean
+}
+
+/** A weapon property (Heavy, Reach, Versatile...) with the sheet's rules text, plain text. */
+export interface WeaponProperty {
+  name: string
+  text: string
+}
+
+/** The 2024 weapon masteries. A character can use one only for the weapon kinds they chose (`known`). */
+export interface WeaponMastery {
+  name: string
+  /** Rules text from the sheet. */
+  text: string
+  /** The sheet lists a chosen mastery for this weapon's base type. As of the last import: masteries can change on a long rest. */
+  known: boolean
+}
+
+/**
+ * A weapon carried, from the sheet's inventory. Attack numbers are not stored: `domain/attacks.ts` derives them from the
+ * abilities, so they stay right if a score changes. There is deliberately no "equipped" flag: nothing in the app can change it
+ * and several weapons are marked equipped at once.
+ */
+export interface Weapon {
+  /** Stable id, `weapon:<slug>`; a repeated name gets `-2`, `-3` in inventory order. */
+  id: string
+  name: string
+  /** The base weapon kind ("Halberd"); a homebrew or magic weapon shares its base's. Masteries are chosen per base type. */
+  baseType: string
+  /** Melee (`attackType` 1 on the sheet) or ranged (2). A Thrown melee weapon stays melee. */
+  melee: boolean
+  proficient: boolean
+  /** As of the last import: a weapon that stops being magical when its charges run out will not update. */
+  magic: boolean
+  /** Present only when the item requires attunement. */
+  attunement?: 'attuned' | 'not-attuned'
+  damage: { dice: string; type: string; /** Two-handed dice of a Versatile weapon. */ versatile?: string }
+  /** Feet, as printed on the sheet (a melee weapon says 5/5). Reach is derived from the Reach property, not from this. */
+  range: { normal: number; long?: number }
+  /** Everything but the mastery, in the sheet's order. */
+  properties: WeaponProperty[]
+  mastery?: WeaponMastery
+  /** The item's own description, plain text, only for magic or homebrew items. */
+  description?: string
 }
 
 export interface Character {
@@ -124,6 +171,7 @@ export interface Character {
   spells: Spell[]
   counters: CounterDef[]
   features: Feature[]
+  weapons: Weapon[]
 }
 
 /** Everything the app needs to start from: the character plus values that seed from the sheet, not "fully rested". */
