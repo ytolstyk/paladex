@@ -1684,14 +1684,12 @@ button.vital:hover .vital__value {
   font-family: var(--font-display);
   font-size: 0.82rem;
 }
-.dial__hint {
-  font-family: var(--font-text);
-  font-size: 0.82rem;
-  color: var(--bone-dim);
-  font-style: italic;
-}
 .dial__caption .btn--action {
   margin-top: 3px;
+}
+/* Nothing to clear: keep the button's space so the card does not change height as the dial is set */
+.dial__caption .btn--action:disabled {
+  visibility: hidden;
 }
 
 /* Bardic Inspiration: a die that lights up while it is held */
@@ -1754,16 +1752,6 @@ button.vital:hover .vital__value {
   font-size: 0.82rem;
   font-weight: 500;
   line-height: 1.1;
-}
-.inspiration__status {
-  color: var(--bone-dim);
-  font-size: 0.8rem;
-  font-style: italic;
-  line-height: 1.15;
-}
-.inspiration[data-held] .inspiration__status {
-  color: var(--third-lit);
-  font-style: normal;
 }
 .inspiration__sizes {
   display: flex;

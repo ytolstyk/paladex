@@ -39,9 +39,6 @@ export function InspirationDie(): React.JSX.Element {
     <div className="inspiration" data-held={held || undefined} role="group" aria-label="Bardic Inspiration">
       <DieFace size={die} held={held} />
       <h3 className="inspiration__title">Bardic Inspiration</h3>
-      <p className="inspiration__status" aria-live="polite">
-        {held ? `Add a d${die} to one d20 roll` : 'Not held'}
-      </p>
       <div className="inspiration__sizes" role="group" aria-label="Die size">
         {INSPIRATION_DICE.map((size) => (
           <button

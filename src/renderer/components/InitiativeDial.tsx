@@ -161,13 +161,9 @@ export function InitiativeDial(): React.JSX.Element {
         </button>
         <span className="dial__caption">
           Initiative
-          {initiative !== null ? (
-            <button type="button" className="btn btn--action" onClick={() => save(null)}>
-              clear
-            </button>
-          ) : (
-            <span className="dial__hint">turn the dial</span>
-          )}
+          <button type="button" className="btn btn--action" disabled={initiative === null} onClick={() => save(null)}>
+            clear
+          </button>
         </span>
         <button type="button" className="step" aria-label="Raise initiative by one" onClick={() => save(stepInitiative(initiative, 1))}>
           +1
