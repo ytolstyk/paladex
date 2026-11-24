@@ -351,6 +351,139 @@ button {
   transform: scale(0.94);
 }
 
+/* ───────── Spell timers ───────── */
+.timer-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.timer {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 2px var(--space-2);
+  padding-left: 10px;
+  border-left: 3px solid var(--iron);
+}
+.timer[data-soon] {
+  border-left-color: var(--third);
+}
+.timer__name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.timer__left {
+  font-variant-numeric: tabular-nums;
+  color: var(--bone);
+}
+.timer[data-soon] .timer__left {
+  color: var(--third-lit);
+  font-weight: 600;
+}
+/* A thin track; the fill is scaled from the left, so a tick moves a compositor layer and lays nothing out */
+.timer__bar {
+  grid-column: 1 / -1;
+  display: block;
+  height: 4px;
+  overflow: hidden;
+  background: var(--vellum-deep);
+  border-radius: 2px;
+}
+.timer__fill {
+  display: block;
+  height: 100%;
+  background: var(--second);
+  transform-origin: left center;
+  transition: transform 0.3s var(--ease-out);
+}
+.timer[data-soon] .timer__fill {
+  background: var(--third);
+}
+.timer-panel__note {
+  margin-top: var(--space-3);
+  font-size: var(--step--1);
+}
+.spell-card__timer {
+  font-variant-numeric: tabular-nums;
+  color: var(--second-lit);
+}
+.spell-card__timer[data-soon] {
+  color: var(--third-lit);
+  font-weight: 600;
+}
+
+/* ───────── Recently cast and history ───────── */
+.recent {
+  display: grid;
+  gap: 4px;
+  margin-bottom: var(--space-3);
+}
+.recent__row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+}
+.recent__title {
+  font-family: var(--font-display);
+  font-size: var(--step-0);
+  font-weight: 500;
+  color: var(--second-lit);
+}
+.history summary {
+  cursor: pointer;
+  width: max-content;
+  color: var(--bone);
+  font-size: var(--step--1);
+}
+.history__list {
+  display: grid;
+  gap: 2px;
+  max-height: 14rem;
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-3);
+  overflow-y: auto;
+  list-style: none;
+  background: var(--vellum-deep);
+  border: 1px solid var(--gold-dim);
+}
+.history__use {
+  display: grid;
+  grid-template-columns: 5.5em 1fr auto;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+.history__time {
+  font-variant-numeric: tabular-nums;
+}
+.history__break {
+  margin: 4px 0;
+  padding-top: 2px;
+  border-top: 1px dashed var(--gold-dim);
+  font-size: var(--step--1);
+  font-style: italic;
+  color: var(--third-lit);
+}
+
+/* ───────── Timer settings ───────── */
+.timer-settings {
+  display: grid;
+  gap: var(--space-3);
+}
+.timer-settings__row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.timer-settings__field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 /* ───────── Turn panel ───────── */
 .turn-line {
   display: flex;

@@ -3,6 +3,7 @@ import type { PlayState } from '@shared/schema'
 import type { Catalog } from './catalog'
 import { isChoosable } from './prepared'
 import { clamp, clampUsed } from './slots'
+import { settleTimers } from './timers'
 
 export interface Reconciled {
   state: PlayState
@@ -17,7 +18,7 @@ function sameJson(a: unknown, b: unknown): boolean {
 /**
  * Make a saved state agree with the current catalog. A save outlives the seed it was made against
  * (a re-import, a level-up, a removed spell), so every reference is checked rather than trusted:
- * slot/counter usage is clamped, unknown ids (prepared, favorites, roles) are dropped, and maximum hit points and armor class follow the seed
+ * slot/counter usage is clamped, unknown ids (prepared, favorites, roles, timers) are dropped, and maximum hit points and armor class follow the seed
  * (nothing edits them yet; when editing arrives they become overrides on top of it).
  */
 export function reconcile(saved: PlayState, catalog: Catalog): Reconciled {
@@ -48,7 +49,8 @@ export function reconcile(saved: PlayState, catalog: Catalog): Reconciled {
     tempHp: Math.max(0, saved.vitals.tempHp)
   }
 
-  const state: PlayState = { ...saved, slotsUsed, counters, prepared, favorites, concentration, roleOverrides, vitals }
+  // Timers for a spell that is gone, a second one for the same spell, or a concentration spell no longer concentrated on, are dropped.
+  const state = settleTimers({ ...saved, slotsUsed, counters, prepared, favorites, concentration, roleOverrides, vitals }, catalog)
   return { state, repaired: !sameJson(state, saved) }
 }
 

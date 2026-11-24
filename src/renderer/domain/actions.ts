@@ -7,6 +7,7 @@ import { abilityMod, concentrationDc, signed } from './derived'
 import { usedAfterRest, type RestKind } from './rests'
 import { isChoosable } from './prepared'
 import { clamp, slotKey, slotsRemaining, slotsUsedAt } from './slots'
+import { elapse, endedText, REST_SECONDS, settleTimers, startTimer } from './timers'
 import { applyToTurn, isTurnClear, turnActionOf, turnWarnings, TURN_STEP_FLAG, withStep, type TurnWarning } from './turn'
 import { COALESCE_MS, undoKey, type UndoMeta } from './undo'
 
@@ -94,6 +95,7 @@ export function castSpell(
   if (!payment) return null
 
   const concentration = swapConcentration(pay(state, payment), spell)
+  const withTimer = settleTimers(startTimer(concentration.state, spell), catalog)
   const entry: LogEntry = {
     t: now,
     kind: 'cast',
@@ -105,7 +107,7 @@ export function castSpell(
   const action = turnActionOf(spell, payment.kind === 'slot')
   const warnings = turnWarnings(state.turn, action)
   return {
-    state: appendLog({ ...concentration.state, turn: applyToTurn(state.turn, { ...action, isSpellCast: true }) }, entry),
+    state: appendLog({ ...withTimer, turn: applyToTurn(state.turn, { ...action, isSpellCast: true }) }, entry),
     undo: { kind: 'cast' },
     entry,
     ...(warnings.length > 0 ? { warnings } : {})
@@ -141,11 +143,45 @@ export function adjustSlot(
   }
 }
 
-/** Start a new turn. A no-op (and so no history, write or lost undo step) when the turn is already clear. */
-export function startNewTurn(state: PlayState, now: number): ActionResult | null {
-  if (isTurnClear(state.turn)) return null
+/** One `timer-end` log entry for each spell whose timer ran out, so an expiry missed in the toast is still in the log (the footer shows it). */
+function appendEnded(state: PlayState, ended: readonly string[], now: number): PlayState {
+  if (ended.length === 0) return state
+  const entries = ended.map((spellId): LogEntry => ({ t: now, kind: 'timer-end', spellId }))
+  return { ...state, log: [...state.log, ...entries].slice(-LOG_CAP) }
+}
+
+/**
+ * Start a new turn: clears the turn and takes `turnSeconds` off every running spell timer, ending the ones that run out. It is a
+ * no-op (no history, write or lost undo step) only when the turn is clear and nothing is counting down. When it only ticks timers
+ * (the turn was already clear) a run of presses is one undo step and one log line, like a run of dial taps.
+ */
+export function startNewTurn(state: PlayState, catalog: Catalog, now: number, turnSeconds: number): ActionResult | null {
+  const turnWasClear = isTurnClear(state.turn)
+  if (turnWasClear && state.timers.length === 0) return null
+  const { state: ticked, ended } = elapse({ ...state, turn: emptyTurn() }, catalog, turnSeconds)
   const entry: LogEntry = { t: now, kind: 'new-turn' }
-  return { state: appendLog({ ...state, turn: emptyTurn() }, entry), undo: { kind: 'turn' }, entry }
+  const logged = turnWasClear ? appendCoalescedLog(ticked, entry) : appendLog(ticked, entry)
+  return {
+    state: appendEnded(logged, ended, now),
+    undo: turnWasClear ? { kind: 'edit', key: undoKey.newTurn } : { kind: 'turn' },
+    entry,
+    ...(ended.length > 0 ? { toast: endedText(ended.map((id) => catalog.nameOf(id))) } : {})
+  }
+}
+
+/** The player ends a running timer (the effect was dispelled, or the table's ruling differs). Ending a concentration spell ends the concentration. */
+export function endTimer(state: PlayState, catalog: Catalog, spellId: string, now: number): ActionResult | null {
+  if (!state.timers.some((t) => t.spellId === spellId)) return null
+  const entry: LogEntry = { t: now, kind: 'timer-end', spellId }
+  const next = settleTimers(
+    {
+      ...state,
+      timers: state.timers.filter((t) => t.spellId !== spellId),
+      concentration: state.concentration === spellId ? null : state.concentration
+    },
+    catalog
+  )
+  return { state: appendLog(next, entry), undo: { kind: 'toggle' }, entry, toast: `${catalog.nameOf(spellId)} timer ended` }
 }
 
 /**
@@ -177,10 +213,10 @@ export function toggleFavorite(state: PlayState, catalog: Catalog, spellId: stri
   return { state: appendLog({ ...state, favorites }, entry), undo: { kind: 'toggle' }, entry }
 }
 
-export function dropConcentration(state: PlayState, now: number): ActionResult | null {
+export function dropConcentration(state: PlayState, catalog: Catalog, now: number): ActionResult | null {
   if (!state.concentration) return null
   const entry: LogEntry = { t: now, kind: 'drop-concentration', spellId: state.concentration }
-  return { state: appendLog({ ...state, concentration: null }, entry), undo: { kind: 'toggle' }, entry }
+  return { state: appendLog(settleTimers({ ...state, concentration: null }, catalog), entry), undo: { kind: 'toggle' }, entry }
 }
 
 /**
@@ -243,7 +279,7 @@ export function adjustHp(state: PlayState, catalog: Catalog, delta: number, now:
 
   const entry: LogEntry = { t: now, kind: 'hp', amount: logged }
   return {
-    state: appendLog({ ...state, vitals, concentration }, entry),
+    state: appendLog(settleTimers({ ...state, vitals, concentration }, catalog), entry),
     undo: { kind: 'edit', key: undoKey.hp },
     entry,
     ...(toast ? { toast } : {})
@@ -259,7 +295,7 @@ export function takeRest(state: PlayState, catalog: Catalog, rest: RestKind, now
   const entry: LogEntry = { t: now, kind: rest === 'long' ? 'long-rest' : 'short-rest' }
   const restToast = rest === 'long' ? 'Long rest: slots, resources and hit points restored' : 'Short rest taken'
   const base: PlayState = { ...state, counters, inspiration: { ...state.inspiration, held: false } }
-  const next: PlayState =
+  const rested: PlayState =
     rest === 'long'
       ? {
           ...base,
@@ -269,11 +305,14 @@ export function takeRest(state: PlayState, catalog: Catalog, rest: RestKind, now
           vitals: { ...base.vitals, hp: base.vitals.hpMax, tempHp: 0 }
         }
       : base
+  // The rest also lets time pass for the spell timers: a timer it runs out is over, and one on a spell whose concentration the rest ended goes with it.
+  const { state: next, ended } = elapse(rested, catalog, REST_SECONDS[rest])
+  const notes = [restToast, state.inspiration.held ? 'Bardic Inspiration has run out' : '', endedText(ended.map((id) => catalog.nameOf(id)))]
   return {
-    state: appendLog(next, entry),
+    state: appendEnded(appendLog(next, entry), ended, now),
     undo: { kind: 'rest' },
     entry,
-    toast: state.inspiration.held ? `${restToast}. Bardic Inspiration has run out` : restToast
+    toast: notes.filter(Boolean).join('. ')
   }
 }
 

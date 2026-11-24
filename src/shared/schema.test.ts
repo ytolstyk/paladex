@@ -31,4 +31,19 @@ describe('play state schema', () => {
     expect(parsePlayState({ ...oldSave, log: [entry] }).ok).toBe(true)
     expect(parsePlayState({ ...oldSave, log: [{ ...entry, step: 'dance' }] }).ok).toBe(false)
   })
+
+  it('loads a save that predates timers with none running', () => {
+    const parsed = parsePlayState(oldSave)
+    expect(parsed.ok && parsed.state.timers).toEqual([])
+  })
+
+  it('keeps a timer through a round trip, and drops a damaged one without losing the save', () => {
+    const good = { spellId: 'spell:bless', remaining: 30, total: 60 }
+    const parsed = parsePlayState({ ...oldSave, timers: [good, { spellId: 'spell:x', remaining: -1, total: 60 }, 'junk', { spellId: 'spell:y', remaining: 90, total: 60 }] })
+    expect(parsed.ok && parsed.state.timers).toEqual([good, { spellId: 'spell:y', remaining: 60, total: 60 }])
+  })
+
+  it('reads a timer-end log entry', () => {
+    expect(parsePlayState({ ...oldSave, log: [{ t: 1, kind: 'timer-end', spellId: 'spell:bless' }] }).ok).toBe(true)
+  })
 })

@@ -6,6 +6,7 @@ import { DetailDrawer } from './components/DetailDrawer'
 import { Footer } from './components/Footer'
 import { OtherFeatures } from './components/OtherFeatures'
 import { ResourcePanel } from './components/ResourcePanel'
+import { RecentCasts } from './components/RecentCasts'
 import { RestGlow } from './components/RestGlow'
 import { SettingsPage } from './components/SettingsPage'
 import { SlotTracker } from './components/SlotTracker'
@@ -13,6 +14,7 @@ import { SpellGrid } from './components/SpellGrid'
 import { STAGE_PANEL_ID, StageTabs, stageTabId } from './components/StageTabs'
 import { Toast } from './components/Toast'
 import { TablePanel } from './components/TablePanel'
+import { TimerPanel } from './components/TimerPanel'
 import { TurnChart } from './components/TurnChart'
 import { TurnPanel } from './components/TurnPanel'
 import { UnreadableState } from './components/UnreadableState'
@@ -55,6 +57,7 @@ export function App(): React.JSX.Element {
           <aside className="rail">
             <TablePanel />
             <SlotTracker />
+            <TimerPanel />
             <TurnPanel />
             <ResourcePanel />
           </aside>
@@ -67,6 +70,7 @@ export function App(): React.JSX.Element {
             <div id={STAGE_PANEL_ID} className="stage-panel" role="tabpanel" aria-labelledby={stageTabId(stageTab)}>
               {stageTab === 'spells' ? (
                 <>
+                  <RecentCasts />
                   <FilterBar />
                   <SpellGrid />
                   <OtherFeatures />

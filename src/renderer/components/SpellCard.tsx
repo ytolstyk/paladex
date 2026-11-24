@@ -6,13 +6,24 @@ import { paymentLabel, ROLE_LABEL } from '@/domain/labels'
 import { isChoosable, isInDefaultView } from '@/domain/prepared'
 import { spellFoundBeyondCard, searchTokens } from '@/domain/search'
 import { NO_WARNINGS, turnActionOf, turnWarnings, warningText } from '@/domain/turn'
+import { timerView } from '@/domain/duration'
 import { catalog, usePlayStore } from '@/state/session'
+import { useTimerPrefs } from '@/state/timerPrefsStore'
 import { selectEffectFor, useEffectsStore } from '@/state/effectsStore'
 import { useUiStore } from '@/state/uiStore'
 import { CastButton, CastRoundel, ComponentMarks, PaymentStepper } from './CardParts'
 import { FxHost, type FxHandle } from './CastEffect'
 import { opensDetail } from './detailTrigger'
 import { RangeBadge } from './RangeBadge'
+
+function TimerBadge({ remaining, turnSeconds }: { remaining: number; turnSeconds: number }): React.JSX.Element {
+  const { text, soon } = timerView(remaining, turnSeconds)
+  return (
+    <span className="spell-card__timer" data-soon={soon || undefined}>
+      {text}
+    </span>
+  )
+}
 
 export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): React.JSX.Element {
   // The player's pick (an upcast level, or a slot instead of the free cast). View state of this card, dropped after each cast.
@@ -30,6 +41,9 @@ export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): R
   const active = usePlayStore((s) => s.play?.concentration === spell.id)
   const chosen = usePlayStore((s) => s.play?.prepared.includes(spell.id) ?? false)
   const cast = usePlayStore((s) => s.cast)
+  // Seconds left on this spell's timer, or null: a number, so only a card whose own timer ticked re-renders.
+  const timerLeft = usePlayStore((s) => s.play?.timers.find((t) => t.spellId === spell.id)?.remaining ?? null)
+  const turnSeconds = useTimerPrefs((s) => s.turnSeconds)
   // A string, so a card re-renders only when its own effect changes, not when any other spell's does.
   const effect = useEffectsStore(selectEffectFor(spell.id))
   const fx = useRef<FxHandle>(null)
@@ -73,6 +87,7 @@ export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): R
             <span className="spell-card__role">{ROLE_LABEL[spell.role]}</span>
             <span>{spell.school}</span>
             {spell.concentration && <span className="spell-card__conc">concentration</span>}
+            {timerLeft !== null && <TimerBadge remaining={timerLeft} turnSeconds={turnSeconds} />}
             {spell.castingNote && <span>{spell.castingNote} to cast</span>}
             {spell.ritual && <span>ritual</span>}
             <span className="spell-card__tools">

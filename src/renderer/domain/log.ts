@@ -64,6 +64,8 @@ export function formatLog(entry: LogEntry, nameOf: (id: string) => string = (id)
       return `Bardic Inspiration die set to ${dieName(entry)}`
     case 'turn-step':
       return turnStepText(entry)
+    case 'timer-end':
+      return `${name} has ended`
     case 'prepare':
       return `Prepared ${name}`
     case 'unprepare':

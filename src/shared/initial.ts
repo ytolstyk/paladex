@@ -27,6 +27,7 @@ export function createInitialPlayState(input: InitialStateInput, now: number): P
     turn: emptyTurn(),
     initiative: null,
     inspiration: { held: false, die: DEFAULT_INSPIRATION_DIE },
+    timers: [],
     log: [{ t: now, kind: 'seed' }]
   }
 }

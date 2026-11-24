@@ -81,14 +81,16 @@ export const smite = spell({
   alwaysPrepared: true,
   costs: [{ kind: 'free', counterId: 'free-smite' }, { kind: 'slot' }]
 })
-export const bless = spell({ id: 'spell:bless', name: 'Bless', concentration: true, role: 'support', summary: 'Allies add a d4' })
-export const holdPerson = spell({ id: 'spell:hold-person', name: 'Hold Person', level: 2, concentration: true, role: 'control' })
+export const bless = spell({ id: 'spell:bless', name: 'Bless', concentration: true, duration: '1 minute', role: 'support', summary: 'Allies add a d4' })
+export const holdPerson = spell({ id: 'spell:hold-person', name: 'Hold Person', level: 2, concentration: true, duration: '1 minute', role: 'control' })
+export const divineFavor = spell({ id: 'spell:divine-favor', name: 'Divine Favor', duration: '1 minute', castTime: 'bonus', role: 'offense' })
 export const cure = spell({ id: 'spell:cure-wounds', name: 'Cure Wounds', role: 'support', summary: 'Heal a touched creature' })
 export const mistyStep = spell({ id: 'spell:misty-step', name: 'Misty Step', level: 2, castTime: 'bonus', role: 'utility', alwaysPrepared: true })
 export const protection = spell({
   id: 'spell:protection',
   name: 'Protection from Evil and Good',
   concentration: true,
+  duration: '10 minutes',
   role: 'support',
   source: 'item',
   // Cast from the Ward's charges; also a real Paladin spell, so it can be prepared and cast from a slot.

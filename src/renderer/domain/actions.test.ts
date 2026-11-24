@@ -107,7 +107,7 @@ describe('castSpell: concentration and turn', () => {
 
     it('a new turn clears it', () => {
       const cast = castSpell(state0, catalog, bless.id, undefined, 1)!.state
-      expect(startNewTurn(cast, 2)!.state.turn.slotSpellCast).toBe(false)
+      expect(startNewTurn(cast, catalog, 2, 6)!.state.turn.slotSpellCast).toBe(false)
     })
   })
 
@@ -142,20 +142,20 @@ describe('adjustSlot', () => {
 
 describe('startNewTurn / dropConcentration', () => {
   it('new turn is a no-op when nothing happened this turn', () => {
-    expect(startNewTurn(state0, 1)).toBeNull()
+    expect(startNewTurn(state0, catalog, 1, 6)).toBeNull()
   })
 
   it('new turn clears the turn flags', () => {
     const cast = castSpell(state0, catalog, smite.id, undefined, 1)!.state
-    const next = startNewTurn(cast, 2)!
+    const next = startNewTurn(cast, catalog, 2, 6)!
     expect(next.state.turn).toEqual(emptyTurn())
     expect(next.undo).toEqual({ kind: 'turn' })
   })
 
   it('drops concentration only when concentrating', () => {
-    expect(dropConcentration(state0, 1)).toBeNull()
+    expect(dropConcentration(state0, catalog, 1)).toBeNull()
     const conc = castSpell(state0, catalog, bless.id, undefined, 1)!.state
-    const dropped = dropConcentration(conc, 2)!
+    const dropped = dropConcentration(conc, catalog, 2)!
     expect(dropped.state.concentration).toBeNull()
     expect(formatLog(dropped.entry, catalog.nameOf)).toBe('Dropped concentration on Bless')
   })
@@ -354,7 +354,7 @@ describe('toggleTurnStep', () => {
 
   it('new turn clears every step, and is no longer a no-op when only a step was marked', () => {
     const marked = toggleTurnStep(toggleTurnStep(state0, 'move', 1).state, 'reaction', 2).state
-    const next = startNewTurn(marked, 3)
+    const next = startNewTurn(marked, catalog, 3, 6)
     expect(next).not.toBeNull()
     expect(next!.state.turn).toEqual(emptyTurn())
   })

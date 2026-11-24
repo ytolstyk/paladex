@@ -73,7 +73,8 @@ describe('takeRest', () => {
   })
 
   it('short rest leaves slots, hit points and concentration alone', () => {
-    const { state } = takeRest(tired, catalog, 'short', 9)
+    // No running timer: a rest is an hour, which would end Bless's one minute (see timers.test.ts).
+    const { state } = takeRest({ ...tired, timers: [] }, catalog, 'short', 9)
     expect(state.slotsUsed).toEqual(tired.slotsUsed)
     expect(state.vitals).toEqual(tired.vitals)
     expect(state.concentration).toBe(tired.concentration)

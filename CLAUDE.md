@@ -79,6 +79,24 @@ schema, vitest for tests. See README.md for scripts and layout.
   `chartOpen` is in `uiStore`, in-session, and kept (not drawn) on the settings page. `T` toggles it.
 - `PALADEX_SIZE=960x640` (with `PALADEX_SHOT`) sizes the window for a screenshot, so the 1180 px breakpoint and a short window can be checked.
 
+## Recently cast, history and duration timers
+
+- "Recently cast" and the History list (`RecentCasts`, `domain/recent.ts`) are read from `play.log` (cast and feature entries), so they follow Undo and add
+  nothing to the save. The log keeps 200 entries shared with everything else, so history reaches back about one session. A chip opens the detail
+  drawer (`opensDetail` knows `.recent-chip`); it does not cast.
+- `PlayState.timers` (`{ spellId, remaining, total }`, **seconds**, `.default([])`, each entry validated alone so one bad timer cannot make a save unreadable)
+  starts in `castSpell` when `durationSeconds(spell.duration)` (`domain/duration.ts`) is finite; a recast restarts it. Rules are in `domain/timers.ts`:
+  `elapse` (a timer at 0 is removed, and takes the concentration with it) and `settleTimers`, the one place that drops a timer for an unknown spell, a duplicate,
+  or a concentration spell that is no longer `state.concentration` (read from the catalog, not a stored flag). Every action that can change concentration calls it
+  (`castSpell`, `dropConcentration`, `adjustHp`, `endTimer`, `elapse`), and so does `reconcile`.
+- **New turn is the tick**: `startNewTurn(state, catalog, now, turnSeconds)`. It is still a no-op when the turn is clear and no timer runs; when it only ticks, a run
+  of presses is one undo step (`undoKey.newTurn`) and one log line. Rests let time pass too (`REST_SECONDS`: short 1 hour, long 8: the least a rest takes).
+  Each expiry also logs a `timer-end` entry (a save with one is unreadable to a build from before it: rollback only). A test (`timers.test.ts`) fails if a re-import
+  brings a duration the parser cannot read and that is not on its short untimed list.
+- The turn length is a view preference (`state/timerPrefsStore.ts`, `paladex.timers`, `domain/timerPrefs.ts`), wired into the play store as the `turnSeconds` dependency
+  in `state/session.ts`. Timers stay in seconds, so changing it never rewrites a running timer; "turns left" is `ceil(remaining / turnSeconds)`.
+- Timers use the printed (base) duration. Upcast durations are not modelled, and features have no duration data.
+
 ## Spell components
 
 - `Spell.components` is `{ verbal, somatic, material, materialText? }`, data not play state. `scripts/components.ts` is the only place

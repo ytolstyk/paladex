@@ -9,5 +9,6 @@ const OWN_ACTION = 'button:not(.name-button), input, select, textarea, a, label,
  */
 export function opensDetail(target: EventTarget | null): boolean {
   if (!(target instanceof Element)) return false
+  if (target.closest('.recent-chip') !== null) return true // a "Recently cast" chip opens the drawer the same way
   return target.closest('.spell-card') !== null && target.closest(OWN_ACTION) === null
 }

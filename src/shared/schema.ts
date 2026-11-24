@@ -5,6 +5,7 @@ import {
   INITIATIVE_MAX,
   INITIATIVE_MIN,
   LOG_CAP,
+  MAX_TIMERS,
   LOG_KINDS,
   PAYMENT_KINDS,
   ROLES,
@@ -34,6 +35,15 @@ const LogEntrySchema = z.object({
   step: z.enum(TURN_STEPS).optional(),
   on: z.boolean().optional()
 })
+
+const TimerSchema = z
+  .object({
+    spellId: z.string().max(100),
+    remaining: z.number().int().min(0),
+    total: z.number().int().min(1)
+  })
+  // A hand-edited timer that has more left than it began with would draw a bar past full.
+  .transform((t) => ({ ...t, remaining: Math.min(t.remaining, t.total) }))
 
 /** Spelled out (not built from INSPIRATION_DICE) so the inferred type is the literal union 6 | 8 | 10 | 12. */
 const InspirationDieSchema = z.union([z.literal(6), z.literal(8), z.literal(10), z.literal(12)])
@@ -82,6 +92,14 @@ export const PlayStateSchema = z.object({
       die: InspirationDieSchema.catch(DEFAULT_INSPIRATION_DIE).default(DEFAULT_INSPIRATION_DIE)
     })
     .default(() => ({ held: false, die: DEFAULT_INSPIRATION_DIE })),
+  /**
+   * Running duration timers, ticked by "New turn". Read entry by entry: one damaged timer is dropped, it does not make the whole
+   * save unreadable. A timer for an unknown spell, or a second one for the same spell, is dropped by `reconcile`.
+   */
+  timers: z
+    .array(z.unknown())
+    .default([])
+    .transform((entries) => entries.flatMap((e) => { const t = TimerSchema.safeParse(e); return t.success ? [t.data] : [] }).slice(0, MAX_TIMERS)),
   log: z
     .array(LogEntrySchema)
     .default([])

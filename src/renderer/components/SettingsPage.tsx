@@ -3,6 +3,7 @@ import { useUiStore } from '@/state/uiStore'
 import { EffectSettings } from './EffectSettings'
 import { Flourish } from './Ornaments'
 import { ThemePicker } from './ThemePicker'
+import { TimerSettings } from './TimerSettings'
 
 /** Full-width settings view. Esc or the back button returns to the sheet. */
 export function SettingsPage(): React.JSX.Element {
@@ -30,6 +31,8 @@ export function SettingsPage(): React.JSX.Element {
       <ThemePicker />
       <Flourish />
       <EffectSettings />
+      <Flourish />
+      <TimerSettings />
       <p className="muted settings__note">Your choices are remembered on this computer and apply instantly.</p>
     </main>
   )

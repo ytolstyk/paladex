@@ -143,3 +143,20 @@ describe('actions through the store', () => {
     expect(store.getState().play?.vitals.hp).toBe(52)
   })
 })
+
+describe('spell timers', () => {
+  it('New turn takes the current turn length off a running timer', async () => {
+    const port = fakePort({ status: 'empty' })
+    let seconds = 6
+    const store = createPlayStore({ port, catalog, turnSeconds: () => seconds })
+    await store.getState().init()
+    store.getState().cast(bless.id)
+    store.getState().newTurn()
+    expect(store.getState().play?.timers[0]?.remaining).toBe(54)
+    seconds = 30 // the setting changes: the timer keeps its seconds, and the next tick uses the new length
+    store.getState().newTurn()
+    expect(store.getState().play?.timers[0]?.remaining).toBe(24)
+    store.getState().endTimer(bless.id)
+    expect(store.getState().play?.timers).toEqual([])
+  })
+})

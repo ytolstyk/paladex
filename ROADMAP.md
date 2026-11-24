@@ -22,7 +22,7 @@ Today: search (full text), sort, quick chips (intent, casting time, castable now
 - [x] **Remember filters** across launches (view preference, so `localStorage` like the theme, not play state). *(done)* The search text is deliberately not kept.
 - [ ] **Saved filter sets**: "Combat", "Exploring", "Downtime", one click each. The "last used" default now exists (remembered filters). **M**
 - [x] **Favorites / pins**: a star on each spell card pins it in a "Favorites" group above the sort. *(play state, done)* Still open: starring class features, and a "favorites only" quick filter.
-- [ ] **Recently cast**: a short row of the last few spells and features, for repeating a turn. Data is already in the log. **S**
+- [x] **Recently cast**: a row of the last six spells and features above the filter bar, plus a History list (last 40, with breaks at each new turn and rest). *(done; read from the log, so it reaches back about one session. A chip opens the details: it does not cast.)*
 - [ ] **Command palette (Cmd/Ctrl+K)**: type a spell, feature, rest or setting and jump to it or run it. **M**
 
 ## 2. Casting and the turn
@@ -34,7 +34,7 @@ are soft hints.
 - [x] **Choose the slot level when casting (upcasting)**: a ‹ › stepper under the Cast button, using the payment list
       `availableCosts()` produces. The pick is per-card view state and resets after each cast. **M**
 - [x] **Reaction and action tracking** next to the slot and bonus-action lines, with a turn chart beside the stage. *(play state, done)* Still open: a "turn N / round N" counter, and an `R` shortcut.
-- [ ] **Duration timers**: when you cast Bless or Hunter's Mark, count rounds (1 minute = 10) and tell you when it ends. *(play state)* **M**
+- [x] **Duration timers**: casting a spell with a set duration starts a countdown that New turn ticks (turn length set in Settings), with "N turns left" in the rail and on the card. *(play state, done)* Still open: timers for features (Vow of Enmity, no duration data), and upcast durations (Hunter's Mark lasts longer from a higher slot; the timer uses the printed duration).
 - [ ] **Concentration target note**: "Hunter's Mark on the ogre". A one-line field on the active concentration. *(play state)* **S**
 - [ ] **Concentration check helper** when taking damage: show the DC (10, or half the damage if higher) and your save bonus. **S**
 - [ ] **Damage and dice helper** for Divine Smite and friends: dice by slot level, crit doubling, and a roller that logs the result. **M**

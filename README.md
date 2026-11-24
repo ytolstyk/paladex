@@ -56,6 +56,20 @@ The top of the left rail holds two things you carry from the table into your own
   Bard gives it to you, pick the size they gave, and press Use it when you spend it. Any rest ends it, since it only lasts
   an hour. The die size is remembered, and every step is logged and undoable.
 
+## Recently cast, history and spell timers
+
+- **Recently cast.** Above the filters, a row of the last six different spells and features you used. Press one to open its
+  details. **History** under it lists the last 40 casts with the time, how each was paid for, and a line wherever a new turn or
+  a rest began. It is read from the action log, so Undo takes a cast out of it, and it reaches back about one session.
+- **Spell timers.** Casting a spell with a set duration (Bless, Hunter's Mark, Shield of Faith...) starts a countdown: the
+  **Spell timers** panel in the left rail and the spell's card both say "7 turns left", in the accent colour for the last three.
+  **New turn** (the button, or `N`) counts every timer down by one turn; a short rest takes off an hour and a long rest eight.
+  Casting the spell again restarts it, **End** stops it by hand, and a concentration spell's timer goes when the concentration does
+  (and when its timer runs out, so does the concentration). Long timers show the time left instead ("55 minutes left").
+- **How long is a turn?** In Settings, under Spell timers: 6 seconds (a round of combat) to begin with, with buttons for 1 minute
+  and 10 minutes for exploring, or type your own. A running timer keeps its time when you change it. The countdown uses each
+  spell's printed duration: a longer duration from a higher slot is not worked out, so End or recast it if your table says so.
+
 ## Weapons and attacks
 
 The strip above the stage has two tabs: **Spells & features** and **Weapons & attacks**. The search bar, sort and filters belong to

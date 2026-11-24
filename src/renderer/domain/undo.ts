@@ -13,6 +13,8 @@ export const undoKey = {
   hp: 'hp',
   initiative: 'initiative',
   inspirationDie: 'inspiration-die',
+  /** A run of New turn presses that only tick spell timers (the turn was already clear) is one history step. */
+  newTurn: 'new-turn',
   /** A mis-tap on a turn step and its undo are one history step, like a run of ± taps. */
   turnStep: (step: TurnStep): string => `turn-step:${step}`
 }

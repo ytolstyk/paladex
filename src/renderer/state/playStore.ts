@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { InspirationDie, TurnStep } from '@shared/constants'
+import { DEFAULT_TURN_SECONDS, type InspirationDie, type TurnStep } from '@shared/constants'
 import type { PaladexApi } from '@shared/ipc'
 import type { PlayState } from '@shared/schema'
 import type { Payment } from '@shared/types'
@@ -38,7 +38,10 @@ export interface PaladexStore {
   cast(spellId: string, payment?: Payment): boolean
   /** Manual gem correction: spend or restore one slot. */
   adjustSlot(level: number, direction: 'spend' | 'restore'): void
+  /** Start a new turn: clears it, and takes one turn length off every spell timer. */
   newTurn(): void
+  /** End a running spell timer by hand. */
+  endTimer(spellId: string): void
   /** Mark one of the hand-tracked turn steps (action, move, bonus action, reaction) used, or clear it. */
   toggleTurnStep(step: TurnStep): void
   /** Use a class/race feature. `amount` only matters for pool features (Lay On Hands). */
@@ -69,10 +72,12 @@ export interface StoreDeps {
   port: PaladexApi
   catalog: Catalog
   now?: () => number
+  /** The turn length in force right now (a setting that lives outside the play state). Defaults to one round of combat. */
+  turnSeconds?: () => number
 }
 
 /** A thin dispatcher: every rule lives in `domain/actions`. The store owns session state, persistence and undo bookkeeping. */
-export function createPlayStore({ port, catalog, now = Date.now }: StoreDeps) {
+export function createPlayStore({ port, catalog, now = Date.now, turnSeconds = () => DEFAULT_TURN_SECONDS }: StoreDeps) {
   let toastSeq = 0
   let initPromise: Promise<void> | null = null
 
@@ -151,7 +156,12 @@ export function createPlayStore({ port, catalog, now = Date.now }: StoreDeps) {
 
       newTurn() {
         const play = current()
-        if (play) apply(actions.startNewTurn(play, now()))
+        if (play) apply(actions.startNewTurn(play, catalog, now(), turnSeconds()))
+      },
+
+      endTimer(spellId) {
+        const play = current()
+        if (play) apply(actions.endTimer(play, catalog, spellId, now()))
       },
 
       toggleTurnStep(step) {
@@ -206,7 +216,7 @@ export function createPlayStore({ port, catalog, now = Date.now }: StoreDeps) {
 
       dropConcentration() {
         const play = current()
-        if (play) apply(actions.dropConcentration(play, now()))
+        if (play) apply(actions.dropConcentration(play, catalog, now()))
       },
 
       undoLast() {
