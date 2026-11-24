@@ -1,4 +1,4 @@
-import type { Feature, Spell, Weapon } from '@shared/types'
+import type { Feature, Spell, Trait, Weapon } from '@shared/types'
 import { weaponAttack, weaponRangeText } from './attacks'
 import type { Catalog } from './catalog'
 import { describeComponents } from './components'
@@ -13,10 +13,14 @@ import {
   describeWeaponKind,
   paragraphsOf
 } from './describe'
-import { ATTUNEMENT_LABEL } from './labels'
+import { ATTUNEMENT_LABEL, TRAIT_KIND_LABEL, TRAIT_WHEN_LABEL } from './labels'
 
 /** What the detail drawer is showing: one thing, found by its id. */
-export type DetailEntry = { kind: 'spell'; spell: Spell } | { kind: 'feature'; feature: Feature } | { kind: 'weapon'; weapon: Weapon }
+export type DetailEntry =
+  | { kind: 'spell'; spell: Spell }
+  | { kind: 'feature'; feature: Feature }
+  | { kind: 'weapon'; weapon: Weapon }
+  | { kind: 'trait'; trait: Trait }
 
 export function detailEntry(catalog: Catalog, id: string): DetailEntry | null {
   const spell = catalog.spellById(id)
@@ -24,7 +28,9 @@ export function detailEntry(catalog: Catalog, id: string): DetailEntry | null {
   const feature = catalog.featureById(id)
   if (feature) return { kind: 'feature', feature }
   const weapon = catalog.weaponById(id)
-  return weapon ? { kind: 'weapon', weapon } : null
+  if (weapon) return { kind: 'weapon', weapon }
+  const trait = catalog.traitById(id)
+  return trait ? { kind: 'trait', trait } : null
 }
 
 /** A paragraph of the drawer's text; `lead` is a bold run-in heading ("Heavy."). */
@@ -49,8 +55,21 @@ type DetailParts = Omit<DetailModel, 'facts'> & { facts: Fact[] }
 
 /** Everything the drawer prints, as plain text. Nothing here is markup: the sheet's text is never rendered as HTML. */
 export function describeDetail(entry: DetailEntry, catalog: Catalog): DetailModel {
-  const parts = entry.kind === 'spell' ? describeSpell(entry.spell, catalog) : entry.kind === 'feature' ? describeFeature(entry.feature, catalog) : describeWeapon(entry.weapon, catalog)
+  const parts = describeParts(entry, catalog)
   return { ...parts, facts: parts.facts.flatMap(([label, text]) => (text ? [{ label, text }] : [])) }
+}
+
+function describeParts(entry: DetailEntry, catalog: Catalog): DetailParts {
+  switch (entry.kind) {
+    case 'spell':
+      return describeSpell(entry.spell, catalog)
+    case 'feature':
+      return describeFeature(entry.feature, catalog)
+    case 'weapon':
+      return describeWeapon(entry.weapon, catalog)
+    case 'trait':
+      return describeTrait(entry.trait, catalog)
+  }
 }
 
 function describeSpell(spell: Spell, catalog: Catalog): DetailParts {
@@ -105,5 +124,19 @@ function describeWeapon(weapon: Weapon, catalog: Catalog): DetailParts {
       ...(mastery ? [{ lead: `Mastery: ${mastery.name}${mastery.known ? '' : ' (not chosen)'}`, text: describeMastery(mastery).tooltip }] : []),
       ...paragraphsOf(weapon.description).map((text) => ({ text }))
     ]
+  }
+}
+
+function describeTrait(trait: Trait, catalog: Catalog): DetailParts {
+  return {
+    title: trait.name,
+    kind: TRAIT_KIND_LABEL[trait.kind],
+    summary: trait.summary,
+    facts: [
+      ['From', trait.origin],
+      ['When', TRAIT_WHEN_LABEL[trait.when]],
+      ['See also', trait.related?.map((id) => catalog.nameOf(id)).join(', ')]
+    ],
+    paragraphs: paragraphsOf(trait.text).map((text) => ({ text }))
   }
 }

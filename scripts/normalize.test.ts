@@ -166,14 +166,73 @@ describe('seed hygiene', () => {
     expect(seedText).not.toContain('see D&D Beyond') // the marker for a placeholder we could not resolve
   })
 
-  it('homebrew without a tile stays read-only', () => {
-    const names = seed.otherFeatures.map((f) => f.name)
-    expect(names.some((n) => n.startsWith('Circle Spell'))).toBe(true)
-    expect(names).toContain('Undead Steed: Ghostly Stride')
+  it('homebrew without a tile stays read-only, as traits of the homebrew kind', () => {
+    const homebrew = seed.traits.filter((t) => t.kind === 'homebrew').map((t) => t.name)
+    expect(homebrew.some((n) => n.startsWith('Circle Spell'))).toBe(true)
+    expect(homebrew).toContain('Undead Steed: Ghostly Stride')
   })
 
   it('Death Coil is on the DDB sheet but the table never used it, so it stays out of the app (the regeneration check below makes this hold for a re-import too)', () => {
     expect(JSON.stringify(seed)).not.toMatch(/death.?coil/i)
+  })
+})
+
+describe('feats and traits', () => {
+  const trait = (name: string) => seed.traits.find((t) => t.name === name)
+  const names = (kind: string) => seed.traits.filter((t) => t.kind === kind).map((t) => t.name)
+
+  it('lists the Oath features reached so far (level 5), with the later ones left for a level-up re-seed', () => {
+    expect(names('oath')).toEqual(['Oath of Vengeance Spells', 'Vow of Enmity'])
+    expect(trait('Vow of Enmity')?.origin).toBe('Oath of Vengeance, level 3')
+    expect(trait('Relentless Avenger')).toBeUndefined() // level 7
+  })
+
+  it('lists the Dragonborn traits that matter at the table, not size, speed or the one-time score choice', () => {
+    expect(names('species')).toEqual(['Draconic Ancestry', 'Breath Weapon', 'Damage Resistance', 'Darkvision', 'Draconic Flight', 'Languages'])
+    for (const ignored of ['Creature Type', 'Size', 'Speed', 'Ability Score Increases']) expect(trait(ignored)).toBeUndefined()
+  })
+
+  it('lists the feats and the Fighting Style, but not the ability score improvements', () => {
+    expect(names('feat')).toEqual(['Savage Attacker', 'Blessed Warrior', 'Weapon Mastery', 'Dark Bargain'])
+    expect(JSON.stringify(seed.traits)).not.toContain('Ability Score Improvement')
+  })
+
+  it('reads the chosen dragon, not the generic table: the ancestor is Black and the breath and resistance are acid', () => {
+    expect(trait('Draconic Ancestry')?.text).toBe('You have a Black Dragon ancestor.')
+    expect(trait('Breath Weapon')?.text).toContain('Acid damage')
+    expect(trait('Damage Resistance')?.text).toContain('Acid')
+  })
+
+  it('adds what the sheet chose elsewhere: the languages known and the weapon masteries picked', () => {
+    expect(trait('Languages')?.text).toContain('Languages you know from your species: Common, Draconic, Orc.')
+    expect(trait('Languages')?.text).not.toContain('Sigil') // the sheet appends the whole Standard Languages table; its rows are cut
+    expect(trait('Weapon Mastery')?.text).toMatch(/Chosen on the sheet .*Cleave \(Halberd\)/)
+  })
+
+  it('keeps a rules table on readable lines, one row each', () => {
+    expect(trait('Oath of Vengeance Spells')?.text).toMatch(/^3 \| Bane, Hunter’s Mark$/m)
+  })
+
+  it('points at spells and tiles that exist, so a card can open them', () => {
+    const ids = new Set([...seed.character.spells, ...seed.character.features].map((x) => x.id))
+    const related = seed.traits.flatMap((t) => t.related ?? [])
+    expect(related.length).toBeGreaterThan(0)
+    for (const id of related) expect(ids.has(id), id).toBe(true)
+    expect(trait('Oath of Vengeance Spells')?.related).toEqual(['spell:bane', 'spell:hunters-mark', 'spell:hold-person', 'spell:misty-step'])
+  })
+
+  it('every trait has a summary and its text, with no markup or leftover placeholder', () => {
+    for (const t of seed.traits) {
+      expect(t.summary.length, t.name).toBeGreaterThan(10)
+      expect(t.text.length, t.name).toBeGreaterThan(10)
+      expect(t.text, t.name).not.toMatch(/<[a-z!/][^>]*>|\{\{|\[\/?[a-z]+\]/i)
+    }
+  })
+
+  it('ids are unique and made from the name', () => {
+    const ids = seed.traits.map((t) => t.id)
+    expect(new Set(ids).size).toBe(ids.length)
+    expect(trait('Circle Spell: Augment')?.id).toBe('trait:circle-spell-augment')
   })
 })
 
@@ -224,6 +283,35 @@ describe.skipIf(!existsSync(RAW_PATH))('regeneration from the raw payload', () =
     const { seed: fresh, warnings } = normalizeDdb(JSON.parse(readFileSync(RAW_PATH, 'utf8')))
     expect(warnings).toEqual([])
     expect(fresh).toEqual(seed)
+  })
+})
+
+describe.skipIf(!existsSync(RAW_PATH))('traits and a changing sheet', () => {
+  const raw = (): { data: Record<string, any> } => JSON.parse(readFileSync(RAW_PATH, 'utf8')) // eslint-disable-line @typescript-eslint/no-explicit-any
+
+  it('warns about a feat the overlay does not know, so it is not lost silently', () => {
+    const payload = raw()
+    const [first] = payload.data.feats
+    payload.data.feats.push({ ...structuredClone(first), definition: { ...structuredClone(first.definition), name: 'Tough' } })
+    const { warnings, seed: next } = normalizeDdb(payload)
+    expect(warnings.join('\n')).toContain('the feat "Tough"')
+    expect(next.traits.some((t) => t.name === 'Tough')).toBe(false)
+  })
+
+  it('shows an Oath feature once the level is reached', () => {
+    const payload = raw()
+    payload.data.classes[0].level = 7
+    const { seed: leveled } = normalizeDdb(payload)
+    expect(leveled.traits.map((t) => t.name)).toContain('Relentless Avenger')
+    expect(leveled.traits.find((t) => t.name === 'Relentless Avenger')?.origin).toBe('Oath of Vengeance, level 7')
+  })
+
+  it('skips an entry the sheet no longer has, with a warning', () => {
+    const payload = raw()
+    payload.data.feats = payload.data.feats.filter((f: { definition: { name: string } }) => f.definition.name !== 'Savage Attacker')
+    const { warnings, seed: next } = normalizeDdb(payload)
+    expect(warnings.join('\n')).toContain('Trait "Savage Attacker" skipped')
+    expect(next.traits.some((t) => t.name === 'Savage Attacker')).toBe(false)
   })
 })
 
@@ -292,6 +380,10 @@ describe('weapons', () => {
     const flaggedFeatures = seed.character.features.filter((f) => f.attackRider).map((f) => f.id)
     expect(flaggedSpells.sort()).toEqual([...ATTACK_RIDER_SPELLS].sort())
     expect(flaggedFeatures.sort()).toEqual([...ATTACK_RIDER_FEATURES].sort())
+  })
+
+  it('keeps the cells of a table row on one line, separated by a bar, and rows on their own lines', () => {
+    expect(htmlToText('<table><tr><th>Level</th><th>Spells</th></tr><tr><td>3</td><td>Bane</td></tr></table>')).toBe('Level | Spells\n3 | Bane')
   })
 
   it('strips D&D Beyond reference tags, keeping the display text after a semicolon', () => {

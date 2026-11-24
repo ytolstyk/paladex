@@ -1,6 +1,6 @@
-import type { Feature, OtherFeature, Spell } from '@shared/types'
+import type { Feature, Spell, Trait } from '@shared/types'
 import { componentWords } from './components'
-import { CAST_LABEL, LEVEL_TITLE, ROLE_LABEL, SOURCE_LABEL } from './labels'
+import { CAST_LABEL, LEVEL_TITLE, ROLE_LABEL, SOURCE_LABEL, TRAIT_KIND_LABEL, TRAIT_WHEN_LABEL } from './labels'
 
 /**
  * Full-text search. A card shows a name, a one-line summary and a few facts, but the player may remember a spell by
@@ -34,7 +34,7 @@ interface Haystack {
 // Keyed by the catalog's own objects, which live for the whole session: each is read once, not on every keystroke.
 const cache = new WeakMap<object, Haystack>()
 
-function haystack(item: Spell | Feature, build: () => Haystack): Haystack {
+function haystack(item: Spell | Feature | Trait, build: () => Haystack): Haystack {
   let found = cache.get(item)
   if (!found) {
     found = build()
@@ -81,6 +81,13 @@ function featureHaystack(feature: Feature): Haystack {
   })
 }
 
+function traitHaystack(trait: Trait): Haystack {
+  return haystack(trait, () => {
+    const shown = join([trait.name, trait.summary, trait.origin, TRAIT_KIND_LABEL[trait.kind], TRAIT_WHEN_LABEL[trait.when]])
+    return { shown, all: `${shown} ${join([trait.text])}` }
+  })
+}
+
 export function spellMatches(spell: Spell, tokens: readonly string[]): boolean {
   return matchesTokens(spellHaystack(spell).all, tokens)
 }
@@ -89,8 +96,8 @@ export function featureMatches(feature: Feature, tokens: readonly string[]): boo
   return matchesTokens(featureHaystack(feature).all, tokens)
 }
 
-export function otherFeatureMatches(feature: OtherFeature, tokens: readonly string[]): boolean {
-  return matchesTokens(normalize(`${feature.name} ${feature.text}`), tokens)
+export function traitMatches(trait: Trait, tokens: readonly string[]): boolean {
+  return matchesTokens(traitHaystack(trait).all, tokens)
 }
 
 /** True when the query matches this spell but not through anything its card shows (so the card can say why it is listed). */
@@ -100,4 +107,8 @@ export function spellFoundBeyondCard(spell: Spell, tokens: readonly string[]): b
 
 export function featureFoundBeyondCard(feature: Feature, tokens: readonly string[]): boolean {
   return tokens.length > 0 && !matchesTokens(featureHaystack(feature).shown, tokens)
+}
+
+export function traitFoundBeyondCard(trait: Trait, tokens: readonly string[]): boolean {
+  return tokens.length > 0 && !matchesTokens(traitHaystack(trait).shown, tokens)
 }

@@ -9,9 +9,10 @@ import { chosenCount, paladinPreparedLimit } from '@/domain/prepared'
 import { useDismiss } from '@/hooks/useDismiss'
 import { useResults } from '@/hooks/useResults'
 import { catalog, usePlayStore } from '@/state/session'
-import { SEARCH_INPUT_ID, useUiStore } from '@/state/uiStore'
+import { useUiStore } from '@/state/uiStore'
 import { Chip } from './Chip'
 import { FilterPanel } from './FilterPanel'
+import { SearchField } from './SearchField'
 
 const INTENTS: { id: Intent; label: string; hint: string }[] = [
   { id: 'enemies', label: 'Hurt enemies', hint: 'Damage and control spells' },
@@ -76,20 +77,7 @@ export function FilterBar(): React.JSX.Element {
   return (
     <div className="filter-bar" role="search" aria-label="Find a spell">
       <div className="filter-bar__row">
-        <input
-          id={SEARCH_INPUT_ID}
-          className="field field--search"
-          type="search"
-          placeholder="Search spells and features…  ( / )"
-          aria-label="Search spells and features"
-          value={filters.query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key !== 'Escape') return
-            if (filters.query !== '') setQuery('')
-            else e.currentTarget.blur()
-          }}
-        />
+        <SearchField value={filters.query} onChange={setQuery} placeholder="Search spells and features…  ( / )" label="Search spells and features" />
         <label className="sort">
           <span className="sort__label">Sort by</span>
           {/* The options are exactly SORT_KEYS, so the cast in onChange is safe. */}

@@ -1,16 +1,17 @@
 import { tabIndexForKey } from '@/domain/tabs'
 import { useUiStore, type StageTab } from '@/state/uiStore'
 
-/** `more` is the part of the label a narrow window can drop ("Spells" / "Weapons") when the turn chart takes room from the stage. */
+/** `more` is the part of the label a narrow window can drop ("Spells" / "Weapons" / "Feats") when the turn chart takes room from the stage. */
 const TABS: { id: StageTab; label: string; more: string }[] = [
   { id: 'spells', label: 'Spells', more: ' & features' },
-  { id: 'attacks', label: 'Weapons', more: ' & attacks' }
+  { id: 'attacks', label: 'Weapons', more: ' & attacks' },
+  { id: 'traits', label: 'Feats', more: ' & traits' }
 ]
 
 export const stageTabId = (tab: StageTab): string => `stage-tab-${tab}`
 export const STAGE_PANEL_ID = 'stage-panel'
 
-/** The two views of the stage. ARIA tabs: only the chosen tab is in the tab order, and the arrow keys, Home and End move between them. */
+/** The views of the stage. ARIA tabs: only the chosen tab is in the tab order, and the arrow keys, Home and End move between them. */
 export function StageTabs(): React.JSX.Element {
   const stageTab = useUiStore((s) => s.stageTab)
   const setStageTab = useUiStore((s) => s.setStageTab)

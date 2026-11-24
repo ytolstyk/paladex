@@ -765,7 +765,7 @@
           "self"
         ],
         "summary": "Call a loyal otherworldly steed that fights beside you.",
-        "description": "You summon an otherworldly being that appears as a loyal steed in an unoccupied space of your choice within range. This creature uses the Otherworldly Steed stat block. If you already have a steed from this spell, the steed is replaced by the new one.\nThe steed resembles a Large, rideable animal of your choice, such as a horse, a camel, a dire wolf, or an elk. Whenever you cast the spell, choose the steed’s creature type—Celestial, Fey, or Fiend—which determines certain traits in the stat block.\nCombat. The steed is an ally to you and your allies. In combat, it shares your Initiative count, and it functions as a controlled mount while you ride it (as defined in the rules on mounted combat). If you have the Incapacitated condition, the steed takes its turn immediately after yours and acts independently, focusing on protecting you.\nDisappearance of the Steed. The steed disappears if it drops to 0 Hit Points or if you die. When it disappears, it leaves behind anything it was wearing or carrying. If you cast this spell again, you decide whether you summon the steed that disappeared or a different one.\nUsing a Higher-Level Spell Slot. Use the spell slot’s level for the spell’s level in the stat block.\nOtherworldly Steed\nLarge Celestial, Fey, or Fiend (Your Choice), Neutral\nAC 10 + 1 per spell level\nHP 5 + 10 per spell level (the steed has a number of Hit Dice [d10s] equal to the spell’s level)\nSpeed 60 ft., Fly 60 ft. (requires level 4+ spell)\nMod\r\nSave\r\nSTR\r\n18\r\n+4\r\n+4\r\nDEX\r\n12\r\n+1\r\n+1\r\nCON\r\n14\r\n+2\r\n+2\r\nMod\r\nSave\r\nINT\r\n6\r\n 2\r\n 2\r\nWIS\r\n12\r\n+1\r\n+1\r\nCHA\r\n8\r\n 1\r\n 1\r\nSenses Passive Perception 11\nLanguages Telepathy 1 mile (works only with you)\nCR None (XP 0; PB equals your Proficiency Bonus)\nTraits\nLife Bond. When you regain Hit Points from a level 1+ spell, the steed regains the same number of Hit Points if you’re within 5 feet of it.\nActions\nOtherworldly Slam. Melee Attack Roll: Bonus equals your spell attack modifier, reach 5 ft. Hit: 1d8 plus the spell’s level of Radiant (Celestial), Psychic (Fey), or Necrotic (Fiend) damage.\nBonus Actions\nFell Glare (Fiend Only; Recharges after a Long Rest). Wisdom Saving Throw: DC equals your spell save DC, one creature within 60 feet the steed can see. Failure: The target has the Frightened condition until the end of your next turn.\nFey Step (Fey Only; Recharges after a Long Rest). The steed teleports, along with its rider, to an unoccupied space of your choice up to 60 feet away from itself.\nHealing Touch (Celestial Only; Recharges after a Long Rest). One creature within 5 feet of the steed regains a number of Hit Points equal to 2d8 plus the spell’s level.",
+        "description": "You summon an otherworldly being that appears as a loyal steed in an unoccupied space of your choice within range. This creature uses the Otherworldly Steed stat block. If you already have a steed from this spell, the steed is replaced by the new one.\nThe steed resembles a Large, rideable animal of your choice, such as a horse, a camel, a dire wolf, or an elk. Whenever you cast the spell, choose the steed’s creature type—Celestial, Fey, or Fiend—which determines certain traits in the stat block.\nCombat. The steed is an ally to you and your allies. In combat, it shares your Initiative count, and it functions as a controlled mount while you ride it (as defined in the rules on mounted combat). If you have the Incapacitated condition, the steed takes its turn immediately after yours and acts independently, focusing on protecting you.\nDisappearance of the Steed. The steed disappears if it drops to 0 Hit Points or if you die. When it disappears, it leaves behind anything it was wearing or carrying. If you cast this spell again, you decide whether you summon the steed that disappeared or a different one.\nUsing a Higher-Level Spell Slot. Use the spell slot’s level for the spell’s level in the stat block.\nOtherworldly Steed\nLarge Celestial, Fey, or Fiend (Your Choice), Neutral\nAC 10 + 1 per spell level\nHP 5 + 10 per spell level (the steed has a number of Hit Dice [d10s] equal to the spell’s level)\nSpeed 60 ft., Fly 60 ft. (requires level 4+ spell)\n | | Mod | Save\r\nSTR | 18 | +4 | +4\r\nDEX | 12 | +1 | +1\r\nCON | 14 | +2 | +2\r\n | | Mod | Save\r\nINT | 6 | 2 | 2\r\nWIS | 12 | +1 | +1\r\nCHA | 8 | 1 | 1\r\nSenses Passive Perception 11\nLanguages Telepathy 1 mile (works only with you)\nCR None (XP 0; PB equals your Proficiency Bonus)\nTraits\nLife Bond. When you regain Hit Points from a level 1+ spell, the steed regains the same number of Hit Points if you’re within 5 feet of it.\nActions\nOtherworldly Slam. Melee Attack Roll: Bonus equals your spell attack modifier, reach 5 ft. Hit: 1d8 plus the spell’s level of Radiant (Celestial), Psychic (Fey), or Necrotic (Fiend) damage.\nBonus Actions\nFell Glare (Fiend Only; Recharges after a Long Rest). Wisdom Saving Throw: DC equals your spell save DC, one creature within 60 feet the steed can see. Failure: The target has the Frightened condition until the end of your next turn.\nFey Step (Fey Only; Recharges after a Long Rest). The steed teleports, along with its rider, to an unoccupied space of your choice up to 60 feet away from itself.\nHealing Touch (Celestial Only; Recharges after a Long Rest). One creature within 5 feet of the steed regains a number of Hit Points equal to 2d8 plus the spell’s level.",
         "source": "class",
         "costs": [
           {
@@ -1466,38 +1466,208 @@
   "seededUsed": {
     "arbiters-ward": 5
   },
-  "otherFeatures": [
+  "traits": [
     {
+      "id": "trait:oath-of-vengeance-spells",
+      "name": "Oath of Vengeance Spells",
+      "kind": "oath",
+      "origin": "Oath of Vengeance, level 3",
+      "when": "passive",
+      "summary": "Bane, Hunter’s Mark, Hold Person and Misty Step are always prepared and do not count against your limit. More follow at levels 9, 13 and 17.",
+      "text": "The magic of your oath ensures you always have certain spells ready; when you reach a Paladin level specified in the Oath of Vengeance Spells table, you thereafter always have the listed spells prepared.\nOath of Vengeance Spells\nPaladin Level | Spells\r\n3 | Bane, Hunter’s Mark\r\n5 | Hold Person, Misty Step\r\n9 | Haste, Protection from Energy\r\n13 | Banishment, Dimension Door\r\n17 | Hold Monster, Scrying",
+      "related": [
+        "spell:bane",
+        "spell:hunters-mark",
+        "spell:hold-person",
+        "spell:misty-step"
+      ]
+    },
+    {
+      "id": "trait:vow-of-enmity",
+      "name": "Vow of Enmity",
+      "kind": "oath",
+      "origin": "Oath of Vengeance, level 3",
+      "when": "triggered",
+      "summary": "With the Attack action, spend a Channel Divinity use to gain Advantage against one creature for a minute. The vow moves to a new target if the first drops.",
+      "text": "When you take the Attack action, you can expend one use of your Channel Divinity to utter a vow of enmity against a creature you can see within 30 feet of yourself. You have Advantage on attack rolls against the creature for 1 minute or until you use this feature again.\nIf the creature drops to 0 Hit Points before the vow ends, you can transfer the vow to a different creature within 30 feet of yourself (no action required).",
+      "related": [
+        "feature:vow-of-enmity"
+      ]
+    },
+    {
+      "id": "trait:draconic-ancestry",
+      "name": "Draconic Ancestry",
+      "kind": "species",
+      "origin": "Dragonborn",
+      "when": "passive",
+      "summary": "Your dragon ancestor is Black, so your Breath Weapon and your damage resistance are acid.",
+      "text": "You have a Black Dragon ancestor."
+    },
+    {
+      "id": "trait:breath-weapon",
+      "name": "Breath Weapon",
+      "kind": "species",
+      "origin": "Dragonborn",
+      "when": "action",
+      "summary": "Replace one attack with a cone or line of acid. Dexterity save for half. You can do it as many times as your proficiency bonus before a long rest.",
+      "text": "When you take the Attack action on your turn, you can replace one of your attacks with an exhalation of magical energy in either a 15-foot Cone or a 30-foot Line that is 5 feet wide (choose the shape each time). Each creature in that area must make a Dexterity saving throw (DC 8 plus your Constitution modifier and Proficiency Bonus). On a failed save, a creature takes 1d10 Acid damage. On a successful save, a creature takes half as much damage. This damage increases by 1d10 when you reach character levels 5 (2d10), 11 (3d10), and 17 (4d10).\nYou can use this Breath Weapon a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest.",
+      "related": [
+        "feature:breath-weapon"
+      ]
+    },
+    {
+      "id": "trait:damage-resistance",
+      "name": "Damage Resistance",
+      "kind": "species",
+      "origin": "Dragonborn",
+      "when": "passive",
+      "summary": "You take half damage from acid.",
+      "text": "You have resistance to Acid damage."
+    },
+    {
+      "id": "trait:darkvision",
+      "name": "Darkvision",
+      "kind": "species",
+      "origin": "Dragonborn",
+      "when": "passive",
+      "summary": "You see in dim light as if it were bright, and in darkness as if it were dim, out to 60 feet.",
+      "text": "You have Darkvision with a range of 60 feet."
+    },
+    {
+      "id": "trait:draconic-flight",
+      "name": "Draconic Flight",
+      "kind": "species",
+      "origin": "Dragonborn",
+      "when": "bonus",
+      "summary": "Once per long rest, spectral wings give you a Fly Speed equal to your Speed for 10 minutes.",
+      "text": "When you reach character level 5, you can channel draconic magic to give yourself temporary flight. As a Bonus Action, you sprout spectral wings on your back that last for 10 minutes or until you retract the wings (no action required) or have the Incapacitated condition. During that time, you have a Fly Speed equal to your Speed. Your wings appear to be made of the same energy as your Breath Weapon. Once you use this trait, you can’t use it again until you finish a Long Rest.",
+      "related": [
+        "feature:draconic-flight"
+      ]
+    },
+    {
+      "id": "trait:languages",
+      "name": "Languages",
+      "kind": "species",
+      "origin": "Dragonborn",
+      "when": "passive",
+      "summary": "You speak, read and write Common, Draconic and Orc.",
+      "text": "Your character knows at least three languages: Common plus two languages you roll or choose from the Standard Languages table. Knowledge of a language means your character can communicate in it, read it, and write it. Your class and other features might also give you languages.\nLanguages you know from your species: Common, Draconic, Orc."
+    },
+    {
+      "id": "trait:savage-attacker",
+      "name": "Savage Attacker",
+      "kind": "feat",
+      "origin": "Origin feat (Soldier background)",
+      "when": "triggered",
+      "summary": "Once per turn, when you hit with a weapon, roll its damage dice twice and use either result.",
+      "text": "You’ve trained to deal particularly damaging strikes. Once per turn when you hit a target with a weapon, you can roll the weapon’s damage dice twice and use either roll against the target."
+    },
+    {
+      "id": "trait:blessed-warrior",
+      "name": "Blessed Warrior",
+      "kind": "feat",
+      "origin": "Fighting Style (Paladin level 2)",
+      "when": "passive",
+      "summary": "Two Cleric cantrips count as Paladin spells for you, cast with Charisma. You can swap one each time you gain a Paladin level.",
+      "text": "You learn two Cleric cantrips of your choice. The chosen cantrips count as Paladin spells for you, and Charisma is your spellcasting ability for them. Whenever you gain a Paladin level, you can replace one of these cantrips with another Cleric cantrip.",
+      "related": [
+        "spell:resistance",
+        "spell:spare-the-dying"
+      ]
+    },
+    {
+      "id": "trait:weapon-mastery",
+      "name": "Weapon Mastery",
+      "kind": "feat",
+      "origin": "Paladin level 1",
+      "when": "passive",
+      "summary": "Use the mastery property of two kinds of weapon you are proficient with. You can change the kinds after a long rest.",
+      "text": "Your training with weapons allows you to use the mastery properties of two kinds of weapons of your choice with which you have proficiency.\nWhenever you finish a Long Rest, you can change the kinds of weapons you chose.\nChosen on the sheet (as of the last import): Graze (Greatsword), Cleave (Halberd)."
+    },
+    {
+      "id": "trait:dark-bargain",
+      "name": "Dark Bargain",
+      "kind": "feat",
+      "origin": "DM homebrew",
+      "when": "passive",
+      "summary": "A bargain taken at the GM’s discretion; the GM decides what it does.",
+      "text": "At your GM's discretion, you can take a Dark Bargain."
+    },
+    {
+      "id": "trait:initiate-a-circle-spell",
       "name": "Initiate a Circle Spell",
+      "kind": "homebrew",
+      "origin": "DM homebrew",
+      "when": "action",
+      "summary": "Start a Circle casting with secondary casters. You must keep Concentration on the spell until the casting is complete.",
       "text": "You take a Magic action to initiate casting a Circle spell. When you do so, choose which Circle casting option you’re using for this casting; you must also meet any of the other requirements described in that option’s text. Until the Circle spell’s casting is complete, you must maintain Concentration on the spell."
     },
     {
+      "id": "trait:circle-spell-augment",
       "name": "Circle Spell: Augment",
+      "kind": "homebrew",
+      "origin": "DM homebrew",
+      "when": "triggered",
+      "summary": "A spell with range of at least 5 ft. reaches 1,000 ft. further for each secondary caster, up to a mile.",
       "text": "When you cast a spell with a range of at least 5 ft., you can increase the range of the spell by 1,000 ft. per secondary caster contributing to the spell, up to a max of a 1-mile increase."
     },
     {
+      "id": "trait:circle-spell-distribute",
       "name": "Circle Spell: Distribute",
+      "kind": "homebrew",
+      "origin": "DM homebrew",
+      "when": "triggered",
+      "summary": "You and the secondary casters can all keep Concentration on one spell; it lasts while any one of you does.",
       "text": "When you cast a spell that requires Concentration, you can distribute the mental load of the spell among you and the secondary casters. Once the casting is complete, you and all secondary casters can maintain Concentration on this spell. As long as at least one caster who contributed to the spell maintains this Concentration, the spell’s effects remain active."
     },
     {
+      "id": "trait:circle-spell-expand",
       "name": "Circle Spell: Expand",
+      "kind": "homebrew",
+      "origin": "DM homebrew",
+      "when": "triggered",
+      "summary": "One dimension of an area grows by 10 ft. per secondary caster, and each of them spends a spell slot.",
       "text": "When you cast a spell that creates an area of effect, you can increase one dimension of the spell’s area of effect for this casting by 10 ft. per secondary caster contributing to the spell. \r\nEach secondary caster contributing to the spell must expend a spell slot (no action required). If the spell fails, these spell slots aren’t expended."
     },
     {
+      "id": "trait:circle-spell-prolong",
       "name": "Circle Spell: Prolong",
+      "kind": "homebrew",
+      "origin": "DM homebrew",
+      "when": "triggered",
+      "summary": "A spell lasting 1 minute or more runs longer for each secondary caster, and each of them spends a spell slot.",
       "text": "When you cast a spell that has a duration of 1 min or longer, you can increase the duration of the spell depending on the number of secondary casters contributing to the spell.\r\nEach secondary caster contributing to the spell must expend a spell slot (no action required). If the spell fails, these spell slots aren’t expended."
     },
     {
+      "id": "trait:circle-spell-safeguard",
       "name": "Circle Spell: Safeguard",
+      "kind": "homebrew",
+      "origin": "DM homebrew",
+      "when": "triggered",
+      "summary": "Carve a safe zone of 3 + the number of secondary casters 5-ft. Cubes out of an area spell.",
       "text": "When you cast a spell that creates an area of effect, you can carve out a safe zone within that area of effect that is unaffected by the spell for its duration. This safe zone consists of a number of 5-ft. Cubes equal to 3 + the number of secondary casters contributing to the spell (min of 1 Cube). You can arrange the Cubes as you like, but each Cube must be contiguous with at least one other Cube.\r\nIf the spell’s area of effect can be moved, the safe zone moves with it."
     },
     {
+      "id": "trait:circle-spell-supplant",
       "name": "Circle Spell: Supplant",
+      "kind": "homebrew",
+      "origin": "DM homebrew",
+      "when": "triggered",
+      "summary": "Cut the cost of a consumed Material component by 50 GP per secondary caster, who each spend a slot of the spell’s level or higher.",
       "text": "When you cast a spell that requires at least one Material component with a specified cost that is consumed by the spell, you can reduce the min cost of one such Material component by 50 GP per each secondary caster contributing to the spell.\r\nEach secondary caster contributing to the spell must expend a spell slot of a level greater than or equal to the spell’s level (no action required). If the spell fails, these spell slots aren’t expended."
     },
     {
+      "id": "trait:undead-steed-ghostly-stride",
       "name": "Undead Steed: Ghostly Stride",
-      "text": "In addition to the benefits of the Paladin’s Faithful Steed feature, when you cast Find Steed, the Otherworldly Steed can be Undead. An Undead steed deals Necrotic damage with its Otherworldly Slam action and has this Bonus Action:\r\nGhostly Stride (Undead Only; Recharges After a Long Rest). The steed and its rider can move through other creatures and objects this turn as if they were Difficult Terrain. Both steed and rider take 5 (1d10) Force damage if they end their turn inside an object."
+      "kind": "homebrew",
+      "origin": "DM homebrew",
+      "when": "bonus",
+      "summary": "An Undead Find Steed moves you both through creatures and objects this turn. Recharges on a long rest.",
+      "text": "In addition to the benefits of the Paladin’s Faithful Steed feature, when you cast Find Steed, the Otherworldly Steed can be Undead. An Undead steed deals Necrotic damage with its Otherworldly Slam action and has this Bonus Action:\r\nGhostly Stride (Undead Only; Recharges After a Long Rest). The steed and its rider can move through other creatures and objects this turn as if they were Difficult Terrain. Both steed and rider take 5 (1d10) Force damage if they end their turn inside an object.",
+      "related": [
+        "spell:find-steed"
+      ]
     }
   ]
 }

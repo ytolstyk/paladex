@@ -16,7 +16,7 @@ Today: search (full text), sort, quick chips (intent, casting time, castable now
 - [x] **Sort** the grid by level, name, range, casting time, school or role, with headings that follow the sort. *(done)*
       Still open: "most useful right now" (castable first) and a reversed order.
 - [x] **More facets**: level, range, school, save or attack, source and ritual. *(done)* Duration is still open. **S**
-- [x] **Search the full text** of spells, class features and the Other features list. *(done)*
+- [x] **Search the full text** of spells, class features and the feats and traits. *(done)*
 - [x] **Focus search with `/`** and clear it with Esc. *(done)*
 - [ ] **Hide or collapse sections**: a "Spells / Features" toggle, and collapsible level groups, for turns when you only want one. **S**
 - [x] **Remember filters** across launches (view preference, so `localStorage` like the theme, not play state). *(done)* The search text is deliberately not kept.
@@ -74,7 +74,7 @@ outside spellcasting.
 - [ ] **Inventory and attunement**: item list with charges (Protection from Evil and Good is already an item charge), weight,
       attunement slots (max 3). *(play state)* **L**
 - [ ] **Currency and consumables** (potions, spell scrolls) with a count and a "use" button. *(play state)* **M**
-- [ ] **Feats and Oath features reference**: the other-features list as searchable cards, with the same filters as spells. **M**
+- [x] **Feats and Oath features reference**: a *Feats & traits* tab with the feats, Oath features, species traits and DM homebrew as searchable cards, filtered by where they come from and when they apply. *(done; view-only, the filters are not remembered. Class features other than the Oath's, and a half-human heritage (the sheet has none), are not on it.)*
 
 ## 6. Keyboard, accessibility and display
 

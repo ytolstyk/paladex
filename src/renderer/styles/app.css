@@ -2544,35 +2544,57 @@ button.vital:hover .vital__value {
   line-height: 1.45;
 }
 
-/* ───────── Other features (reference) ───────── */
-.other-features {
-  margin-top: var(--space-5);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--gold-dim);
-  background: var(--tint-dim);
+/* ───────── Feats & traits (reference cards) ───────── */
+/* Two classes: `.spell-level__cards` is declared later and would win a tie. Wider than a spell card: a trait is a sentence or two. */
+.spell-level__cards.trait-cards {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr));
 }
-.other-features summary {
-  cursor: pointer;
+.trait-card {
+  grid-template-columns: auto 1fr;
+}
+.trait-card[data-kind='oath'] {
+  --tincture: var(--gold);
+}
+.trait-card[data-kind='species'] {
+  --tincture: var(--third);
+}
+.trait-card[data-kind='feat'] {
+  --tincture: var(--second);
+}
+.trait-card[data-kind='homebrew'] {
+  --tincture: var(--iron);
+}
+.trait-card__kind {
   color: var(--second-lit);
-  font-family: var(--font-display);
 }
-.other-features ul {
-  list-style: none;
-  margin: var(--space-3) 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
-  gap: var(--space-3) var(--space-5);
-  user-select: text;
+.trait-card .spell-card__summary {
+  -webkit-line-clamp: 3; /* a trait's one line is longer than a spell's */
 }
-.other-features h3 {
-  font-family: var(--font-display);
-  font-size: var(--step-0);
-  color: var(--bone);
+.trait-card__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
 }
-.other-features p {
+.trait-card__see {
   color: var(--bone-dim);
-  font-size: 0.92rem;
+  font-size: 0.8rem;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+}
+.trait-link {
+  padding: 0 6px;
+  background: none;
+  border: 1px solid var(--rule-strong);
+  color: var(--bone);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.trait-link:hover {
+  border-color: var(--gold-bright);
+  color: var(--gold-bright);
 }
 
 /* ───────── Settings ───────── */

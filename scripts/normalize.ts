@@ -1,12 +1,13 @@
 import { createCatalog } from '../src/renderer/domain/catalog'
 import { abilityMod, proficiencyForLevel } from '../src/renderer/domain/derived'
 import { isChoosable } from '../src/renderer/domain/prepared'
-import type { Character, CounterDef, Feature, OtherFeature, SeedData, Spell, Weapon } from '../src/shared/types'
+import type { Character, CounterDef, Feature, SeedData, Spell, Trait, Weapon } from '../src/shared/types'
 import { componentsFromCode, componentsFromDdb } from './components'
 import { ATTACK_RIDER_FEATURES, ATTACK_RIDER_SPELLS } from './data/attack-riders'
 import { AUTHORED_SPELLS } from './data/authored-spells'
 import { FEATURE_OVERLAYS } from './data/feature-overlay'
 import { SPELL_OVERLAY, type SpellOverlay } from './data/spell-overlay'
+import { IGNORED_FEATS, IGNORED_RACIAL_TRAITS, TRAIT_OVERLAYS, type TraitOverlay } from './data/trait-overlay'
 import { DICE_PATTERN, SeedSchema } from './seed-schema'
 
 // The DDB payload is large, undocumented and changes shape; this module reads only what it needs and is tolerant of the rest.
@@ -153,6 +154,7 @@ function stripDdbTags(text: string): string {
 
 export function htmlToText(html: string): string {
   return stripDdbTags(html)
+    .replace(/(<\/t[dh]>)\s*(?=<t[dh]\b)/gi, '$1 | ') // cells of one row stay on one line: "3 | Bane, Hunter’s Mark"
     .replace(/<\/(p|li|h\d|div|tr)>/gi, '\n')
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<[^<>]{0,2000}>/g, '')
@@ -467,16 +469,25 @@ export function weaponKindKey(name: string): string {
 /** One chosen mastery for one kind of weapon. Built here and read in `parseWeaponProperties`, so both sides agree. */
 const masteryKey = (mastery: string, kind: string): string => `${mastery}|${weaponKindKey(kind)}`
 
-/** The masteries the sheet lists as chosen: feat actions named like "Cleave (Halberd)". */
-function chosenMasteries(data: Json): Set<string> {
-  const chosen = new Set<string>()
+interface ChosenMastery {
+  mastery: string
+  kind: string
+  /** The feat action's own name, "Cleave (Halberd)". */
+  name: string
+}
+
+/** The masteries the sheet lists as chosen: feat actions named like "Cleave (Halberd)". The one reader, so weapon cards and the Weapon Mastery trait agree. */
+function chosenMasteryActions(data: Json): ChosenMastery[] {
+  const chosen: ChosenMastery[] = []
   for (const action of data.actions?.feat ?? []) {
     const match = /^([A-Za-z]+) \((.+)\)$/.exec(action.name ?? '')
     const [, mastery, kind] = match ?? []
-    if (mastery && kind && MASTERY_NAMES.includes(mastery)) chosen.add(masteryKey(mastery, kind))
+    if (mastery && kind && MASTERY_NAMES.includes(mastery)) chosen.push({ mastery, kind, name: action.name })
   }
   return chosen
 }
+
+const chosenMasteries = (data: Json): Set<string> => new Set(chosenMasteryActions(data).map((m) => masteryKey(m.mastery, m.kind)))
 
 /** Proficiency ids the character has (`martial-weapons`, `heavy-armor`...), from every source that applies. */
 function proficiencyIds(data: Json): Set<string> {
@@ -585,24 +596,102 @@ function markAttackRiders(spells: Spell[], features: Feature[]): { spells: Spell
   }
 }
 
-// ───────────────────────── other features ─────────────────────────
+// ───────────────────────── traits ─────────────────────────
 
-// Homebrew with no tile. This is an allowlist: a new action on the sheet is not shown until it is listed here.
-// The sheet also carries a "Death Coil" that the table never used; it is left off on purpose, do not add it.
-const HOMEBREW_PREFIXES = ['Initiate a Circle Spell', 'Circle Spell', 'Undead Steed']
+/** Where a trait's sheet entry is, as the one object whose text and level are read. Undefined when the sheet does not have it. */
+function sheetEntry(data: Json, overlay: TraitOverlay): Json | undefined {
+  switch (overlay.sheet) {
+    case 'subclass':
+      return data.classes[0]?.subclassDefinition?.classFeatures?.find((f: Json) => f.name === overlay.name)
+    case 'racial-trait':
+      return data.race?.racialTraits?.find((t: Json) => t.definition?.name === overlay.name)?.definition
+    case 'feat':
+      return data.feats?.find((f: Json) => f.definition?.name === overlay.name)?.definition
+    case 'class-option':
+      return data.options?.class?.find((o: Json) => o.definition?.name === overlay.name)?.definition
+    case 'action':
+      return allActions(data).find((a) => a.name === overlay.name)
+  }
+}
 
-function buildOtherFeatures(data: Json, ctx: PlaceholderContext): OtherFeature[] {
-  const seen = new Set<string>()
-  const out: OtherFeature[] = []
-  for (const group of Object.values<Json[]>(data.actions ?? {})) {
-    for (const action of group ?? []) {
-      const name: string = action.name ?? ''
-      if (seen.has(name) || !HOMEBREW_PREFIXES.some((p) => name.startsWith(p))) continue
-      seen.add(name)
-      out.push({ name, text: htmlToText(resolvePlaceholders(action.snippet ?? action.description ?? '', ctx)) })
+/** The sheet opens a feat's text with its category ("Origin Feat", "General Feat (Prerequisite: Level 4+)") on a line of its own. */
+const FEAT_CATEGORY_LINE = /^(Origin|General|Fighting Style|Epic Boon) Feat\b[^\n]*\n/
+
+/** The DDB modifier type of a language the species grants. */
+const LANGUAGE_MODIFIER = 'language'
+
+/** Lines the sheet spells out elsewhere that belong under a trait's own text: what was chosen, so the reference says it too. Chosen per overlay entry by `extra`. */
+const TRAIT_EXTRAS: Record<NonNullable<TraitOverlay['extra']>, (data: Json) => string | null> = {
+  'chosen-masteries': (data) => {
+    const chosen = chosenMasteryActions(data).map((m) => m.name)
+    return chosen.length > 0 ? `Chosen on the sheet (as of the last import): ${chosen.join(', ')}.` : null
+  },
+  'species-languages': (data) => {
+    const known: string[] = (data.modifiers?.race ?? []).filter((m: Json) => m.type === LANGUAGE_MODIFIER).map((m: Json) => String(m.friendlySubtypeName))
+    return known.length > 0 ? `Languages you know from your species: ${known.join(', ')}.` : null
+  }
+}
+
+function traitText(data: Json, overlay: TraitOverlay, entry: Json, ctx: PlaceholderContext, warnings: string[]): string {
+  const optionFor = (name: string): Json | undefined => data.options?.race?.find((o: Json) => o.definition?.name === name)?.definition
+  const fromOption = overlay.textFromRaceOption ? optionFor(overlay.textFromRaceOption) : undefined
+  if (overlay.textFromRaceOption && !fromOption) warnings.push(`Trait "${overlay.name}": the sheet has no species option "${overlay.textFromRaceOption}"; using the trait's own text`)
+  // A custom action's snippet is the text for that action; every other entry reads best from its full description.
+  const source: Json = fromOption ?? entry
+  const html: string = (overlay.sheet === 'action' ? (source.snippet ?? source.description) : (source.description ?? source.snippet)) ?? ''
+  const lines = htmlToText(resolvePlaceholders(html, ctx)).replace(FEAT_CATEGORY_LINE, '').split('\n')
+  const body = lines.slice(0, overlay.keepLines ?? lines.length).join('\n')
+  const extra = overlay.extra ? TRAIT_EXTRAS[overlay.extra](data) : null
+  return [body, extra].filter(Boolean).join('\n')
+}
+
+function traitOrigin(data: Json, overlay: TraitOverlay, entry: Json): string {
+  if (overlay.sheet === 'subclass') return `${data.classes[0].subclassDefinition.name}, level ${entry.requiredLevel}`
+  if (overlay.sheet === 'racial-trait') return data.race?.fullName ?? data.race?.baseRaceName ?? 'Species'
+  if (!overlay.origin) throw new Error(`scripts/data/trait-overlay.ts: "${overlay.name}" needs an origin`)
+  return overlay.origin
+}
+
+/** Warns about sheet entries the overlay neither shows nor deliberately ignores, so a new feat is never lost without a word. */
+function warnUnlistedTraits(data: Json, warnings: string[]): void {
+  const listed = (sheet: TraitOverlay['sheet']): Set<string> => new Set(TRAIT_OVERLAYS.filter((o) => o.sheet === sheet).map((o) => o.name))
+  const check = (kind: string, names: string[], shown: Set<string>, ignored: string[]): void => {
+    for (const name of names) {
+      if (!shown.has(name) && !ignored.includes(name)) warnings.push(`The sheet has ${kind} "${name}" with no entry in scripts/data/trait-overlay.ts: add it, or list it as ignored`)
     }
   }
-  return out
+  check('the feat', (data.feats ?? []).map((f: Json) => String(f.definition?.name)), listed('feat'), IGNORED_FEATS)
+  check('the species trait', (data.race?.racialTraits ?? []).map((t: Json) => String(t.definition?.name)), listed('racial-trait'), IGNORED_RACIAL_TRAITS)
+}
+
+function buildTraits(data: Json, ctx: PlaceholderContext, warnings: string[]): Trait[] {
+  warnUnlistedTraits(data, warnings)
+  const traits: Trait[] = []
+  for (const overlay of TRAIT_OVERLAYS) {
+    const entry = sheetEntry(data, overlay)
+    if (!entry) {
+      warnings.push(`Trait "${overlay.name}" skipped: the sheet has no ${overlay.sheet} entry with that name`)
+      continue
+    }
+    // An Oath feature the character has not reached yet is left out; re-seeding after a level-up brings it in.
+    if (overlay.sheet === 'subclass' && Number(entry.requiredLevel) > ctx.level) continue
+    const text = traitText(data, overlay, entry, ctx, warnings)
+    if (!text) {
+      warnings.push(`Trait "${overlay.name}" skipped: the sheet has no text for it`)
+      continue
+    }
+    traits.push({
+      id: `trait:${slugify(overlay.name)}`,
+      name: overlay.name,
+      kind: overlay.kind,
+      origin: traitOrigin(data, overlay, entry),
+      when: overlay.when,
+      summary: overlay.summary,
+      text,
+      ...(overlay.related ? { related: overlay.related } : {})
+    })
+  }
+  return traits
 }
 
 // ───────────────────────── entry point ─────────────────────────
@@ -644,7 +733,7 @@ export function normalizeDdb(payload: Json): NormalizeResult {
     weapons: buildWeapons(data, ctx, warnings)
   }
   // Parsing our own output means any drift between the importer and the types fails here, not at runtime in the app.
-  const seed = SeedSchema.parse({ character, prepared, seededUsed, otherFeatures: buildOtherFeatures(data, ctx) })
+  const seed = SeedSchema.parse({ character, prepared, seededUsed, traits: buildTraits(data, ctx, warnings) })
   createCatalog(seed) // the app's own startup invariants (unique ids, real counters, choosable prepared spells) run at generation time too
   return { seed, warnings }
 }

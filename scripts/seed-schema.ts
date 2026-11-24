@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { CAST_TIMES, ROLES } from '../src/shared/constants'
+import { CAST_TIMES, ROLES, TRAIT_KINDS, TRAIT_WHENS } from '../src/shared/constants'
 import type { SeedData } from '../src/shared/types'
 
 /**
@@ -115,6 +115,19 @@ const weapon = z
   })
   .strict()
 
+const trait = z
+  .object({
+    id: z.string().regex(/^trait:[a-z0-9-]+$/),
+    name: z.string().min(1),
+    kind: z.enum(TRAIT_KINDS),
+    origin: z.string().min(1),
+    when: z.enum(TRAIT_WHENS),
+    summary: z.string().min(1),
+    text: z.string().min(1),
+    related: z.array(z.string().regex(/^(spell|feature):[a-z0-9-]+$/)).min(1).optional()
+  })
+  .strict()
+
 const score = z.number().int().min(1).max(30)
 
 const character = z
@@ -141,6 +154,6 @@ export const SeedSchema: z.ZodType<SeedData> = z
     character,
     prepared: z.array(z.string()),
     seededUsed: z.record(z.string(), z.number().int().min(0)),
-    otherFeatures: z.array(z.object({ name: z.string().min(1), text: z.string() }).strict())
+    traits: z.array(trait)
   })
   .strict()

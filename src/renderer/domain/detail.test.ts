@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { describeDetail, detailEntry } from './detail'
-import { bless, layOnHands, testCatalog, weapon } from './testing'
+import { bless, layOnHands, testCatalog, trait, weapon } from './testing'
 
 const HEAVY = { name: 'Heavy', text: 'Disadvantage if too weak.' }
 const warhammer = weapon({
@@ -12,10 +12,14 @@ const warhammer = weapon({
   mastery: { name: 'Push', text: 'Shove it.', known: false }
 })
 const ward = weapon({ id: 'weapon:ward', name: 'The Ward', magic: true, attunement: 'not-attuned', description: 'Six charges.\n\nIt fades.' })
-const catalog = testCatalog([bless], [layOnHands], [warhammer, ward])
+const darkvision = trait({ id: 'trait:darkvision', name: 'Darkvision', kind: 'species', origin: 'Dragonborn', when: 'passive', text: 'Sixty feet.\nSee in the dark.' })
+const oathSpells = trait({ id: 'trait:oath-spells', name: 'Oath Spells', kind: 'oath', origin: 'Oath of Vengeance, level 3', related: [bless.id, layOnHands.id] })
+const catalog = testCatalog([bless], [layOnHands], [warhammer, ward], [darkvision, oathSpells])
 
 describe('detailEntry', () => {
-  it('finds a spell, a feature and a weapon by id, and nothing else', () => {
+  it('finds a spell, a feature, a weapon and a trait by id, and nothing else', () => {
+    expect(detailEntry(catalog, 'trait:darkvision')?.kind).toBe('trait')
+    expect(detailEntry(catalog, 'trait:nope')).toBeNull()
     expect(detailEntry(catalog, bless.id)?.kind).toBe('spell')
     expect(detailEntry(catalog, layOnHands.id)?.kind).toBe('feature')
     expect(detailEntry(catalog, 'weapon:warhammer')?.kind).toBe('weapon')
@@ -49,5 +53,17 @@ describe('describeDetail', () => {
     const detail = model('weapon:ward')
     expect(detail.facts.find((f) => f.label === 'Attunement')?.text).toBe('Needs attunement (not attuned)')
     expect(detail.paragraphs.map((p) => p.text)).toEqual(['Six charges.', 'It fades.'])
+  })
+
+  it('a trait says where it is from and when it applies, with a paragraph per line of its text', () => {
+    const detail = model('trait:darkvision')
+    expect(detail.title).toBe('Darkvision')
+    expect(detail.kind).toBe('Species trait')
+    expect(Object.fromEntries(detail.facts.map((f) => [f.label, f.text]))).toEqual({ From: 'Dragonborn', When: 'Always on' })
+    expect(detail.paragraphs.map((p) => p.text)).toEqual(['Sixty feet.', 'See in the dark.'])
+  })
+
+  it('a trait names the spells and tiles it points at', () => {
+    expect(model('trait:oath-spells').facts.find((f) => f.label === 'See also')?.text).toBe('Bless, Lay On Hands')
   })
 })

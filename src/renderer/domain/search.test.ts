@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { featureFoundBeyondCard, featureMatches, matchesTokens, otherFeatureMatches, searchTokens, spellFoundBeyondCard, spellMatches } from './search'
-import { layOnHands, spell } from './testing'
+import { featureFoundBeyondCard, featureMatches, matchesTokens, searchTokens, spellFoundBeyondCard, spellMatches, traitFoundBeyondCard, traitMatches } from './search'
+import { layOnHands, spell, trait } from './testing'
 
 const hunters = spell({
   name: "Hunter's Mark",
@@ -76,7 +76,7 @@ describe('what a spell is found by', () => {
   })
 })
 
-describe('features, and reference-only features', () => {
+describe('features', () => {
   it('finds a feature by name, summary and kind', () => {
     expect(featureMatches(layOnHands, searchTokens('lay on hands'))).toBe(true)
     expect(featureMatches(layOnHands, searchTokens('heal'))).toBe(true)
@@ -84,12 +84,33 @@ describe('features, and reference-only features', () => {
     expect(featureMatches(layOnHands, searchTokens('bonus action'))).toBe(true)
     expect(featureMatches(layOnHands, searchTokens('fireball'))).toBe(false)
   })
+})
 
-  it('finds a reference feature in its text', () => {
-    const circle = { name: 'Circle Spell', text: 'Once per long rest you may cast a spell of the circle.' }
-    expect(otherFeatureMatches(circle, searchTokens('long rest'))).toBe(true)
-    expect(otherFeatureMatches(circle, searchTokens('circle spell'))).toBe(true)
-    expect(otherFeatureMatches(circle, searchTokens('dragon'))).toBe(false)
+describe('feats and traits', () => {
+  const circle = trait({
+    name: 'Circle Spell: Augment',
+    kind: 'homebrew',
+    origin: 'DM homebrew',
+    when: 'triggered',
+    summary: 'A spell reaches further for each secondary caster.',
+    text: 'Once per long rest you may cast a spell of the circle.'
+  })
+  const find = (query: string, target = circle) => traitMatches(target, searchTokens(query))
+
+  it('is found by its name, summary, text, where it comes from and when it applies', () => {
+    expect(find('circle spell')).toBe(true)
+    expect(find('secondary caster')).toBe(true)
+    expect(find('long rest')).toBe(true)
+    expect(find('homebrew')).toBe(true)
+    expect(find('dm homebrew')).toBe(true)
+    expect(find('when triggered')).toBe(true)
+    expect(find('dragon')).toBe(false)
+  })
+
+  it('says a match was found beyond the card only when the card does not show the words', () => {
+    expect(traitFoundBeyondCard(circle, searchTokens('secondary caster'))).toBe(false)
+    expect(traitFoundBeyondCard(circle, searchTokens('long rest'))).toBe(true)
+    expect(traitFoundBeyondCard(circle, [])).toBe(false)
   })
 })
 

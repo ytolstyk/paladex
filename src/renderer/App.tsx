@@ -6,7 +6,6 @@ import { FilterBar } from './components/FilterBar'
 import { DetailDrawer } from './components/DetailDrawer'
 import { DiceTray } from './components/DiceTray'
 import { Footer } from './components/Footer'
-import { OtherFeatures } from './components/OtherFeatures'
 import { ResourcePanel } from './components/ResourcePanel'
 import { RecentCasts } from './components/RecentCasts'
 import { RestGlow } from './components/RestGlow'
@@ -17,6 +16,8 @@ import { STAGE_PANEL_ID, StageTabs, stageTabId } from './components/StageTabs'
 import { Toast } from './components/Toast'
 import { TablePanel } from './components/TablePanel'
 import { TimerPanel } from './components/TimerPanel'
+import { TraitMatches } from './components/TraitMatches'
+import { TraitsPage } from './components/TraitsPage'
 import { TurnChart } from './components/TurnChart'
 import { TurnPanel } from './components/TurnPanel'
 import { UndoHistory } from './components/UndoHistory'
@@ -71,18 +72,18 @@ export function App(): React.JSX.Element {
             {recovered && (
               <p className="notice">Your latest save was damaged, so the previous backup was loaded. Check your slots and HP.</p>
             )}
-            {/* Search, sort and filters describe spells, so they and the features list belong to the spells view only. */}
+            {/* Search, sort and filters describe spells, so they belong to the spells view only; the feats view has a search of its own. */}
             <div id={STAGE_PANEL_ID} className="stage-panel" role="tabpanel" aria-labelledby={stageTabId(stageTab)}>
-              {stageTab === 'spells' ? (
+              {stageTab === 'spells' && (
                 <>
                   <RecentCasts />
                   <FilterBar />
                   <SpellGrid />
-                  <OtherFeatures />
+                  <TraitMatches />
                 </>
-              ) : (
-                <AttacksPage />
               )}
+              {stageTab === 'attacks' && <AttacksPage />}
+              {stageTab === 'traits' && <TraitsPage />}
             </div>
           </main>
         </>

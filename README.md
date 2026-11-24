@@ -18,7 +18,7 @@ showing ("11 spells and 6 features").
 - **Search** (press `/` to jump to it, Esc clears it). Every word must appear somewhere in the spell, in any order: its name,
   summary, full description, school, range, duration, role, casting time, level and source. Apostrophes and case do not
   matter ("hunters mark" finds Hunter's Mark). A card that matched only through text it doesn't show says "Found in the
-  full text". Search also reaches class features and the Other features list.
+  full text". Search also reaches class features, and shows the feats and traits that match below the spells.
 - **Sort by** Level (the default), Name, Range (nearest first), Casting time, School or What it does. The headings follow the
   sort, so under Range the cards sit under Self, Touch, Up to 30 ft, 31 to 60 ft and Over 60 ft.
 - **Quick filters**: Hurt enemies / Help allies / Utility, Action / Bonus action / Reaction, Castable now, and Show all
@@ -77,8 +77,8 @@ The top of the left rail holds two things you carry from the table into your own
 
 ## Weapons and attacks
 
-The strip above the stage has two tabs: **Spells & features** and **Weapons & attacks**. The search bar, sort and filters belong to
-the spells tab only (so `/` does nothing on the other one), and the tab you are on is not remembered between launches.
+The strip above the stage has three tabs: **Spells & features**, **Weapons & attacks** and **Feats & traits**. The spell search bar, sort and
+filters belong to the spells tab only, and the tab you are on is not remembered between launches. `/` jumps to the search of whichever tab has one.
 
 - **Weapons.** Every weapon on the D&D Beyond sheet, magic first, each with its to-hit, damage, reach or range, properties and
   weapon mastery. Click one for the rules text of each property. The numbers come from your ability scores and proficiency (hover
@@ -93,6 +93,21 @@ the spells tab only (so `/` does nothing on the other one), and the tab you are 
 - **Attack options.** The spells and features that go with an attack, as ordinary cards you can cast or use right there: Smites,
   Hunter's Mark, Divine Favor, Magic Weapon, Vow of Enmity and Breath Weapon (the list is `scripts/data/attack-riders.ts`).
   Spells you have not prepared are left out and counted in a line under the cards. These cards ignore the spell filters.
+
+## Feats and traits
+
+The **Feats & traits** tab is the reference for everything that has no tile of its own, as cards under a heading each: the Oath of Vengeance
+features you have reached (the Oath spells, Vow of Enmity), your Dragonborn traits (Draconic Ancestry, Breath Weapon, Damage Resistance,
+Darkvision, Draconic Flight, Languages), your feats (Savage Attacker, the Blessed Warrior Fighting Style, Weapon Mastery, Dark Bargain) and the DM's
+homebrew (the Circle spell options, Undead Steed). Nothing here is spent or saved.
+
+- Each card has a round badge for when it applies (**P** always on, **A** action, **B** bonus action, **R** reaction, **If** when something
+  triggers it), a one-line summary and "See also" buttons that open the spells and tiles it grants (the Oath spells, Breath Weapon). Press the card for its full text.
+- **Search** (`/`) reads the name, summary and full text, and the chips narrow by where it comes from (Oath, Species, Feats, Homebrew) and when it applies.
+  The chips offered are the ones you have. The search and chips are not remembered between launches.
+- While you search on the spells tab, the feats and traits that match appear under the spell cards.
+- Re-seeding after a level-up brings in the Oath features you have reached (Relentless Avenger at 7, Soul of Vengeance at 15, Avenging Angel at 20).
+  What is listed, and each summary, is `scripts/data/trait-overlay.ts`; a feat or species trait the sheet has that is not there makes `npm run seed` warn.
 
 ## The turn and the turn chart
 

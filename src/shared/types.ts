@@ -1,11 +1,13 @@
 // Domain types shared by main, preload and renderer. Type-only imports: nothing here ships at runtime.
-import type { CAST_TIMES, ROLES } from './constants'
+import type { CAST_TIMES, ROLES, TRAIT_KINDS, TRAIT_WHENS } from './constants'
 
 export type Role = (typeof ROLES)[number]
 export type Target = 'enemy' | 'ally' | 'self'
 /** A "Magic action" in 2024 wording is just an Action. */
 export type CastTime = (typeof CAST_TIMES)[number]
 export type SpellSource = 'class' | 'oath' | 'feature' | 'item' | 'cantrip'
+export type TraitKind = (typeof TRAIT_KINDS)[number]
+export type TraitWhen = (typeof TRAIT_WHENS)[number]
 
 /** One way a spell *may* be paid for. A spell lists its options in preference order. */
 export type CostOption =
@@ -103,7 +105,7 @@ export interface Feature {
   summary: string
   /** Full text from the sheet, plain text. */
   description?: string
-  /** `homebrew` has no importer producer today (tile-less homebrew goes to `OtherFeature`); it stays for hand-written seed entries. */
+  /** `homebrew` has no importer producer today (homebrew with no counter is a read-only `Trait`); it stays for hand-written seed entries. A thing spent from a counter is a `Feature`; reference text only is a `Trait`. */
   source: 'class' | 'race' | 'homebrew'
   /** The counter this is spent from. */
   counterId: string
@@ -181,12 +183,27 @@ export interface SeedData {
   prepared: string[]
   /** Counters whose `used` amount seeds from DDB (e.g. consumable item charges). */
   seededUsed: Record<string, number>
-  /** Read-only features shown for reference (DM homebrew etc.), with placeholders already resolved. */
-  otherFeatures: OtherFeature[]
+  /** Feats, Oath features, species traits and DM homebrew shown for reference, with placeholders already resolved. */
+  traits: Trait[]
 }
 
-export interface OtherFeature {
+/**
+ * A feat, Oath feature, species trait or piece of DM homebrew with no tile of its own: read-only reference on the Feats & traits
+ * page. Nothing is spent from a counter (a thing with a use count is a `Feature`); `related` points at the spells and tiles it
+ * gives or works with, so the card can open them.
+ */
+export interface Trait {
+  /** Stable id, `trait:<slug>`. */
+  id: string
   name: string
-  /** Plain text. */
+  kind: TraitKind
+  /** Where it comes from, as a player says it: "Oath of Vengeance, level 3", "Dragonborn", "Origin feat (Soldier)". */
+  origin: string
+  when: TraitWhen
+  /** One line, in our own words. */
+  summary: string
+  /** Full text from the sheet, plain text, with placeholders resolved. */
   text: string
+  /** Ids of spells and features it grants or works with (`spell:...` / `feature:...`). Each must exist in the catalog. */
+  related?: string[]
 }

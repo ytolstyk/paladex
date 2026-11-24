@@ -110,6 +110,39 @@ describe('stage tab', () => {
   })
 })
 
+describe('feats and traits filters', () => {
+  it('start empty, toggle chips and the search, clear together, and are never written to storage', async () => {
+    const storage = fakeStorage()
+    const { useUiStore } = await loadStore(storage)
+    const ui = useUiStore.getState()
+    expect(ui.traitFilters).toEqual({ query: '', kinds: [], whens: [] })
+    ui.setTraitQuery('wings')
+    ui.toggleTraitKind('species')
+    ui.toggleTraitWhen('bonus')
+    ui.toggleTraitWhen('passive')
+    ui.toggleTraitWhen('bonus')
+    expect(useUiStore.getState().traitFilters).toEqual({ query: 'wings', kinds: ['species'], whens: ['passive'] })
+    useUiStore.getState().clearTraitFilters()
+    expect(useUiStore.getState().traitFilters).toEqual({ query: '', kinds: [], whens: [] })
+    expect(storage.writes).toEqual([])
+  })
+
+  it('are separate from the spell filters, so a search on one tab does not follow you to the other', async () => {
+    const { useUiStore } = await loadStore(fakeStorage())
+    useUiStore.getState().setQuery('bless')
+    useUiStore.getState().setTraitQuery('wings')
+    expect(useUiStore.getState().filters.query).toBe('bless')
+    useUiStore.getState().clear()
+    expect(useUiStore.getState().traitFilters.query).toBe('wings')
+  })
+
+  it('open as a tab of their own', async () => {
+    const { useUiStore } = await loadStore(fakeStorage())
+    useUiStore.getState().setStageTab('traits')
+    expect(useUiStore.getState().stageTab).toBe('traits')
+  })
+})
+
 describe('turn chart', () => {
   it('starts closed, toggles, closes, and is never written to storage', async () => {
     const storage = fakeStorage()

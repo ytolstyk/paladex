@@ -1,5 +1,5 @@
 import type { TurnStep } from '@shared/constants'
-import type { CastTime, Payment, Role, SpellSource, Weapon } from '@shared/types'
+import type { CastTime, Payment, Role, SpellSource, TraitKind, TraitWhen, Weapon } from '@shared/types'
 import { roman } from './derived'
 
 /** Display vocabulary, defined once. Typed as Records so a new role or cast time is a compile error until it is named. */
@@ -27,6 +27,35 @@ export const SOURCE_LABEL: Record<SpellSource, string> = {
   feature: 'Feature',
   item: 'Item',
   cantrip: 'Cantrip'
+}
+
+/** What a feat, Oath feature, species trait or piece of homebrew is called in a card's meta line and the drawer. */
+export const TRAIT_KIND_LABEL: Record<TraitKind, string> = {
+  oath: 'Oath feature',
+  species: 'Species trait',
+  feat: 'Feat',
+  homebrew: 'DM homebrew'
+}
+
+/** The same, as the short word on a filter chip. */
+export const TRAIT_KIND_CHIP: Record<TraitKind, string> = { oath: 'Oath', species: 'Species', feat: 'Feats', homebrew: 'Homebrew' }
+
+/** When a trait does anything: "Always on" for a passive one, the action it takes, or "When triggered" (on a hit, on a cast). */
+export const TRAIT_WHEN_LABEL: Record<TraitWhen, string> = {
+  passive: 'Always on',
+  action: CAST_LABEL.action,
+  bonus: CAST_LABEL.bonus,
+  reaction: CAST_LABEL.reaction,
+  triggered: 'When triggered'
+}
+
+/** The letter in the roundel on a trait card: the action it takes, P for always on, "If" for something that must happen first. */
+export const TRAIT_WHEN_LETTER: Record<TraitWhen, string> = {
+  passive: 'P',
+  action: CAST_LETTER.action,
+  bonus: CAST_LETTER.bonus,
+  reaction: CAST_LETTER.reaction,
+  triggered: 'If'
 }
 
 /**

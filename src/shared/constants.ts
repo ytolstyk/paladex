@@ -10,6 +10,10 @@ export const ROLES = ['offense', 'control', 'support', 'utility'] as const
 /** `long` = anything slower than an action, e.g. a 10-minute or 1-hour cast (see `Spell.castingNote`). */
 export const CAST_TIMES = ['action', 'bonus', 'reaction', 'long'] as const
 export const PAYMENT_KINDS = ['slot', 'free', 'charge', 'none'] as const
+/** Where a reference trait comes from, in the order the Feats & traits page lists them. */
+export const TRAIT_KINDS = ['oath', 'species', 'feat', 'homebrew'] as const
+/** When a trait does anything: always, or on the action it takes, or when something happens (a hit, a cast). */
+export const TRAIT_WHENS = ['passive', 'action', 'bonus', 'reaction', 'triggered'] as const
 export const LOG_KINDS = [
   'seed',
   'cast',

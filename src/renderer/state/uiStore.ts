@@ -1,10 +1,11 @@
 import { create } from 'zustand'
-import type { CastTime } from '@shared/types'
+import type { CastTime, TraitKind, TraitWhen } from '@shared/types'
 import type { DiceRoll } from '@/domain/dice'
 import type { FacetId } from '@/domain/facets'
 import { NO_FILTERS, type Filters, type Intent } from '@/domain/filters'
 import type { SortKey } from '@/domain/order'
 import type { RestKind } from '@/domain/rests'
+import { NO_TRAIT_FILTERS, type TraitFilters } from '@/domain/traits'
 import { DEFAULT_VIEW_PREFS, parseViewPrefs, serializeViewPrefs, type ViewPrefs } from '@/domain/viewPrefs'
 
 /** localStorage key for the remembered filters and sort. A view preference like the theme: never in the play state. */
@@ -13,9 +14,9 @@ export const VIEW_STORAGE_KEY = 'paladex.view'
 export type ViewId = 'sheet' | 'settings'
 
 /** Which view of the sheet's stage is showing. In-session only: like the settings page it is not a filter, so it is not remembered. */
-export type StageTab = 'spells' | 'attacks'
+export type StageTab = 'spells' | 'attacks' | 'traits'
 
-/** The id of the search field, so a keyboard shortcut (`/`) can focus it without reaching into a component. */
+/** The id of the search field (on the spells tab and on the Feats & traits tab, never both at once), so `/` can focus it without reaching into a component. */
 export const SEARCH_INPUT_ID = 'spell-search'
 
 /** The yes/no filters; each is one toggle on the bar or in the filter panel. */
@@ -70,6 +71,12 @@ interface UiStore {
   setQuery(query: string): void
   /** Clears the narrowing filters; keeps the "show all" view choice. */
   clear(): void
+  /** What the Feats & traits tab is narrowed by. In-session like the tab itself: not remembered between launches. */
+  traitFilters: TraitFilters
+  setTraitQuery(query: string): void
+  toggleTraitKind(kind: TraitKind): void
+  toggleTraitWhen(when: TraitWhen): void
+  clearTraitFilters(): void
 }
 
 function readStoredView(): ViewPrefs {
@@ -123,7 +130,12 @@ export const useUiStore = create<UiStore>((set) => ({
     })),
   setFlag: (flag, on) => set((s) => ({ filters: { ...s.filters, [flag]: on } })),
   setQuery: (query) => set((s) => ({ filters: { ...s.filters, query } })),
-  clear: () => set((s) => ({ filters: { ...NO_FILTERS, showAll: s.filters.showAll } }))
+  clear: () => set((s) => ({ filters: { ...NO_FILTERS, showAll: s.filters.showAll } })),
+  traitFilters: NO_TRAIT_FILTERS,
+  setTraitQuery: (query) => set((s) => ({ traitFilters: { ...s.traitFilters, query } })),
+  toggleTraitKind: (kind) => set((s) => ({ traitFilters: { ...s.traitFilters, kinds: toggleIn(s.traitFilters.kinds, kind) } })),
+  toggleTraitWhen: (when) => set((s) => ({ traitFilters: { ...s.traitFilters, whens: toggleIn(s.traitFilters.whens, when) } })),
+  clearTraitFilters: () => set({ traitFilters: NO_TRAIT_FILTERS })
 }))
 
 // Remember the filters and sort. Keystrokes in the search box replace `filters` too, but the search text is not kept, so

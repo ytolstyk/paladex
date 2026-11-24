@@ -1,6 +1,6 @@
 // Shared test fixtures. Not imported by app code.
 import type { PlayState } from '@shared/schema'
-import type { CounterDef, Feature, SeedData, Spell, Weapon } from '@shared/types'
+import type { CounterDef, Feature, SeedData, Spell, Trait, Weapon } from '@shared/types'
 import { createCatalog, type Catalog } from './catalog'
 import { seedPlayState } from './hydrate'
 import { isChoosable } from './prepared'
@@ -100,6 +100,20 @@ export const protection = spell({
 })
 export const guidance = spell({ id: 'spell:guidance', name: 'Guidance', level: 0, source: 'cantrip', costs: [{ kind: 'none' }] })
 
+/** A reference trait; override what the test is about. */
+export function trait(over: Partial<Trait> = {}): Trait {
+  return {
+    id: 'trait:test',
+    name: 'Test',
+    kind: 'feat',
+    origin: 'Test',
+    when: 'passive',
+    summary: 'A test trait.',
+    text: 'The full text of a test trait.',
+    ...over
+  }
+}
+
 /** A melee weapon with Havel's proficiency; override what the test is about. */
 export function weapon(over: Partial<Weapon> = {}): Weapon {
   return {
@@ -119,7 +133,8 @@ export function weapon(over: Partial<Weapon> = {}): Weapon {
 export function testCatalog(
   spells: Spell[] = [smite, bless, holdPerson, protection, guidance, cure, mistyStep],
   features: Feature[] = [layOnHands, vowOfEnmity],
-  weapons: Weapon[] = []
+  weapons: Weapon[] = [],
+  traits: Trait[] = []
 ): Catalog {
   const seed: SeedData = {
     character: {
@@ -141,7 +156,7 @@ export function testCatalog(
     // Like the real sheet: choosable spells start chosen, except the item-granted one (it is cast from the Ward instead).
     prepared: spells.filter((s) => isChoosable(s) && s.source !== 'item').map((s) => s.id),
     seededUsed: {},
-    otherFeatures: []
+    traits
   }
   return createCatalog(seed)
 }

@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest'
 import type { SeedData } from '@shared/types'
 import { seed } from '@/data/character'
 import { createCatalog } from './catalog'
-import { bless, guidance, layOnHands, protection, spell, testCounters, weapon } from './testing'
+import { bless, guidance, layOnHands, protection, spell, testCounters, trait, weapon } from './testing'
 
 function seedWith(spells: SeedData['character']['spells'], seededUsed: Record<string, number> = {}): SeedData {
   const base = createCatalog({ ...seed }).character
-  return { character: { ...base, spells, counters: testCounters, features: [] }, prepared: [], seededUsed, otherFeatures: [] }
+  return { character: { ...base, spells, counters: testCounters, features: [] }, prepared: [], seededUsed, traits: [] }
 }
 
 describe('createCatalog', () => {
@@ -99,5 +99,31 @@ describe('weapons', () => {
 
   it('the real seed carries its weapons', () => {
     expect(createCatalog(seed).weapons.map((w) => w.name)).toContain('Warhammer')
+  })
+})
+
+describe('traits', () => {
+  const withTraits = (traits: SeedData['traits']): SeedData => ({ ...seedWith([bless]), character: { ...seedWith([bless]).character, features: [layOnHands] }, traits })
+
+  it('finds a trait by id and names it', () => {
+    const catalog = createCatalog(withTraits([trait({ id: 'trait:a', name: 'Alpha' })]))
+    expect(catalog.traitById('trait:a')?.name).toBe('Alpha')
+    expect(catalog.nameOf('trait:a')).toBe('Alpha')
+    expect(catalog.traitById('trait:b')).toBeUndefined()
+  })
+
+  it('accepts a trait that points at a real spell and feature', () => {
+    expect(() => createCatalog(withTraits([trait({ related: [bless.id, layOnHands.id] })]))).not.toThrow()
+  })
+
+  it('rejects a trait that points at something that does not exist, and duplicate ids', () => {
+    expect(() => createCatalog(withTraits([trait({ related: ['spell:nope'] })]))).toThrow(/unknown spell or feature "spell:nope"/)
+    expect(() => createCatalog(withTraits([trait(), trait()]))).toThrow(/duplicate trait id/)
+  })
+
+  it('rejects a kind or timing the cards could not label, and a seed with no traits list', () => {
+    expect(() => createCatalog(withTraits([trait({ kind: 'mystery' as never })]))).toThrow(/unknown kind or timing/)
+    expect(() => createCatalog(withTraits([trait({ when: 'sometimes' as never })]))).toThrow(/unknown kind or timing/)
+    expect(() => createCatalog({ ...withTraits([]), traits: undefined as never })).toThrow(/no traits list/)
   })
 })

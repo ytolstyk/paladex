@@ -9,6 +9,7 @@ const OWN_ACTION = 'button:not(.name-button), input, select, textarea, a, label,
  */
 export function opensDetail(target: EventTarget | null): boolean {
   if (!(target instanceof Element)) return false
-  if (target.closest('.recent-chip') !== null) return true // a "Recently cast" chip opens the drawer the same way
+  // A "Recently cast" chip and a trait card's "See also" button open the drawer the same way, so a press on one switches it instead of closing it first.
+  if (target.closest('.recent-chip, .trait-link') !== null) return true
   return target.closest('.spell-card') !== null && target.closest(OWN_ACTION) === null
 }

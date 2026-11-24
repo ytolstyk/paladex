@@ -1,4 +1,6 @@
-import type { Character, CounterDef, Feature, OtherFeature, SeedData, Spell, SpellComponents, Weapon } from '@shared/types'
+// Relative, not `@shared`: the seed script (tsx, outside Vite) loads this file and cannot resolve the alias at runtime.
+import { TRAIT_KINDS, TRAIT_WHENS } from '../../shared/constants'
+import type { Character, CounterDef, Feature, SeedData, Spell, SpellComponents, Trait, Weapon } from '@shared/types'
 import { isChoosable } from './prepared'
 import { paladinSlotCapacity } from './slots'
 
@@ -18,12 +20,13 @@ export interface Catalog {
   features: Feature[]
   /** Carried weapons, magic first. Informational: attack numbers are derived from the abilities in `domain/attacks.ts`. */
   weapons: Weapon[]
-  /** Read-only reference features (DM homebrew etc.). */
-  otherFeatures: OtherFeature[]
+  /** Read-only reference: feats, Oath features, species traits and DM homebrew, in the order the Feats & traits page lists them. */
+  traits: Trait[]
   spellById(id: string): Spell | undefined
   featureById(id: string): Feature | undefined
   weaponById(id: string): Weapon | undefined
-  /** Display name of a spell, feature or weapon, falling back to the id. */
+  traitById(id: string): Trait | undefined
+  /** Display name of a spell, feature, weapon or trait, falling back to the id. */
   nameOf(id: string): string
   counterById(id: string): CounterDef | undefined
 }
@@ -45,6 +48,21 @@ function assertUniqueIds(kind: string, items: readonly { id: string }[]): void {
   for (const { id } of items) {
     if (seen.has(id)) throw new Error(`Seed data has duplicate ${kind} id: ${id}`)
     seen.add(id)
+  }
+}
+
+/** The renderer cannot run zod over the seed, so check what a trait card indexes or follows without a guard. */
+function assertTraits(seed: SeedData): void {
+  if (!Array.isArray(seed.traits)) throw new Error('Seed data has no traits list; regenerate the seed (npm run seed)')
+  assertUniqueIds('trait', seed.traits)
+  const known = new Set([...seed.character.spells, ...seed.character.features].map((thing) => thing.id))
+  for (const trait of seed.traits) {
+    if (!TRAIT_KINDS.includes(trait.kind) || !TRAIT_WHENS.includes(trait.when)) {
+      throw new Error(`Trait "${trait.name}" has an unknown kind or timing; regenerate the seed (npm run seed)`)
+    }
+    for (const id of trait.related ?? []) {
+      if (!known.has(id)) throw new Error(`Trait "${trait.name}" points at unknown spell or feature "${id}"`)
+    }
   }
 }
 
@@ -81,6 +99,7 @@ function assertCatalogInvariants(seed: SeedData): void {
   }
   assertUniqueIds('weapon', character.weapons)
   character.weapons.forEach(assertWeaponShape)
+  assertTraits(seed)
   for (const id of seed.prepared) {
     const spell = character.spells.find((s) => s.id === id)
     if (!spell) throw new Error(`Seed prepared list references unknown spell "${id}"`)
@@ -99,6 +118,7 @@ export function createCatalog(seed: SeedData): Catalog {
   const spellMap = new Map(character.spells.map((s) => [s.id, s]))
   const featureMap = new Map(character.features.map((f) => [f.id, f]))
   const weaponMap = new Map(character.weapons.map((w) => [w.id, w]))
+  const traitMap = new Map(seed.traits.map((t) => [t.id, t]))
   const counterMap = new Map(character.counters.map((c) => [c.id, c]))
 
   return {
@@ -110,11 +130,12 @@ export function createCatalog(seed: SeedData): Catalog {
     spells: character.spells,
     features: character.features,
     weapons: character.weapons,
-    otherFeatures: seed.otherFeatures,
+    traits: seed.traits,
     spellById: (id) => spellMap.get(id),
     featureById: (id) => featureMap.get(id),
     weaponById: (id) => weaponMap.get(id),
-    nameOf: (id) => spellMap.get(id)?.name ?? featureMap.get(id)?.name ?? weaponMap.get(id)?.name ?? id,
+    traitById: (id) => traitMap.get(id),
+    nameOf: (id) => spellMap.get(id)?.name ?? featureMap.get(id)?.name ?? weaponMap.get(id)?.name ?? traitMap.get(id)?.name ?? id,
     counterById: (id) => counterMap.get(id)
   }
 }

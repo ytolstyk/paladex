@@ -3,13 +3,18 @@ import type { CastTime, Payment, SpellComponents } from '@shared/types'
 import { COMPONENT_KINDS, componentsTitle, componentWords } from '@/domain/components'
 import { CAST_LABEL, CAST_LETTER, paymentLabel } from '@/domain/labels'
 
-/** The round badge on a card: A, B, R or T for the action it takes. Bonus actions are filled so they stand out. */
-export function CastRoundel({ castTime }: { castTime: CastTime }): React.JSX.Element {
+/** The round badge on a card. `time` is the style hook: a bonus action is filled and a reaction dashed (`.roundel[data-time]`). */
+export function Roundel({ time, label, letter }: { time: string; label: string; letter: string }): React.JSX.Element {
   return (
-    <span className="roundel" data-time={castTime} title={CAST_LABEL[castTime]} aria-label={CAST_LABEL[castTime]}>
-      {CAST_LETTER[castTime]}
+    <span className="roundel" data-time={time} title={label} aria-label={label}>
+      {letter}
     </span>
   )
+}
+
+/** The badge for the action a spell or feature takes: A, B, R or T. */
+export function CastRoundel({ castTime }: { castTime: CastTime }): React.JSX.Element {
+  return <Roundel time={castTime} label={CAST_LABEL[castTime]} letter={CAST_LETTER[castTime]} />
 }
 
 /**

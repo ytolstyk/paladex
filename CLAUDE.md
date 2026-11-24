@@ -59,8 +59,8 @@ schema, vitest for tests. See README.md for scripts and layout.
 
 ## Weapons tab
 
-- `uiStore.stageTab` (`'spells' | 'attacks'`) picks the stage's view; it is in-session view state, not in `viewPrefs`. FilterBar, SpellGrid
-  and OtherFeatures render only on the spells tab. The tab strip (`StageTabs`) is sticky; `.filter-bar` sticks below it by
+- `uiStore.stageTab` (`'spells' | 'attacks' | 'traits'`) picks the stage's view; it is in-session view state, not in `viewPrefs`. FilterBar, SpellGrid
+  and TraitMatches render only on the spells tab. The tab strip (`StageTabs`) is sticky; `.filter-bar` sticks below it by
   `--tabs-height`, so change that token if the strip's height changes.
 - Weapons are seed data (`Character.weapons`, from the sheet's inventory by `buildWeapons` in `scripts/normalize.ts`). Attack numbers are
   never stored: `domain/attacks.ts` derives them from abilities, so they are BASE numbers (no spell or magic bonus). There is no
@@ -72,6 +72,19 @@ schema, vitest for tests. See README.md for scripts and layout.
 - `WeaponCard` keeps the `spell-card` class so `opensDetail` treats a press on it like a spell card press (the drawer switches instead of
   closing). Weapon ids (`weapon:<slug>`, repeats get `-2`) go through `detailId` like spells and features.
 - DDB's reference tags (`[rules]x[/rules]`, `[wprop]Thrown[/wprop]`, `[action]A;B[/action]`) are flattened by `htmlToText`.
+
+## Feats and traits
+
+- `SeedData.traits` (`Trait` in `shared/types.ts`: `kind` oath/species/feat/homebrew, `when` passive/action/bonus/reaction/triggered, `summary`, `text`, `related` ids) replaced `otherFeatures`.
+  A trait is reference only: a thing with a use count is a `Feature` with a counter. `kind` and `when` lists are `TRAIT_KINDS` / `TRAIT_WHENS` in `shared/constants.ts`.
+- `scripts/data/trait-overlay.ts` is an allowlist (which sheet entries, `when`, our own one-line summary, `related`); the text always comes from the sheet. `buildTraits` in
+  `normalize.ts` skips an Oath feature above the character's level (a re-seed after level-up shows it), reads the chosen dragon's text (`textFromRaceOption`), appends what the sheet
+  chose elsewhere (`TRAIT_EXTRAS`: languages, weapon masteries) and warns about a sheet feat or species trait that is neither listed nor in `IGNORED_FEATS` / `IGNORED_RACIAL_TRAITS`. Summaries must not
+  carry numbers a level-up changes. `related` ids are checked in `createCatalog`, so a rename fails at seed time. Death Coil stays out (see memory): do not add it as homebrew.
+- `catalog.ts` is loaded by the seed script (tsx, no Vite aliases), so it imports `../../shared/constants` relatively. Keep runtime `@shared` imports out of anything `normalize.ts` reaches.
+- View state: `uiStore.traitFilters` (query, kinds, whens), in-session, separate from the spell `filters` and not remembered. Pure logic is `domain/traits.ts` (`filterTraits`, `groupTraits`);
+  search is `traitMatches` in `search.ts`. `TraitsPage` owns the tab's search input and uses `SEARCH_INPUT_ID` (only one tab renders at a time, so `/` works on both). `TraitCard` keeps the
+  `spell-card` class so `opensDetail` treats it like a spell card; its "See also" buttons are their own action. The detail drawer shows a trait through `detailEntry` (`kind: 'trait'`).
 
 ## The turn, and the turn chart
 

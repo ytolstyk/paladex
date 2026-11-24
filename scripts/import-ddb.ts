@@ -45,7 +45,7 @@ async function main(): Promise<void> {
   const c = seed.character
   console.log(`Wrote ${OUT_PATH}`)
   console.log(`${c.name}: ${c.race} ${c.className} ${c.level}, HP ${c.hpMax}, AC ${c.ac}`)
-  console.log(`${c.spells.length} spells, ${c.counters.length} counters, ${seed.otherFeatures.length} other features`)
+  console.log(`${c.spells.length} spells, ${c.counters.length} counters, ${seed.traits.length} feats and traits`)
   console.log(`prepared (chosen): ${seed.prepared.join(', ') || 'none'}`)
   for (const w of warnings) console.warn(`WARNING: ${w}`)
 }
