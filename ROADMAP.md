@@ -38,6 +38,7 @@ are soft hints.
 - [ ] **Concentration target note**: "Hunter's Mark on the ogre". A one-line field on the active concentration. *(play state)* **S**
 - [ ] **Concentration check helper** when taking damage: show the DC (10, or half the damage if higher) and your save bonus. **S**
 - [ ] **Damage and dice helper** for Divine Smite and friends: dice by slot level, crit doubling, and a roller that logs the result. **M**
+- [x] **Dice tray** for initiative (d20 + Dexterity, with Advantage or Disadvantage) and the Bardic Inspiration die: a card where the dice tumble and land, then set the dial or spend the die. *(done; damage dice for Smite and a general roller are still the open part of the item above)*
 - [ ] **Undo history list**, not only the last step: show the last 10 changes and undo back to a chosen one. **M**
 
 ## 3. Preparing spells

@@ -16,6 +16,7 @@ function isTypingTarget(el: EventTarget | null): boolean {
  * ignored (a held key must not fire dozens of actions). Z, N, T and / are also ignored while typing; the settings toggle is
  * not, since a comma with a modifier is never text. N and T do nothing on the settings page, where it would be a hidden side effect; Undo stays
  * live there because it is visible in the footer and the toast, which both remain on screen.
+ * None of them act while the dice tray is open.
  * The Edit menu deliberately has no Undo item, so Cmd+Z reaches us.
  */
 export function useShortcuts(): void {
@@ -25,6 +26,8 @@ export function useShortcuts(): void {
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       if (e.repeat) return
+      // The dice tray owns the keyboard while it is open (its own Esc closes it); the sheet behind it must not change under a roll.
+      if (useUiStore.getState().roll) return
       const key = e.key.toLowerCase()
       const hasCommandKey = e.metaKey || e.ctrlKey
 

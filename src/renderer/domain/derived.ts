@@ -9,6 +9,11 @@ export function proficiencyForLevel(level: number): number {
   return Math.ceil(level / 4) + 1
 }
 
+/** Initiative is a Dexterity check, so its modifier is Dexterity's. A later flat bonus (the Alert feat, say) joins here. */
+export function initiativeModifier(c: Pick<Character, 'abilities'>): number {
+  return abilityMod(c.abilities.dex)
+}
+
 export function signed(n: number): string {
   return n >= 0 ? `+${n}` : `${n}`
 }

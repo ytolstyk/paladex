@@ -43,6 +43,20 @@ schema, vitest for tests. See README.md for scripts and layout.
 - The dial's geometry is in `domain/dial.ts`; the component only draws and handles input. A drag saves once, on release, so it
   is one undo step; typed or arrow-key changes coalesce through the `initiative` undo key.
 
+## Dice tray
+
+- `domain/dice.ts` (pure, `Rand` injected, `secureRand` by default) decides every roll: `rollInitiative(modifier, mode)` (d20 + `initiativeModifier`, 1 or 2 dice, the
+  result held to the dial's 1 to 25 with `wasClamped`) and `rollInspiration(sides)`. `state/rolls.ts` is the only caller: it rolls, **writes the outcome to the sheet
+  at once** through the ordinary actions (`commitRoll`: `setInitiative(result)`, or `setInspirationHeld(false)`), then puts the roll in `uiStore.roll` (view state, never saved).
+  A roll is therefore an undoable change and a log line whether or not anyone watches. Initiative is an `edit` that coalesces (2 s), so a quick reroll shares an undo step
+  with the roll before it, and a reroll that lands on the same number changes nothing.
+- `DiceTray` only plays the roll back. Its `Tray` shell (scrim, card, Esc, Tab trap, focus return) stays mounted across rerolls; only `RollBody` is keyed by roll id.
+  While it is open the sheet's shortcuts are off (`useShortcuts` returns early when `uiStore.roll` is set). Esc, the scrim and Done just close it, since nothing is pending.
+  `TUMBLE_MS` and `DIE_STAGGER_MS` reach the stylesheet as `--tumble-ms` / `--die-delay`, so the JS landing timer and the CSS animation share one number. With reduced motion
+  the dice are down at once (animations are also `none` by the global rule, so everything shown must be visible in its base state).
+- `Die.tsx` holds the die shapes (d6 to d12 for the Bard, d20 for the tray); add a size there and to `DieSides`.
+- A roll does not feed the turn tracker or the weapons tab, and the log keeps only the result (not the d20 or the modifier). A general roller and damage dice are still on the roadmap.
+
 ## Weapons tab
 
 - `uiStore.stageTab` (`'spells' | 'attacks'`) picks the stage's view; it is in-session view state, not in `viewPrefs`. FilterBar, SpellGrid

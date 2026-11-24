@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { abilityMod, concentrationDc, roman, signed, spellAttackBonus, spellSaveDc } from './derived'
+import { abilityMod, concentrationDc, initiativeModifier, roman, signed, spellAttackBonus, spellSaveDc } from './derived'
 
 const ref = JSON.parse(readFileSync('data/fixtures/ddb-reference.json', 'utf8'))
 const havel = {
@@ -39,6 +39,11 @@ describe('helpers', () => {
     expect(concentrationDc(20)).toBe(10)
     expect(concentrationDc(22)).toBe(11)
     expect(concentrationDc(41)).toBe(20)
+  })
+  it('initiative is a Dexterity check', () => {
+    expect(initiativeModifier({ abilities: { ...havel.abilities, dex: 12 } })).toBe(1)
+    expect(initiativeModifier({ abilities: { ...havel.abilities, dex: 8 } })).toBe(-1)
+    expect(initiativeModifier(havel)).toBe(abilityMod(havel.abilities.dex))
   })
   it('roman numerals for spell levels', () => {
     expect(roman(1)).toBe('I')

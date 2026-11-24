@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { CastTime } from '@shared/types'
+import type { DiceRoll } from '@/domain/dice'
 import type { FacetId } from '@/domain/facets'
 import { NO_FILTERS, type Filters, type Intent } from '@/domain/filters'
 import type { SortKey } from '@/domain/order'
@@ -42,6 +43,14 @@ interface UiStore {
   historyOpen: boolean
   toggleHistory(): void
   closeHistory(): void
+  /**
+   * The roll the dice tray is showing, if any. In-session view state: the roll itself is never saved; what it did (set the
+   * initiative, spent the die) was already written through the play store when it was rolled (`state/rolls.ts`). `id` is new
+   * for every roll, so a repeat is a new show.
+   */
+  roll: { id: number; roll: DiceRoll } | null
+  showRoll(roll: DiceRoll): void
+  closeRoll(): void
   /** The spell, feature or weapon shown in the detail drawer, by id (`spell:...` / `feature:...` / `weapon:...`). */
   detailId: string | null
   openDetail(id: string): void
@@ -78,6 +87,8 @@ export function toggleIn<T>(list: readonly T[], item: T): T[] {
 
 const initialView = readStoredView()
 
+let rollSeq = 0
+
 export const useUiStore = create<UiStore>((set) => ({
   view: 'sheet',
   closeSettings: () => set({ view: 'sheet' }),
@@ -92,6 +103,9 @@ export const useUiStore = create<UiStore>((set) => ({
   historyOpen: false,
   toggleHistory: () => set((s) => ({ historyOpen: !s.historyOpen })),
   closeHistory: () => set({ historyOpen: false }),
+  roll: null,
+  showRoll: (roll) => set({ roll: { id: ++rollSeq, roll } }),
+  closeRoll: () => set({ roll: null }),
   detailId: null,
   openDetail: (id) => set({ detailId: id }),
   closeDetail: () => set({ detailId: null }),
@@ -115,7 +129,8 @@ export const useUiStore = create<UiStore>((set) => ({
 // Remember the filters and sort. Keystrokes in the search box replace `filters` too, but the search text is not kept, so
 // comparing the serialized form skips those and writes only when a remembered choice changed.
 let remembered = serializeViewPrefs(useUiStore.getState().filters, useUiStore.getState().sort)
-useUiStore.subscribe((s) => {
+useUiStore.subscribe((s, prev) => {
+  if (s.filters === prev.filters && s.sort === prev.sort) return
   const next = serializeViewPrefs(s.filters, s.sort)
   if (next === remembered) return
   remembered = next

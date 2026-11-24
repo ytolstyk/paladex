@@ -2,6 +2,7 @@ import { useCallback, useEffect, useImperativeHandle, useMemo, useState } from '
 import type { Role } from '@shared/types'
 import type { EffectChoice, EffectId } from '@/domain/effects'
 import { buildShow, type Particle } from '@/domain/particles'
+import { prefersReducedMotion } from '@/hooks/prefersReducedMotion'
 
 /** Time to let the last animation finish its fade before the layer is removed. */
 const CLEANUP_SLACK_MS = 120
@@ -70,8 +71,6 @@ interface FxHostProps {
   /** One opaque box: the show plays behind it and is hidden by it, which is what makes it look like it comes from behind. */
   children: React.ReactNode
 }
-
-const prefersReducedMotion = (): boolean => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 /**
  * A box that can play a cast effect from behind its content. It owns everything the effect needs: the stacking

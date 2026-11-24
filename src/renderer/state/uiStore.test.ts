@@ -133,3 +133,21 @@ describe('turn chart', () => {
     expect(useUiStore.getState().chartOpen).toBe(true)
   })
 })
+
+describe('dice tray', () => {
+  const roll = { kind: 'inspiration', sides: 8, value: 5 } as const
+
+  it('shows a roll, gives every roll its own id even after a close, and is never written to storage', async () => {
+    const storage = fakeStorage()
+    const { useUiStore } = await loadStore(storage)
+    expect(useUiStore.getState().roll).toBeNull()
+    useUiStore.getState().showRoll(roll)
+    const first = useUiStore.getState().roll
+    expect(first?.roll).toBe(roll)
+    useUiStore.getState().closeRoll()
+    expect(useUiStore.getState().roll).toBeNull()
+    useUiStore.getState().showRoll(roll)
+    expect(useUiStore.getState().roll?.id).not.toBe(first?.id)
+    expect(storage.writes).toEqual([])
+  })
+})

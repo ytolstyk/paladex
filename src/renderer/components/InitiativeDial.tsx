@@ -2,6 +2,7 @@ import { useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
 import { INITIATIVE_MAX, INITIATIVE_MIN } from '@shared/constants'
 import { angleFor, appendDigit, arcPath, isMajorTick, pointerAngle, polar, stepInitiative, TYPING_WINDOW_MS, valueAt, valueForKey } from '@/domain/dial'
 import { selectInitiative } from '@/state/selectors'
+import { startInitiativeRoll } from '@/state/rolls'
 import { usePlayStore } from '@/state/session'
 
 /**
@@ -159,14 +160,18 @@ export function InitiativeDial(): React.JSX.Element {
         <button type="button" className="step" aria-label="Lower initiative by one" onClick={() => save(stepInitiative(initiative, -1))}>
           −1
         </button>
-        <span className="dial__caption">
-          Initiative
-          <button type="button" className="btn btn--action" disabled={initiative === null} onClick={() => save(null)}>
-            clear
-          </button>
-        </span>
+        <span className="dial__caption">Initiative</span>
         <button type="button" className="step" aria-label="Raise initiative by one" onClick={() => save(stepInitiative(initiative, 1))}>
           +1
+        </button>
+      </div>
+      <div className="dial__buttons">
+        <button type="button" className="btn dial__roll" title="Roll a d20 plus Dexterity and set the dial" onClick={() => startInitiativeRoll()}>
+          Roll
+        </button>
+        {/* Nothing to clear: the button keeps its space so the card does not change height as the dial is set */}
+        <button type="button" className="btn btn--action" disabled={initiative === null} onClick={() => save(null)}>
+          clear
         </button>
       </div>
     </div>

@@ -1929,11 +1929,17 @@ button.vital:hover .vital__value {
   font-family: var(--font-display);
   font-size: 0.82rem;
 }
-.dial__caption .btn--action {
-  margin-top: 3px;
+.dial__buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.dial__roll {
+  flex: 1;
 }
 /* Nothing to clear: keep the button's space so the card does not change height as the dial is set */
-.dial__caption .btn--action:disabled {
+.dial__buttons .btn--action:disabled {
   visibility: hidden;
 }
 
@@ -2008,8 +2014,21 @@ button.vital:hover .vital__value {
   min-width: 0;
   padding: 0 6px;
 }
+.inspiration__actions {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+}
 .inspiration__button {
   width: 100%;
+}
+.dial__roll,
+.inspiration__button--roll {
+  background: linear-gradient(var(--second-lit), var(--second));
+  border-color: var(--second);
+  color: var(--on-second);
+  font-family: var(--font-display);
+  font-weight: 700;
 }
 .inspiration[data-held] .inspiration__button {
   background: linear-gradient(var(--third-lit), var(--third));
@@ -2017,6 +2036,161 @@ button.vital:hover .vital__value {
   color: var(--on-third);
   font-family: var(--font-display);
   font-weight: 700;
+}
+
+/* ───────── Dice tray: a roll tumbles and lands over the sheet ───────── */
+.tray-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 8; /* above the edit steps (7), the drawer (4) and the toast */
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: color-mix(in srgb, var(--oak-shadow) 62%, transparent);
+  animation: fade-in 0.18s ease-out;
+}
+.tray {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  width: min(380px, 100%);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  background: var(--grain), var(--vellum-raised);
+  border: 1px solid var(--gold);
+  box-shadow:
+    0 18px 48px var(--shadow-md),
+    0 0 0 3px var(--vellum-raised),
+    0 0 0 4px var(--rule-strong);
+  animation: rise-in 0.22s var(--ease-out);
+}
+.tray__body {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+}
+.tray__title {
+  color: var(--second-lit);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.tray__table {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  min-height: 118px;
+}
+.tray__die {
+  width: 104px;
+  transition: opacity var(--dur-fast);
+}
+.tray .die {
+  width: 100%;
+}
+.tray__die[data-rolling] {
+  /* `--tumble-ms` is set on the tray and `--die-delay` on each die (DiceTray.tsx), so the stylesheet and the timer cannot drift apart */
+  animation: die-tumble var(--tumble-ms) var(--ease-out) var(--die-delay) backwards;
+}
+.tray__die[data-landed] {
+  animation: die-land 0.3s var(--ease-out);
+}
+.tray__die[data-dropped] {
+  opacity: 0.38;
+  filter: saturate(0.4);
+}
+.die--roll .die__body {
+  fill: color-mix(in srgb, var(--second) 26%, var(--vellum-deep));
+  stroke: var(--second-lit);
+  stroke-width: 2.4;
+  stroke-dasharray: none;
+}
+.die--roll .die__facets {
+  stroke: var(--second-lit);
+  opacity: 0.85;
+}
+.die--roll .die__label {
+  fill: var(--bone);
+  font-size: 23px;
+  stroke: color-mix(in srgb, var(--second) 26%, var(--vellum-deep));
+}
+.tray__sum {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  opacity: 0; /* appears when the dice settle; with motion off the card lands at once, so it is shown at once */
+  transition: opacity 0.25s;
+}
+.tray__sum[data-landed] {
+  opacity: 1;
+}
+.tray__mod,
+.tray__equals {
+  color: var(--bone-dim);
+  font-size: 1.5rem;
+}
+.tray__total {
+  min-width: 2ch;
+  color: var(--second-lit);
+  font-size: 3.4rem;
+  line-height: 1;
+  text-align: center;
+}
+.tray__note {
+  min-height: 1.3em;
+  color: var(--bone-dim);
+  text-align: center;
+  text-wrap: balance;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.tray__note[data-landed] {
+  opacity: 1;
+}
+.tray__modes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+.tray__modes .step {
+  min-width: 0;
+  padding: 0 10px;
+}
+.tray__done {
+  min-width: 8rem;
+}
+/* A natural 20 rings the die in gold; a natural 1 dims it to red */
+.tray__body[data-natural='twenty'] .tray__die:not([data-dropped]) {
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--gold-bright) 80%, transparent));
+}
+.tray__body[data-natural='twenty'] .die--roll .die__body {
+  stroke: var(--gold-bright);
+  fill: color-mix(in srgb, var(--gold) 34%, var(--vellum-deep));
+}
+.tray__body[data-natural='twenty'] .die--roll .die__facets {
+  stroke: var(--gold-bright);
+}
+.tray__body[data-natural='twenty'] .tray__total,
+.tray__body[data-natural='twenty'] .tray__note {
+  color: var(--gold-bright);
+}
+.tray__body[data-natural='one'] .die--roll .die__body {
+  stroke: var(--gules-lit);
+  fill: color-mix(in srgb, var(--gules) 30%, var(--vellum-deep));
+}
+.tray__body[data-natural='one'] .die--roll .die__facets {
+  stroke: var(--gules-lit);
+}
+.tray__body[data-natural='one'] .tray__total,
+.tray__body[data-natural='one'] .tray__note {
+  color: var(--gules-lit);
 }
 
 /* ───────── Turn steps (the rail) ───────── */
@@ -2719,6 +2893,30 @@ button.vital:hover .vital__value {
   }
 }
 /* Individual transform properties (scale, not transform) so they compose with the hover transforms and the pip's rotation */
+@keyframes die-tumble {
+  from {
+    opacity: 0;
+    rotate: -620deg;
+    translate: 0 -70px;
+    scale: 0.55;
+  }
+  25% {
+    opacity: 1;
+  }
+  62% {
+    translate: 0 0;
+    scale: 1.08;
+  }
+  78% {
+    translate: 0 -12px;
+    scale: 1;
+  }
+}
+@keyframes die-land {
+  from {
+    scale: 1.14;
+  }
+}
 @keyframes gem-kindle {
   from {
     scale: 0.55;

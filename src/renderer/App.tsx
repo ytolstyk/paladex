@@ -3,6 +3,7 @@ import { AttacksPage } from './components/AttacksPage'
 import { Backdrop } from './components/Backdrop'
 import { FilterBar } from './components/FilterBar'
 import { DetailDrawer } from './components/DetailDrawer'
+import { DiceTray } from './components/DiceTray'
 import { Footer } from './components/Footer'
 import { OtherFeatures } from './components/OtherFeatures'
 import { ResourcePanel } from './components/ResourcePanel'
@@ -90,6 +91,7 @@ export function App(): React.JSX.Element {
       {historyOpen && view === 'sheet' && <UndoHistory />}
       <DetailDrawer />
       <Toast />
+      <DiceTray />
       <RestGlow />
     </div>
   )

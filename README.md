@@ -51,9 +51,10 @@ The top of the left rail holds two things you carry from the table into your own
 
 - **Initiative dial.** Turn the brass knob to a number from 1 to 25: drag it, click the scale, use the arrow keys (Page
   Up/Down step by five, Home/End jump to the ends), press −1/+1, or just type the number. Backspace or "clear" resets it. A
-  rest does not clear it.
+  rest does not clear it. **Roll** throws a d20 plus your Dexterity modifier in the dice tray and sets the dial to the total;
+  the tray also rolls again with Advantage or Disadvantage.
 - **Bardic Inspiration.** A die (d6, d8, d10 or d12; a d8 to begin with) that glows while you hold it. Press Receive when a
-  Bard gives it to you, pick the size they gave, and press Use it when you spend it. Any rest ends it, since it only lasts
+  Bard gives it to you, pick the size they gave, and press Use it when you spend it, or Roll it to throw the die in the dice tray and spend it in one go. Any rest ends it, since it only lasts
   an hour. The die size is remembered, and every step is logged and undoable.
 
 ## Recently cast, history and spell timers
