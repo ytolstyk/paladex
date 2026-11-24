@@ -123,3 +123,6 @@ export interface SpellTimer {
   /** Seconds it started with, for the progress bar. */
   total: number
 }
+
+/** The URL hash that makes the page render the companion (second-screen) view instead of the sheet. `public/theme-boot.js` repeats it as a literal: change both. */
+export const COMPANION_HASH = 'companion'

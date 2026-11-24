@@ -1,5 +1,6 @@
 import { seed } from '@/data/character'
 import { createCatalog } from '@/domain/catalog'
+import { createCompanionStore } from './companionStore'
 import { createPlayStore } from './playStore'
 import { useTimerPrefs } from './timerPrefsStore'
 
@@ -9,3 +10,6 @@ import { useTimerPrefs } from './timerPrefsStore'
  */
 export const catalog = createCatalog(seed)
 export const usePlayStore = createPlayStore({ port: window.paladex, catalog, turnSeconds: () => useTimerPrefs.getState().turnSeconds })
+
+/** The companion (second screen) window's read-only copy of the sheet. Only that window calls `connectCompanion`; the sheet never does. */
+export const { useCompanion, connect: connectCompanion } = createCompanionStore(window.paladex, catalog)

@@ -8,3 +8,6 @@ try {
 } catch {
   // Storage unavailable: keep the default theme.
 }
+// The second-screen window (see main.tsx) scales everything to its size; set before first paint so it never shows at the sheet's scale.
+// '#companion' matches COMPANION_HASH in shared/constants.ts: change both together.
+if (location.hash === '#companion') document.documentElement.dataset.view = 'companion'

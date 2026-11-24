@@ -33,8 +33,11 @@ function conditionText(entry: LogEntry, nameOf: (id: string) => string): string 
   return `${entry.on === false ? info.ended : info.began}${broken}`
 }
 
-/** Render a structured log entry as a sentence. Wording lives here so it can change without touching saved data. */
-export function formatLog(entry: LogEntry, nameOf: (id: string) => string = (id) => id): string {
+/**
+ * Render a structured log entry as a sentence. Wording lives here so it can change without touching saved data.
+ * `counterLabel` names a resource (the raw id when omitted).
+ */
+export function formatLog(entry: LogEntry, nameOf: (id: string) => string = (id) => id, counterLabel: (id: string) => string = (id) => id): string {
   const name = entry.spellId ? nameOf(entry.spellId) : 'a spell'
   switch (entry.kind) {
     case 'seed':
@@ -54,7 +57,7 @@ export function formatLog(entry: LogEntry, nameOf: (id: string) => string = (id)
     case 'long-rest':
       return 'Long rest'
     case 'counter': {
-      const counter = entry.counterId ?? 'a resource'
+      const counter = entry.counterId ? counterLabel(entry.counterId) : 'a resource'
       return (entry.amount ?? 0) < 0 ? `Spent ${amountOf(entry)} ${counter}` : `Restored ${amountOf(entry)} ${counter}`
     }
     case 'hp':

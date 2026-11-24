@@ -106,7 +106,7 @@ Today: Export writes the play-state JSON. There is no way to bring it back in. S
 - [ ] **In-app editing of the character** (level-up, new spells, changed AC) instead of reseeding from a D&D Beyond export. **L**
 - [ ] **Other classes**: the domain logic is Paladin-shaped (smite, Lay On Hands). Generalizing counters and costs is possible
       but is a rewrite of the seed format. **L**
-- [ ] **Companion view** for a second screen: only slots, HP and concentration, big and readable from across the table. **M**
+- [x] **Companion view** for a second screen: HP, slots, what can be cast, concentration, conditions, the turn and resources, big and readable from across the table. *(done; read-only, follows the sheet live. Not done: a way to hide parts of it, such as exact hit points, for a table that should not see them.)*
 
 ## Small fixes worth doing along the way
 

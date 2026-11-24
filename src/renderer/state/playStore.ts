@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { DEFAULT_TURN_SECONDS, type ConditionId, type InspirationDie, type TurnStep } from '@shared/constants'
-import type { PaladexApi } from '@shared/ipc'
+import type { StatePort } from '@shared/ipc'
 import type { PlayState } from '@shared/schema'
 import type { Payment } from '@shared/types'
 import type { ActionResult } from '@/domain/actions'
@@ -85,7 +85,7 @@ export interface PaladexStore {
 
 export interface StoreDeps {
   /** Persistence port. In the app this is `window.paladex`; tests pass a fake. */
-  port: PaladexApi
+  port: StatePort
   catalog: Catalog
   now?: () => number
   /** The turn length in force right now (a setting that lives outside the play state). Defaults to one round of combat. */

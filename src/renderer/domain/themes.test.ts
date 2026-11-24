@@ -91,6 +91,8 @@ const TEXT_PAIRS: readonly [string, string][] = [
   ['bone-dim', 'vellum-raised'],
   ['gold', 'vellum-deep'],
   ['gold', 'vellum-raised'],
+  ['gold', 'vellum'],
+  ['gold-bright', 'vellum-deep'],
   ['gold-bright', 'oak-shadow'],
   ['gold-bright', 'oak'],
   ['gold-bright', 'vellum'],
@@ -98,7 +100,9 @@ const TEXT_PAIRS: readonly [string, string][] = [
   ['gules-lit', 'oak'],
   ['gules-lit', 'vellum'],
   ['purpure-lit', 'vellum'],
+  ['vert-lit', 'vellum-deep'],
   ['vert-lit', 'vellum'],
+  ['azure-lit', 'vellum-deep'],
   ['azure-lit', 'vellum'],
   ['azure-lit', 'oak-shadow'],
   ['second-lit', 'oak-shadow'],
@@ -122,6 +126,12 @@ const TEXT_PAIRS: readonly [string, string][] = [
 
 /** The disabled cast button: deliberately muted, still readable. Held to the large-text bar, not AA. */
 const MUTED_PAIRS: readonly [string, string][] = [['bone-dim', 'iron']]
+
+/**
+ * Drawn only as large text (24 px or bigger, or bold 19 px or bigger), so the large-text bar applies: the companion screen's health
+ * figure and its "Critical" / "Down" label in the danger colour. Do not use these pairs for small text.
+ */
+const LARGE_TEXT_PAIRS: readonly [string, string][] = [['gules-lit', 'vellum-deep']]
 
 /**
  * Candlelit Oak predates these checks. These specific pairs sit between 3.4:1 and 4.5:1 and are left as originally
@@ -216,6 +226,10 @@ describe.each(THEMES.map((t) => t.id))('theme "%s"', (id) => {
   })
 
   it.each(MUTED_PAIRS)('%s on %s stays readable (large-text bar)', (fg, bg) => {
+    expect(contrast(tokens[fg] as string, tokens[bg] as string)).toBeGreaterThanOrEqual(AA_LARGE_TEXT)
+  })
+
+  it.each(LARGE_TEXT_PAIRS)('%s on %s meets the large-text bar', (fg, bg) => {
     expect(contrast(tokens[fg] as string, tokens[bg] as string)).toBeGreaterThanOrEqual(AA_LARGE_TEXT)
   })
 

@@ -132,6 +132,26 @@ in one turn is flagged but never blocked. A reaction spell counts against the re
   In a window narrower than 1180 px the chart floats over the right edge instead of taking a column, with the spell list kept clear of it.
 - Whether the chart is open is not remembered between launches.
 
+## The companion screen
+
+A read-only view of the sheet for the whole table, to put on a television or a second monitor: **View > Companion Window**
+(`Shift+Cmd/Ctrl+C`), or the screen button in the banner. Press either again to close it. With a second display connected it opens
+full screen there; with one it opens as an ordinary window you can drag, resize or send full screen (View > Toggle Full Screen).
+
+It shows only what the table needs, big enough to read from across the room, and nothing in it can be pressed:
+
+- **Hit points** as a large number and a bar that changes color with the state (Healthy, Bloodied at half, Critical at a quarter,
+  Down at 0), plus temporary hit points and Armor, Initiative and Bardic Inspiration at the top.
+- **Spell slots** as gems per level, and **Ready to cast**: your prepared spells by level with their casting time, concentration
+  and whether a free cast or item charge pays for them. One that cannot be cast right now is dimmed and struck through, but stays
+  put, so the list does not move as slots are spent.
+- **Concentration** with the turns left, other running spell timers, **conditions**, **This turn** (what is used: always a word as
+  well as a color), the **resources** (Channel Divinity, Lay On Hands and so on) and the **latest** thing that happened.
+
+It follows the sheet as you play (each save is pushed to it, so there is no delay and no polling), follows the theme and turn length
+you pick in Settings, and scales to any window size as one picture. In a tall or narrow window it becomes one column. It cannot save,
+export or reset anything: the main process refuses those calls from it.
+
 ## Getting started
 
 ```bash
@@ -199,7 +219,7 @@ theme, and switched off entirely by the system's "reduce motion" setting.
 ## Where things live
 
 ```
-src/main/       Electron main process: window, menu, IPC, atomic JSON store with backup
+src/main/       Electron main process: windows (sheet and companion), menu, IPC, atomic JSON store with backup
 src/preload/    The `window.paladex` bridge
 src/shared/     Types, zod schema and constants shared by every process
 src/renderer/

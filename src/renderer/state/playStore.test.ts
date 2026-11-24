@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { PaladexApi, LoadResult } from '@shared/ipc'
+import type { LoadResult, StatePort } from '@shared/ipc'
 import type { PlayState } from '@shared/schema'
 import { bless, freshState, smite, testCatalog } from '@/domain/testing'
 import { canUndo, createPlayStore } from './playStore'
 
 const catalog = testCatalog()
 
-function fakePort(load: LoadResult | (() => Promise<LoadResult>)): PaladexApi & { saved: PlayState[] } {
+function fakePort(load: LoadResult | (() => Promise<LoadResult>)): StatePort & { saved: PlayState[] } {
   const saved: PlayState[] = []
   return {
     saved,

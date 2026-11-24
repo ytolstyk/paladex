@@ -3,8 +3,12 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { COMPANION_HASH } from '../shared/constants'
 import { IPC, type ProfileInfo } from '../shared/ipc'
-import { parsePlayState } from '../shared/schema'
+import { parsePlayState, type PlayState } from '../shared/schema'
+import { COMPANION_MIN, placeCompanion } from './companionPlacement'
+import { createCompanionController } from './companionWindow'
+import { mayCall, type WindowRole } from './ipcPolicy'
 import { migrateLegacyProfile, PROFILE_NAME, profileDir, type ProfileOptions } from './profile'
 import { StateStore } from './store'
 import { placeWindow, WindowStateStore, type WindowDefaults } from './windowState'
@@ -35,6 +39,16 @@ app.setPath('userData', profileDir(profileOptions()))
 const store = new StateStore(join(app.getPath('userData'), 'state'))
 const windowStore = new WindowStateStore(join(app.getPath('userData'), 'window-state.json'))
 let mainWindow: BrowserWindow | null = null
+const COMPANION_MENU_ID = 'companion'
+
+/** The one set of web preferences for every window we open, so a loosened flag can never drift between them. */
+const secureWebPreferences = (): Electron.WebPreferences => ({
+  preload: join(__dirname, '../preload/index.js'),
+  contextIsolation: true,
+  nodeIntegration: false,
+  sandbox: true,
+  webSecurity: true
+})
 
 /** Vite dev-server URL when running unpackaged under `npm run dev`; null for built/packaged runs. */
 function rendererUrl(): string | null {
@@ -55,32 +69,39 @@ function isAppPage(url: string): boolean {
   }
 }
 
-function isTrustedSender(event: IpcMainInvokeEvent): boolean {
+/** Which of our own windows sent this, or null for anything else (a stray frame, a navigated-away page). */
+function senderRole(event: IpcMainInvokeEvent): WindowRole | null {
   const frame = event.senderFrame
-  return frame !== null && frame === mainWindow?.webContents.mainFrame && isAppPage(frame.url)
+  if (frame === null || !isAppPage(frame.url)) return null
+  // A window being destroyed still has its variable until `closed` fires, and reading its webContents then throws.
+  if (mainWindow !== null && !mainWindow.isDestroyed() && frame === mainWindow.webContents.mainFrame) return 'main'
+  if (companion.ownsFrame(frame)) return 'companion'
+  return null
 }
 
 function registerIpc(): void {
-  const guard = <A extends unknown[], R>(fn: (...args: A) => Promise<R> | R) =>
+  /** Each channel is answered only for the windows `CHANNEL_ROLES` (ipcPolicy.ts) names: the companion gets the one it needs (reading) and nothing that changes anything. */
+  const guard = <A extends unknown[], R>(channel: Parameters<typeof mayCall>[0], fn: (...args: A) => Promise<R> | R) =>
     (event: IpcMainInvokeEvent, ...args: A): Promise<R> | R => {
-      if (!isTrustedSender(event)) throw new Error('Untrusted IPC sender')
+      if (!mayCall(channel, senderRole(event))) throw new Error('Untrusted IPC sender')
       return fn(...args)
     }
 
-  ipcMain.handle(IPC.loadState, guard(() => store.load()))
+  ipcMain.handle(IPC.loadState, guard(IPC.loadState, () => store.load()))
 
   ipcMain.handle(
     IPC.saveState,
-    guard(async (raw: unknown) => {
+    guard(IPC.saveState, async (raw: unknown) => {
       const parsed = parsePlayState(raw)
       if (!parsed.ok) throw new Error(`Refusing to save invalid state: ${parsed.reason}`)
+      companion.push(parsed.state) // before the disk write: the second screen should not wait on it
       await store.save(parsed.state)
     })
   )
 
   ipcMain.handle(
     IPC.exportState,
-    guard(async () => {
+    guard(IPC.exportState, async () => {
       const raw = await store.readRaw()
       if (raw === null) return null
       const stamp = new Date().toISOString().slice(0, 10)
@@ -95,12 +116,88 @@ function registerIpc(): void {
     })
   )
 
-  ipcMain.handle(IPC.resetState, guard(() => store.reset()))
+  ipcMain.handle(IPC.resetState, guard(IPC.resetState, () => store.reset()))
 
   ipcMain.handle(
     IPC.profileInfo,
-    guard((): ProfileInfo => ({ isDev: isDevProfile, stateDir: store.directory }))
+    guard(IPC.profileInfo, (): ProfileInfo => ({ isDev: isDevProfile, stateDir: store.directory }))
   )
+
+  ipcMain.handle(IPC.toggleCompanion, guard(IPC.toggleCompanion, () => companion.toggle()))
+}
+
+function setCompanionMenuChecked(checked: boolean): void {
+  const item = Menu.getApplicationMenu()?.getMenuItemById(COMPANION_MENU_ID)
+  if (item) item.checked = checked
+}
+
+/** Load the app's one page into a window, optionally at a hash (the companion's). */
+function loadPage(win: BrowserWindow, hash?: string): void {
+  const dev = rendererUrl()
+  if (dev) void win.loadURL(hash ? `${dev}#${hash}` : dev)
+  else void win.loadFile(join(__dirname, '../renderer/index.html'), hash ? { hash } : undefined)
+}
+
+interface CompanionBrowserWindow {
+  win: BrowserWindow
+  isDestroyed(): boolean
+  close(): void
+  send(state: PlayState): void
+  setFullScreen(on: boolean): void
+  ownsFrame(frame: unknown): boolean
+}
+
+/**
+ * The second-screen view of the sheet. It only ever receives state (pushed from the save handler) and can never save, export or reset.
+ * The lifecycle rules are `companionWindow.ts`; this is the Electron side of it.
+ */
+const companion = createCompanionController<CompanionBrowserWindow>({
+  place: (preferWindowed) => {
+    const mainDisplay = mainWindow ? screen.getDisplayMatching(mainWindow.getBounds()) : screen.getPrimaryDisplay()
+    return placeCompanion(screen.getAllDisplays(), mainDisplay.id, { preferWindowed })
+  },
+  createWindow: (place, hooks) => {
+    const win = new BrowserWindow({
+      x: place.x,
+      y: place.y,
+      width: place.width,
+      height: place.height,
+      minWidth: COMPANION_MIN.width,
+      minHeight: COMPANION_MIN.height,
+      show: false,
+      title: `${PROFILE_NAME} companion`,
+      backgroundColor: WINDOW_BACKGROUND,
+      webPreferences: secureWebPreferences()
+    })
+    lockNavigation(win)
+    win.once('ready-to-show', () => {
+      win.showInactive() // the player is working in the sheet: a second screen must not take the keyboard from it
+      hooks.onReady()
+    })
+    win.on('closed', hooks.onClosed)
+    loadPage(win, COMPANION_HASH)
+    return {
+      win,
+      isDestroyed: () => win.isDestroyed(),
+      close: () => win.close(),
+      send: (state) => win.webContents.send(IPC.companionState, state),
+      setFullScreen: (on) => win.setFullScreen(on),
+      ownsFrame: (frame) => frame === win.webContents.mainFrame
+    }
+  },
+  onOpenChange: setCompanionMenuChecked,
+  onError: (err) => console.error('Could not update the companion window:', err) // a view of the sheet: never worth failing a save over
+})
+
+/** The app is one local page per window. Neither opens windows or launches anything externally. */
+function lockNavigation(win: BrowserWindow): void {
+  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
+  win.webContents.on('will-navigate', (event, url) => {
+    if (!isAppPage(url)) event.preventDefault()
+  })
+  win.webContents.on('will-redirect', (event, url) => {
+    if (!isAppPage(url)) event.preventDefault()
+  })
 }
 
 /** Remember where the user leaves the window (size, position, maximized, full screen) and reopen it there. */
@@ -153,13 +250,7 @@ function createWindow(): void {
     title: isDevProfile ? `${PROFILE_NAME} (dev)` : PROFILE_NAME,
     titleBarStyle: 'hiddenInset',
     backgroundColor: WINDOW_BACKGROUND,
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true,
-      webSecurity: true
-    }
+    webPreferences: secureWebPreferences()
   })
 
   if (saved?.maximized) mainWindow.maximize()
@@ -168,21 +259,13 @@ function createWindow(): void {
 
   mainWindow.once('ready-to-show', () => mainWindow?.show())
 
-  // Lock navigation: the app is one local page. It opens no windows and launches nothing externally.
-  mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
-  mainWindow.webContents.on('will-navigate', (event, url) => {
-    if (!isAppPage(url)) event.preventDefault()
-  })
-  mainWindow.webContents.on('will-redirect', (event, url) => {
-    if (!isAppPage(url)) event.preventDefault()
-  })
+  lockNavigation(mainWindow)
 
-  const dev = rendererUrl()
-  if (dev) void mainWindow.loadURL(dev)
-  else void mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+  loadPage(mainWindow)
 
   mainWindow.on('closed', () => {
     mainWindow = null
+    companion.close() // a second screen with no sheet behind it would only go stale
   })
 
   attachDevScreenshotHook(mainWindow)
@@ -190,7 +273,8 @@ function createWindow(): void {
 
 /**
  * Dev-only verification aid: PALADEX_SHOT=<png path> [PALADEX_EVAL=<js file>] [PALADEX_SIZE=WxH] captures the window and quits.
- * Disabled in packaged builds.
+ * Add PALADEX_TARGET=companion to open the companion window and capture that instead (the eval script still runs in the sheet, so it
+ * can change the state the companion shows). Disabled in packaged builds.
  */
 function attachDevScreenshotHook(win: BrowserWindow): void {
   const shot = process.env['PALADEX_SHOT']
@@ -198,11 +282,17 @@ function attachDevScreenshotHook(win: BrowserWindow): void {
   const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
   win.webContents.once('did-finish-load', async () => {
     await wait(1500)
+    let target = win
+    if (process.env['PALADEX_TARGET'] === 'companion') {
+      target = companion.open({ preferWindowed: true }).win
+      await new Promise<void>((resolve) => target.webContents.once('did-finish-load', () => resolve()))
+      await wait(1500)
+    }
     // PALADEX_SIZE=960x640 checks a narrow or short window (the media queries follow the real viewport).
     const size = /^(\d{3,4})x(\d{3,4})$/.exec(process.env['PALADEX_SIZE'] ?? '')
     if (size) {
-      win.setMinimumSize(1, 1)
-      win.setSize(Number(size[1]), Number(size[2]))
+      target.setMinimumSize(1, 1)
+      target.setSize(Number(size[1]), Number(size[2]))
       await wait(400)
     }
     const evalFile = process.env['PALADEX_EVAL']
@@ -210,7 +300,7 @@ function attachDevScreenshotHook(win: BrowserWindow): void {
       await win.webContents.executeJavaScript(readFileSync(evalFile, 'utf8'))
       await wait(600)
     }
-    const image = await win.webContents.capturePage()
+    const image = await target.webContents.capturePage()
     writeFileSync(shot, image.toPNG())
     app.quit()
   })
@@ -231,7 +321,18 @@ function buildMenu(): void {
         { role: 'reload', enabled: isDevProfile },
         { role: 'toggleDevTools', enabled: isDevProfile },
         { type: 'separator' },
-        { role: 'togglefullscreen' }
+        { role: 'togglefullscreen' },
+        {
+          // Checked while the second-screen view is open. A click flips `checked` itself, so it is set again from the window's real state.
+          id: COMPANION_MENU_ID,
+          label: 'Companion Window',
+          type: 'checkbox',
+          accelerator: 'CmdOrCtrl+Shift+C',
+          checked: false,
+          click: () => {
+            companion.toggle() // the check mark follows the window (onOpenChange), not the click
+          }
+        }
       ]
     },
     { role: 'windowMenu' }

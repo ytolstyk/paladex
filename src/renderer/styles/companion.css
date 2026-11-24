@@ -1,0 +1,767 @@
+/*
+ * The companion (second screen) window. Read from across a table, so: few things, big, and the state of each one visible without
+ * reading it (colour, fill and a word, never colour alone).
+ *
+ * Everything is in rem, and the window sets the size of a rem from its own size, so the whole layout scales as one picture: a laptop
+ * window and a 4K television look the same. One rem is about 17 px on a 1920 x 1080 screen. Colours are tokens only (no hex or rgba
+ * literals), so every theme works, and the text pairs used here are in the theme contrast test (`themes.test.ts`). The danger colour on a
+ * panel is held to the large-text bar there, so it is for the big health figure and the status label only, never small text.
+ */
+
+html[data-view='companion'] {
+  /* Whichever of the two is smaller keeps the picture whole: 0.9vw = 1.6vh on a 16:9 screen. */
+  font-size: min(0.9vw, 1.6vh);
+}
+
+.cp {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 1.2rem;
+  height: 100vh;
+  padding: 1.3rem 3rem 1.5rem; /* the worn edges some backdrops draw sit in the outer rem or so */
+  overflow: hidden;
+  background:
+    radial-gradient(70rem 36rem at 70% -10%, var(--glow), transparent 60%),
+    radial-gradient(60rem 38rem at 100% 110%, var(--glow-second), transparent 62%),
+    linear-gradient(var(--oak), var(--oak-shadow));
+  color: var(--bone);
+  cursor: default;
+}
+/* The vignette the sheet has: the corners of the room go dark */
+.cp::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 45%, transparent 55%, var(--shadow-sm));
+}
+
+/* Panels are the sheet's (grain, double gilt rule, corner studs), roomier, with studs sized to the screen. */
+.cp .panel {
+  min-height: 0;
+  padding: 1.3rem 1.8rem;
+}
+.cp .panel::after {
+  mask-size: 1.3rem 1.3rem;
+  mask-position:
+    left 0.4rem top 0.4rem,
+    right 0.4rem top 0.4rem,
+    left 0.4rem bottom 0.4rem,
+    right 0.4rem bottom 0.4rem;
+}
+
+/* ───────── Shared type ───────── */
+.cp-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.35rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--second-lit);
+}
+.cp-label {
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  font-size: 1.25rem;
+  color: var(--bone-dim);
+}
+.cp-count {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--bone);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.cp-head-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+}
+.cp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ───────── Header ───────── */
+.cp-header {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--gold-dim);
+  box-shadow: 0 0.2rem 0 var(--oak-shadow), 0 0.3rem 0 var(--rule);
+}
+.cp-header__emblem {
+  height: 4rem;
+  width: auto;
+  filter: drop-shadow(0 0.2rem 0.3rem var(--shadow-md));
+  animation: emblem-in 1s var(--ease-out) backwards;
+}
+.cp-header__id {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.cp-header__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2.7rem;
+  line-height: 1.1;
+  color: var(--gold-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cp-header__title {
+  font-size: 1.4rem;
+  color: var(--bone-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cp-stats {
+  display: flex;
+  align-items: center;
+  gap: 2.4rem;
+}
+.cp-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 6rem;
+  line-height: 1;
+}
+.cp-stat__value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 3rem;
+  font-variant-numeric: lining-nums;
+}
+.cp-stat__label {
+  margin-top: 0.3rem;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  font-size: 1.3rem;
+  color: var(--bone-dim);
+}
+.cp-stat--inspired .cp-stat__label {
+  color: var(--gold-bright);
+}
+.cp-die {
+  width: 3.8rem;
+  height: 3.8rem;
+}
+
+/* ───────── Layout ───────── */
+.cp-main {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 1.6rem;
+  min-height: 0;
+}
+.cp-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  min-height: 0;
+}
+.cp-col > .panel {
+  flex: none;
+}
+.cp-col > .cp-hp,
+.cp-col > .cp-cast {
+  flex: 1 1 0; /* the panels that take up the slack (as weighty as `.cp-col > .panel` above, which would otherwise win) */
+}
+.cp .cp-hp {
+  min-height: 13rem; /* `.cp .panel` sets 0, so this needs the same weight */
+}
+.cp .cp-cast {
+  overflow: hidden;
+}
+
+/* ───────── Hit points ───────── */
+.cp-hp {
+  --hp: var(--vert);
+  --hp-lit: var(--vert-lit);
+  /* Sized by the column, not by its content, so the number can follow the height it is given (container query units below) */
+  container-type: size;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background:
+    linear-gradient(color-mix(in srgb, var(--hp) 9%, transparent), transparent 70%),
+    var(--grain),
+    var(--vellum-deep);
+}
+.cp-hp[data-state='bloodied'] {
+  --hp: var(--gold);
+  --hp-lit: var(--gold-bright);
+}
+.cp-hp[data-state='critical'],
+.cp-hp[data-state='down'] {
+  --hp: var(--gules);
+  --hp-lit: var(--gules-lit);
+  border-color: var(--gules-lit);
+}
+.cp-status {
+  padding: 0.1rem 1rem;
+  border: 0.15rem solid var(--hp);
+  background: color-mix(in srgb, var(--hp) 22%, transparent);
+  color: var(--hp-lit);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.cp-hp[data-state='down'] .cp-status {
+  background: var(--hp);
+  color: var(--on-gules);
+}
+.cp-hp__figures {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 1.2rem;
+  line-height: 1;
+  font-family: var(--font-display);
+  font-variant-numeric: lining-nums;
+}
+.cp-hp__now {
+  font-size: clamp(4.5rem, calc(100cqh - 7rem), 13rem); /* what is left under the title row and above the bar */
+  font-weight: 700;
+  color: var(--bone);
+}
+.cp-hp[data-state='critical'] .cp-hp__now,
+.cp-hp[data-state='down'] .cp-hp__now {
+  color: var(--gules-lit);
+}
+.cp-hp__max {
+  font-size: clamp(2rem, calc(100cqh * 0.2), 4rem);
+  font-weight: 500;
+  color: var(--bone-dim);
+}
+.cp-hp__temp {
+  margin-left: auto;
+  padding: 0.2rem 1rem;
+  border: 0.15rem solid var(--second);
+  background: color-mix(in srgb, var(--second) 20%, transparent);
+  color: var(--second-lit);
+  font-size: 2.6rem;
+  font-weight: 700;
+}
+.cp-hp__temp small {
+  font-family: var(--font-text);
+  font-size: 1.4rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.cp-bar {
+  position: relative;
+  height: 2.2rem;
+  background: var(--well);
+  border: 0.15rem solid var(--gold-dim);
+  overflow: hidden;
+}
+.cp-bar__fill {
+  height: 100%;
+  transform-origin: left center;
+  background:
+    linear-gradient(var(--specular-soft), transparent 55%),
+    linear-gradient(var(--hp-lit), var(--hp));
+  transition: transform 0.7s var(--ease-out);
+}
+/* Quarter marks over the fill, so "about half" can be read at a distance */
+.cp-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent calc(25% - 1px), var(--shadow-md) calc(25% - 1px) 25%, transparent 25%),
+    linear-gradient(90deg, transparent calc(50% - 1px), var(--shadow-md) calc(50% - 1px) 50%, transparent 50%),
+    linear-gradient(90deg, transparent calc(75% - 1px), var(--shadow-md) calc(75% - 1px) 75%, transparent 75%);
+}
+.cp-hp[data-state='critical'] .cp-bar__fill {
+  animation: heartbeat 1.3s ease-in-out infinite;
+}
+html[data-ambient='off'] .cp-bar__fill {
+  animation-play-state: paused;
+}
+
+/* ───────── Concentration and what is still running ───────── */
+.cp-focus {
+  display: grid;
+  gap: 0.9rem;
+}
+.cp-focus__main {
+  display: flex;
+  align-items: center;
+  gap: 1.3rem;
+}
+.cp-focus .rune-ring {
+  width: 4rem;
+  height: 4rem;
+}
+.cp-focus__text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.cp-focus__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2.6rem;
+  line-height: 1.15;
+  color: var(--third-lit);
+  overflow-wrap: anywhere;
+}
+.cp-focus__timer {
+  flex: none;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.8rem;
+  color: var(--bone);
+  font-variant-numeric: lining-nums;
+}
+.cp-focus__timer[data-soon] {
+  color: var(--third-lit);
+}
+.cp-focus[data-active] {
+  border-color: var(--third);
+  background:
+    linear-gradient(color-mix(in srgb, var(--third) 10%, transparent), transparent 80%),
+    var(--grain),
+    var(--vellum-deep);
+}
+.cp-focus__none {
+  font-size: 1.9rem;
+  color: var(--bone-dim);
+}
+.cp-effects {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0.8rem 0 0;
+  list-style: none;
+  border-top: 1px solid var(--rule-faint);
+}
+.cp-effect {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 1.6rem;
+  padding-left: 0.9rem;
+  border-left: 0.25rem solid var(--iron);
+}
+.cp-effect[data-soon] {
+  border-left-color: var(--third);
+}
+.cp-effect__left {
+  color: var(--bone-dim);
+  font-variant-numeric: lining-nums;
+}
+.cp-effect[data-soon] .cp-effect__left {
+  color: var(--third-lit);
+}
+
+/* ───────── Conditions ───────── */
+.cp-conditions {
+  border-color: var(--third);
+  background:
+    linear-gradient(color-mix(in srgb, var(--third) 12%, transparent), transparent),
+    var(--grain),
+    var(--vellum-deep);
+}
+.cp .cp-conditions {
+  padding-block: 0.9rem;
+}
+.cp-conditions ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cp-condition {
+  padding: 0 1.1rem;
+  background: var(--third);
+  border: 0.12rem solid var(--third-lit);
+  color: var(--on-third);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.9rem;
+  letter-spacing: 0.04em;
+}
+
+/* ───────── This turn ───────── */
+.cp-tiles {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cp-tile {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.35rem 0.3rem;
+  text-align: center;
+  background: color-mix(in srgb, var(--second) 14%, transparent);
+  border: 0.14rem solid var(--second);
+  line-height: 1.1;
+}
+.cp-tile__name {
+  font-size: 1.25rem;
+  color: var(--bone);
+}
+.cp-tile__state {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.45rem;
+  color: var(--second-lit);
+}
+/* Used: hollow and struck, so it reads as "gone" with no help from colour */
+.cp-tile[data-used] {
+  background: transparent;
+  border-color: var(--iron);
+  border-style: dashed;
+}
+.cp-tile[data-used] .cp-tile__name {
+  color: var(--bone-dim);
+  text-decoration: line-through;
+  text-decoration-thickness: 0.12rem;
+}
+.cp-tile[data-used] .cp-tile__state {
+  color: var(--bone-dim);
+}
+
+/* ───────── Spell slots ───────── */
+.cp-slot-rows {
+  display: grid;
+  gap: 0.2rem;
+}
+.cp-slot-row {
+  /* Rows shrink their gems as levels are added: the two of a level 5 Paladin are large, the five of a level 17 still fit. */
+  --gem-h: min(3.9rem, calc(17rem / var(--rows)));
+  --gem-w: calc(var(--gem-h) * 0.88);
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 0.2rem 0;
+}
+.cp-slot-row + .cp-slot-row {
+  border-top: 1px solid var(--rule-faint);
+}
+.cp-slot-row__level {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2.8rem;
+  text-align: center;
+  color: var(--gold);
+}
+.cp-slot-row__gems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.cp-slot-row__count {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2.4rem;
+  min-width: 5rem;
+  text-align: right;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.cp-slot-row__count small {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--bone-dim);
+}
+/* The glow sits on the wrapper: a drop-shadow on the clipped facet would be cut off by its own clip-path */
+.cp-gem {
+  position: relative;
+  display: block;
+  width: var(--gem-w);
+  height: var(--gem-h);
+}
+.cp-gem[data-state='full'] {
+  filter: drop-shadow(0 0 0.5rem var(--gem-glow));
+}
+.cp-gem i {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(50% 0, 100% 26%, 100% 74%, 50% 100%, 0 74%, 0 26%);
+}
+.cp-gem[data-state='full'] i {
+  background:
+    linear-gradient(160deg, var(--specular) 0 10%, transparent 10% 100%),
+    linear-gradient(20deg, transparent 0 58%, var(--shadow-sm) 58% 100%),
+    conic-gradient(from 200deg at 50% 52%, var(--gem-a), var(--gem-b), var(--gem-c), var(--gem-d), var(--gem-a));
+  animation: gem-kindle 0.6s var(--ease-out);
+}
+.cp-gem[data-state='spent'] i {
+  background: radial-gradient(circle at 50% 55%, var(--gem-spent-core) 0 55%, var(--gem-spent-rim) 56% 100%);
+  animation: gem-quench 0.4s var(--ease-out);
+}
+/* Out of slots entirely: the count says so in the accent colour */
+.cp-slots[data-empty] .cp-count {
+  color: var(--third-lit);
+}
+
+/* ───────── Ready to cast ───────── */
+.cp-cast {
+  display: flex;
+  flex-direction: column;
+}
+.cp-cast__groups {
+  display: grid;
+  gap: 0.7rem;
+  align-content: start;
+  min-height: 0;
+  overflow: hidden;
+}
+.cp-group {
+  display: grid;
+  grid-template-columns: 7.6rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+.cp-group + .cp-group {
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--rule-faint);
+}
+.cp-group__title {
+  padding-top: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.3rem;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+.cp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cp-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  padding: 0.15rem 0.8rem;
+  background: var(--vellum);
+  border: 0.14rem solid var(--rule-strong);
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+.cp-chip__name {
+  overflow-wrap: anywhere;
+}
+.cp-chip[data-ready='false'] {
+  background: transparent;
+  border: 0.14rem dashed var(--iron);
+  color: var(--bone-dim);
+}
+.cp-chip[data-ready='false'] .cp-chip__name {
+  text-decoration: line-through;
+  text-decoration-thickness: 0.1rem;
+}
+.cp-cast[data-dense] .cp-chip {
+  font-size: 1.4rem;
+  padding: 0.2rem 0.7rem;
+}
+.cp-tag {
+  flex: none;
+  padding: 0 0.5rem;
+  border: 0.1rem solid currentColor;
+  color: var(--bone-dim);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+.cp-tag--via {
+  background: color-mix(in srgb, var(--vert) 26%, transparent);
+  color: var(--vert-lit);
+}
+.cp-chip[data-via='charge'] .cp-tag--via {
+  background: color-mix(in srgb, var(--azure) 26%, transparent);
+  color: var(--azure-lit);
+}
+.cp-tag--conc {
+  background: color-mix(in srgb, var(--third) 22%, transparent);
+  color: var(--third-lit);
+}
+.cp-chip[data-ready='false'] .cp-tag {
+  background: transparent;
+  color: var(--bone-dim);
+}
+
+/* ───────── Resources ───────── */
+.cp-resources {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cp-res {
+  display: grid;
+  gap: 0.4rem;
+  align-content: center;
+  min-height: 5rem;
+  padding: 0.5rem 1rem;
+  background: var(--vellum-deep);
+  border: 1px solid var(--gold-dim);
+}
+.cp-res__label {
+  font-size: 1.25rem;
+  line-height: 1.1;
+  color: var(--bone-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cp-res[data-empty] {
+  border-style: dashed;
+  border-color: var(--iron);
+}
+.cp-pips {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.2rem 0.3rem 0;
+}
+.cp-pip {
+  flex: 0 1 1.25rem; /* a long row of charges shrinks its pips instead of wrapping onto a second line */
+  min-width: 0.7rem;
+  aspect-ratio: 1;
+  rotate: 45deg;
+  border: 0.14rem solid var(--gold-dim);
+}
+.cp-pip[data-state='full'] {
+  background: linear-gradient(135deg, var(--gem-a), var(--gem-d));
+  border-color: var(--gem-c);
+  box-shadow: 0 0 0.5rem var(--gem-glow);
+  animation: pip-kindle 0.4s var(--ease-out);
+}
+.cp-pip[data-state='spent'] {
+  background: var(--gem-spent-core);
+  border-color: var(--gem-spent-rim);
+}
+.cp-pool {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.cp-pool__bar {
+  flex: 1 1 auto;
+  height: 1.3rem;
+  background: var(--well);
+  border: 0.12rem solid var(--gold-dim);
+  overflow: hidden;
+}
+.cp-pool__fill {
+  display: block;
+  height: 100%;
+  transform-origin: left center;
+  background: linear-gradient(var(--second-lit), var(--second));
+  transition: transform 0.6s var(--ease-out);
+}
+.cp-pool__count {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.7rem;
+  line-height: 1;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.cp-pool__count small {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--bone-dim);
+}
+
+/* ───────── Latest ───────── */
+.cp-latest {
+  display: flex;
+  align-items: baseline;
+  gap: 1.4rem;
+  min-height: 2.4rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--rule);
+}
+.cp-latest__text {
+  min-width: 0;
+  font-size: 1.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: rise-in 0.5s var(--ease-out) backwards;
+}
+.cp-latest__text--none {
+  color: var(--bone-dim);
+}
+
+/* ───────── Waiting ───────── */
+.cp--waiting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+.cp-waiting__emblem {
+  height: 12rem;
+  width: auto;
+  filter: drop-shadow(0 0 1.6rem var(--gem-glow));
+}
+.cp-waiting__text {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+}
+
+/* ───────── Tall or narrow windows: one column, and the page may scroll rather than squash ───────── */
+@media (max-aspect-ratio: 5/4) {
+  html[data-view='companion'] {
+    font-size: min(1.5vw, 1.6vh);
+  }
+  .cp {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+  .cp-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cp-col > .cp-hp,
+  .cp-col > .cp-cast {
+    flex: none;
+  }
+  .cp-resources {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  body:has(.cp) {
+    overflow: auto;
+  }
+}

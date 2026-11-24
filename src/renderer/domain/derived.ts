@@ -37,3 +37,8 @@ const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX']
 export function roman(level: number): string {
   return ROMAN[level] ?? String(level)
 }
+
+/** "Dragonborn Paladin 5, Oath of Vengeance": the line under the name. */
+export function characterTitle(c: Pick<Character, 'race' | 'className' | 'level' | 'subclass'>): string {
+  return `${c.race} ${c.className} ${c.level}, ${c.subclass}`
+}

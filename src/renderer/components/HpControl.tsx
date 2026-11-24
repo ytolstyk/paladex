@@ -1,9 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
+import { hpPercent, LOW_HP_PERCENT } from '@/domain/vitals'
 import { useDismiss } from '@/hooks/useDismiss'
 import { usePlayStore } from '@/state/session'
-
-/** At or below this share of maximum hit points the bar throbs. */
-const LOW_HP_PERCENT = 25
 
 /** The hit-point block in the banner. Click it to take damage or heal; the number field takes any amount. */
 export function HpControl(): React.JSX.Element | null {
@@ -17,7 +15,7 @@ export function HpControl(): React.JSX.Element | null {
   useDismiss(open, box, close)
 
   if (!vitals) return null
-  const hpPct = Math.max(0, Math.min(100, (vitals.hp / vitals.hpMax) * 100))
+  const hpPct = hpPercent(vitals.hp, vitals.hpMax)
   const low = hpPct <= LOW_HP_PERCENT
   const parsed = Number.parseInt(amount, 10)
   const valid = Number.isFinite(parsed) && parsed > 0

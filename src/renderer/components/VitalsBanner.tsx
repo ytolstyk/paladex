@@ -1,6 +1,6 @@
 import emblem from '@/assets/emblem.svg'
 import { CONDITION_INFO } from '@/domain/conditions'
-import { signed, spellAttackBonus, spellSaveDc } from '@/domain/derived'
+import { characterTitle, signed, spellAttackBonus, spellSaveDc } from '@/domain/derived'
 import { selectConditions } from '@/state/selectors'
 import { catalog, usePlayStore } from '@/state/session'
 import { useUiStore } from '@/state/uiStore'
@@ -24,9 +24,7 @@ export function VitalsBanner(): React.JSX.Element {
           {isDev && <span className="banner__dev">dev profile</span>}
         </h1>
         <div className="banner__line">
-          <p className="banner__sub">
-            {character.race} {character.className} {character.level}, {character.subclass}
-          </p>
+          <p className="banner__sub">{characterTitle(character)}</p>
           {conditions.length > 0 && (
             <ul className="banner__conditions" aria-label="Conditions">
               {conditions.map((id) => (
@@ -57,6 +55,19 @@ export function VitalsBanner(): React.JSX.Element {
         <span className="vital__value">{signed(character.proficiencyBonus)}</span>
         <span className="vital__label">Proficiency</span>
       </div>
+      <button
+        type="button"
+        className="icon-button"
+        onClick={() => void window.paladex.toggleCompanion()}
+        aria-label="Companion screen"
+        title="Companion screen for the table (Shift+Cmd/Ctrl+C)"
+      >
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true">
+          <rect x="3" y="4.5" width="18" height="12" rx="1.2" />
+          <path d="M8.5 20h7M12 16.5V20" />
+          <path d="M7 12.5 10 9l2.5 2.5L15 8.5l2 2.5" strokeWidth="1.3" />
+        </svg>
+      </button>
       <button
         type="button"
         className="icon-button"

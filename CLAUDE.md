@@ -239,6 +239,28 @@ footer stay. The gear button in `VitalsBanner` and Cmd/Ctrl+, (in `hooks/useShor
   optionally `MATCHED_EFFECTS` entries. The CSS aura and halo must stay within `BACKDROP_MS`.
 - Features (Lay On Hands and the like) keep only the ring on the button: effects are for spells.
 
+## Companion window (second screen)
+
+- A second `BrowserWindow` loading the same page with `#companion` (`main.tsx` picks `<Companion />` over `<App />`; `public/theme-boot.js` sets
+  `data-view='companion'` before first paint). It is a read-only mirror: it never starts the play store (that would load, and could seed and save, the
+  sheet) and calls `initAmbientPause({ followFocus: false })` (it is never the focused window, so only hidden or minimized pauses its heartbeat and rune ring).
+- Data flow: the sheet's `saveState` handler in `main/index.ts` validates, then **pushes** the parsed state to the companion (`IPC.companionState`) before
+  the disk write. The companion listens first and loads second (`state/companionStore.ts`): any push that lands during the load wins. `reconcile` runs
+  on it in memory, never saved. `StatePort` (`shared/ipc.ts`) is what the play store needs; `PaladexApi` adds the window calls.
+- The window's lifecycle (one at a time, push, a stale `closed` never clears a newer window, the menu check follows `onOpenChange`) is `main/companionWindow.ts`, a controller
+  with an injected window factory so it is tested without Electron; `main/index.ts` only supplies the Electron side. Every window gets `secureWebPreferences()` and `loadPage()`.
+- IPC trust is per window: `CHANNEL_ROLES` in `main/ipcPolicy.ts` (a row per channel, enforced by the compiler; a test pins that the companion may call `loadState` only),
+  read by `guard(channel, fn)` in `main/index.ts`. A new channel needs a row.
+- Everything shown is `domain/companion.ts` `buildCompanionView` (pure, tested), built from the same rules as the sheet (`availableCosts`, `timerView`,
+  `turnOptions`-style defaults). Components in `components/companion/` only draw it. Colors are tokens only; `styles/companion.css` sizes everything in `rem`
+  and `html[data-view='companion']` sets the rem from the window (`min(0.9vw, 1.6vh)`), so a laptop window and a 4K television are the same picture.
+  When overriding a `.panel` rule, match its specificity (`.cp .panel`, `.cp-col > .panel`): a plain `.cp-x` loses and the layout silently breaks.
+- Theme and turn length live in localStorage, which both windows share; `followViewPrefs` applies the `storage` event so a change in Settings reaches the
+  companion. Window geometry is not remembered. With a second display it opens full screen there (`main/companionPlacement.ts`, pure, tested).
+- Verify: `PALADEX_TARGET=companion` (with `PALADEX_SHOT`, `PALADEX_SIZE`) opens the companion and captures it; `PALADEX_EVAL` still runs in the sheet, so it
+  can change the state the companion shows. Pre-write `<userdata>/state/play-state.json` to start from a given sheet. Wait 2 s in the script for a storage-event change.
+- Not done on purpose: nothing on it is interactive, and exact HP is always shown.
+
 ## Window state, layout and motion
 
 - Window geometry is a view preference: `src/main/windowState.ts` (electron-free, tested) persists it to

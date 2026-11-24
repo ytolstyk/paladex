@@ -72,6 +72,9 @@ export const TURN_STEP_LABEL: Record<TurnStep, { name: string; on: string; off: 
 /** The turn's one spell slot, as the rail and the chart both say it. */
 export const SLOT_TURN_LABEL = { spent: 'Spell slot spent', free: 'Spell slot free' } as const
 
+/** The same, as a tile on the companion screen: the name, and the one word under it. */
+export const SLOT_TURN_TILE = { name: 'Spell slot', spent: 'Spent', free: 'Free' } as const
+
 /** A weapon that requires attunement: whether the character has it. */
 export const ATTUNEMENT_LABEL: Record<NonNullable<Weapon['attunement']>, string> = {
   attuned: 'Attuned',
