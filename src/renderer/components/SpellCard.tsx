@@ -75,7 +75,21 @@ export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): R
         data-dimmed={dimmed || undefined}
         onClick={(e) => opensDetail(e.target) && openDetail(spell.id)}
       >
-        <CastRoundel castTime={spell.castTime} />
+        <div className="spell-card__lead">
+          <CastRoundel castTime={spell.castTime} />
+          <button
+            type="button"
+            className="fav-toggle"
+            aria-pressed={favorite}
+            aria-label={`Favorite ${spell.name}`}
+            title={favorite ? 'Remove from Favorites' : 'Add to Favorites'}
+            onClick={() => toggleFavorite(spell.id)}
+          >
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+              <path d="M12 3.2l2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.5l6-.8z" />
+            </svg>
+          </button>
+        </div>
         <div className="spell-card__body">
           <h3 className="spell-card__name">
             {/* No handler of its own: its click (and Enter or Space) bubbles to the card. It stays a button for the keyboard. */}
@@ -86,7 +100,6 @@ export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): R
           <p className="spell-card__meta">
             <span className="spell-card__role">{ROLE_LABEL[spell.role]}</span>
             <span>{spell.school}</span>
-            {spell.concentration && <span className="spell-card__conc">concentration</span>}
             {timerLeft !== null && <TimerBadge remaining={timerLeft} turnSeconds={turnSeconds} />}
             {spell.castingNote && <span>{spell.castingNote} to cast</span>}
             {spell.ritual && <span>ritual</span>}
@@ -96,20 +109,9 @@ export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): R
                   {chosen ? 'Prepared' : 'Prepare'}
                 </button>
               )}
-              <button
-                type="button"
-                className="fav-toggle"
-                aria-pressed={favorite}
-                aria-label={`Favorite ${spell.name}`}
-                title={favorite ? 'Remove from Favorites' : 'Add to Favorites'}
-                onClick={() => toggleFavorite(spell.id)}
-              >
-                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
-                  <path d="M12 3.2l2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.5l6-.8z" />
-                </svg>
-              </button>
             </span>
           </p>
+          {spell.concentration && <p className="spell-card__conc">concentration</p>}
           <p className="spell-card__facts">
             <RangeBadge range={spell.range} />
             <ComponentMarks components={spell.components} />

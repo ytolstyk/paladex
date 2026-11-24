@@ -1014,7 +1014,16 @@ button {
 }
 .spell-card__conc {
   font-style: italic;
+  font-size: 0.85rem;
+  line-height: 1.25;
   color: var(--third-lit);
+}
+/* The left column: the action badge with the favorite star under it */
+.spell-card__lead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }
 .spell-card__summary {
   margin-top: 2px;
@@ -1664,7 +1673,7 @@ button {
 .fav-toggle {
   display: grid;
   place-items: center;
-  padding: 0 2px;
+  padding: 2px;
   background: transparent;
   border: 0;
   color: var(--bone-dim);
