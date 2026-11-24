@@ -1,11 +1,12 @@
 import { useEffect } from 'react'
+import { canUndo as selectCanUndo } from '@/state/playStore'
 import { usePlayStore } from '@/state/session'
 
 const TOAST_MS = 4500
 
 export function Toast(): React.JSX.Element | null {
   const toast = usePlayStore((s) => s.toast)
-  const canUndo = usePlayStore((s) => s.undo.length > 0)
+  const canUndo = usePlayStore(selectCanUndo)
   const undoLast = usePlayStore((s) => s.undoLast)
   const dismiss = usePlayStore((s) => s.dismissToast)
 

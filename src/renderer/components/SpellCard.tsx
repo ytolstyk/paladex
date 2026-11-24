@@ -1,7 +1,7 @@
 import { memo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import type { Payment, Spell } from '@shared/types'
-import { availableCosts, paymentOptions, samePaymentOptions, type PaymentOptions } from '@/domain/cost'
+import { availableCosts, paymentOptions, samePayment, samePaymentOptions, type PaymentOptions } from '@/domain/cost'
 import { paymentLabel, ROLE_LABEL } from '@/domain/labels'
 import { isChoosable, isInDefaultView } from '@/domain/prepared'
 import { spellFoundBeyondCard, searchTokens } from '@/domain/search'
@@ -132,7 +132,9 @@ export const SpellCard = memo(function SpellCard({ spell }: { spell: Spell }): R
             onActivate={() => {
               setPicked(null)
               // A refused cast (the store moved on since this render) must not look like a cast.
-              if (cast(spell.id, payment ?? undefined)) fx.current?.play(effect)
+              // Only a payment the player picked is kept fixed if the history is later corrected; the default is paid afresh.
+              const deliberate = picked !== null && payment !== null && samePayment(picked, payment)
+              if (cast(spell.id, payment ?? undefined, { picked: deliberate })) fx.current?.play(effect)
             }}
           />
           {(lower || higher) && <PaymentStepper lower={lower} higher={higher} onPick={setPicked} />}

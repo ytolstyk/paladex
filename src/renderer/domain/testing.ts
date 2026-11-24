@@ -4,6 +4,8 @@ import type { CounterDef, Feature, SeedData, Spell, Weapon } from '@shared/types
 import { createCatalog, type Catalog } from './catalog'
 import { seedPlayState } from './hydrate'
 import { isChoosable } from './prepared'
+import { runCall, type Call, type Step } from './steps'
+import { pushUndo, type UndoEntry } from './undo'
 
 export function spell(over: Partial<Spell> = {}): Spell {
   return {
@@ -146,4 +148,27 @@ export function testCatalog(
 
 export function freshState(catalog: Catalog = testCatalog(), now = 0): PlayState {
   return seedPlayState(catalog, now)
+}
+
+/**
+ * Play a list of calls the way the store does (each at its own time, none that do nothing recorded) and hand back the sheet and the
+ * undo list they leave. For tests of the history, which need a real stack rather than a made-up one.
+ */
+export function runSession(
+  catalog: Catalog,
+  calls: readonly { call: Call; t: number }[],
+  start: PlayState = freshState(catalog, 0)
+): { play: PlayState; stack: UndoEntry[]; steps: Step[] } {
+  let play = start
+  let stack: UndoEntry[] = []
+  const steps: Step[] = []
+  calls.forEach(({ call, t }, index) => {
+    const result = runCall(play, catalog, call, t)
+    if (!result) throw new Error(`Call ${index} (${call.type}) did nothing`)
+    const step: Step = { id: index + 1, call, t, entry: result.entry }
+    stack = pushUndo(stack, play, result.undo, step, t)
+    steps.push(step)
+    play = result.state
+  })
+  return { play, stack, steps }
 }

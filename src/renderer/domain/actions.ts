@@ -14,7 +14,7 @@ import { COALESCE_MS, undoKey, type UndoMeta } from './undo'
 /**
  * Every game mutation is a pure function `(state, catalog, args, now) => ActionResult | null`.
  * `null` means "nothing to do" (e.g. no slot left, already at zero) so callers never record empty history.
- * The store only dispatches these; it contains no rules.
+ * The store only dispatches these (as `Call`s, see `steps.ts`); it contains no rules.
  */
 export interface ActionResult {
   state: PlayState
@@ -186,7 +186,7 @@ export function endTimer(state: PlayState, catalog: Catalog, spellId: string, no
 
 /**
  * Mark a turn step used, or clear it again. Always changes something, so it never returns null. A run of taps on one step is one
- * undo step (a mis-tap and its correction should not push real casts out of the 10-step history).
+ * undo step (a mis-tap and its correction should not push real casts out of the undo history).
  */
 export function toggleTurnStep(state: PlayState, step: TurnStep, now: number): ActionResult {
   const on = !state.turn[TURN_STEP_FLAG[step]]
@@ -226,7 +226,7 @@ export function dropConcentration(state: PlayState, catalog: Catalog, now: numbe
  */
 export function adjustCounter(state: PlayState, catalog: Catalog, counterId: string, delta: number, now: number): ActionResult | null {
   const def = catalog.counterById(counterId)
-  if (!def || !Number.isInteger(delta) || delta === 0) return null
+  if (!def || !Number.isSafeInteger(delta) || delta === 0) return null
   const used = state.counters[counterId] ?? 0
   const nextUsed = clamp(used - delta, 0, def.max)
   if (nextUsed === used) return null
@@ -247,7 +247,7 @@ export function adjustCounter(state: PlayState, catalog: Catalog, counterId: str
  */
 export function adjustHp(state: PlayState, catalog: Catalog, delta: number, now: number): ActionResult | null {
   const { hp, hpMax, tempHp } = state.vitals
-  if (!Number.isInteger(delta) || delta === 0) return null
+  if (!Number.isSafeInteger(delta) || delta === 0) return null
 
   let vitals = state.vitals
   let concentration = state.concentration

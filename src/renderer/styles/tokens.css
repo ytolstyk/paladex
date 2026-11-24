@@ -155,6 +155,7 @@
   --chart-width: var(--drawer-width); /* the turn chart and a detail drawer share an edge, so the drawer covers the chart exactly */
   --card-min: clamp(290px, 17vw, 380px);
   --panel-width: clamp(420px, 46vw, 760px); /* the filter panel's popover */
+  --steps-width: clamp(420px, 38vw, 640px); /* the Edit steps list above the footer */
   --banner-height: 64px;
   --footer-height: 52px;
   --tabs-height: 44px; /* the sticky tab strip above the stage; the filter bar sticks just below it */

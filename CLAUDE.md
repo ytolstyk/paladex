@@ -79,6 +79,33 @@ schema, vitest for tests. See README.md for scripts and layout.
   `chartOpen` is in `uiStore`, in-session, and kept (not drawn) on the settings page. `T` toggles it.
 - `PALADEX_SIZE=960x640` (with `PALADEX_SHOT`) sizes the window for a screenshot, so the 1180 px breakpoint and a short window can be checked.
 
+## Undo, and correcting the history ("Edit steps")
+
+- Every change to the play state is a `Call` (`domain/calls.ts`, leaf types only so `undo.ts` can hold `Step`s without a cycle) run by `runCall`;
+  the store's private `dispatch(call)` is the only writer (besides `undoLast` and `applyHistoryChange`), and every writer ends in `commit`.
+  A new action therefore needs: a `Call` kind and a row in each table keyed by kind, `RUNNERS` and `DROP_REASON` (`steps.ts`) and `EDIT_RULES`
+  (`stepEdit.ts`, `null` = remove only), which the compiler enforces, plus a name in the list in `replay.test.ts` (a test fails for an exported
+  action with no kind). Toggles store the value they set (`on`), never "flip", so a replay cannot invert them; `callFor` (`steps.ts`) builds those
+  calls from the sheet so the store stays a dispatcher. The action functions themselves are unchanged and still toggle.
+- `UndoEntry` (30 of them; a run of taps is one, up to `MAX_STEPS_PER_ENTRY`) holds the `Step`s (`{ id, call, t, entry }`) it is made of. The ids are stable through a
+  replay; the history list and the store address steps by id, never by position.
+- `domain/replay.ts` runs the whole stack again from the oldest remembered state with one change: remove a step, edit one step's call, or
+  `revert` (the state before a step; the newest entry's "Undo from here" is plain Undo). It rebuilds the stack through `pushUndo`, so
+  coalescing is the same as live play, and it rewrites `play.log` (Recently cast and the footer follow). `isReplayable` is the guard: the
+  same replay with no change must equal the sheet, or editing is off. `previewHistoryChange` (pure) adds the diff (`stateDiff.ts`: one describer per part of the sheet, a test checks that every play-state key is
+  worded or ignored) and is run again inside the store's `applyHistoryChange(change, shown)`, which
+  refuses when the undo list is not the one the player was shown.
+- Typed amounts (`stepEdit.ts` `AMOUNT_LIMIT`, and `Number.isSafeInteger` in `adjustHp` and `adjustCounter`) must stay small and safe: the main process refuses to save a
+  log entry whose amount is not a safe integer, and then every later save fails.
+- Payments on replay: only a payment the player picked (the upcast stepper, `cast(id, payment, { picked: true })`) is kept in the step. A default cast
+  pays the way the card would at that point, so removing a free cast lets a later one use it. A picked payment and an edited step are strict: if
+  unavailable the step is dropped (listed in the preview) or the edit refused, never paid some other way. `dropConcentration` carries the
+  spell and does nothing if that spell is no longer the concentration. `newTurn` carries the turn length it was pressed with.
+- Undo after a correction: `historyBackup` holds the sheet and list from just before it. While it is live `undoLast` (footer, Cmd+Z, toast,
+  the list's button) restores it once instead of popping a step; any new action, load or reset clears it. `canUndo` (`playStore.ts`) counts it.
+- The list is session only (never saved) and `historyOpen` is `uiStore` view state, closed when settings opens. Persisting the list would
+  need a schema change and rollback-only saves; it is not done.
+
 ## Recently cast, history and duration timers
 
 - "Recently cast" and the History list (`RecentCasts`, `domain/recent.ts`) are read from `play.log` (cast and feature entries), so they follow Undo and add

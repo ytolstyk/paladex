@@ -17,6 +17,7 @@ import { TablePanel } from './components/TablePanel'
 import { TimerPanel } from './components/TimerPanel'
 import { TurnChart } from './components/TurnChart'
 import { TurnPanel } from './components/TurnPanel'
+import { UndoHistory } from './components/UndoHistory'
 import { UnreadableState } from './components/UnreadableState'
 import { VitalsBanner } from './components/VitalsBanner'
 import { useShortcuts } from './hooks/useShortcuts'
@@ -27,6 +28,7 @@ export function App(): React.JSX.Element {
   const view = useUiStore((s) => s.view)
   const stageTab = useUiStore((s) => s.stageTab)
   const chartOpen = useUiStore((s) => s.chartOpen)
+  const historyOpen = useUiStore((s) => s.historyOpen)
   const status = usePlayStore((s) => s.status)
   const init = usePlayStore((s) => s.init)
   const recovered = usePlayStore((s) => s.recoveredFromBackup)
@@ -85,6 +87,7 @@ export function App(): React.JSX.Element {
       {/* Beside the stage on the sheet; kept mounted (hidden) on the settings page so its focus and state survive the round trip. */}
       {chartOpen && <TurnChart hidden={view !== 'sheet'} />}
       <Footer />
+      {historyOpen && view === 'sheet' && <UndoHistory />}
       <DetailDrawer />
       <Toast />
       <RestGlow />

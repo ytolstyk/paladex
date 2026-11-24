@@ -1240,6 +1240,118 @@ button {
   border-color: var(--gules-lit);
 }
 
+/* ───────── Edit steps (the undo list) ───────── */
+.steps {
+  position: fixed;
+  right: var(--space-4);
+  bottom: calc(var(--footer-height) + var(--space-3));
+  z-index: 7; /* above the detail drawer (4), the HP popover (5) and the rest glow (6); the toast sits beside it */
+  display: grid;
+  gap: var(--space-2);
+  width: min(var(--steps-width), calc(100vw - 2 * var(--space-4)));
+  max-height: calc(100vh - var(--banner-height) - var(--footer-height) - var(--space-6));
+  overflow-y: auto;
+  padding: var(--space-3);
+  background: var(--grain), var(--vellum-raised);
+  border: 1px solid var(--gold);
+  box-shadow: 0 10px 28px var(--shadow-lg);
+  animation: rise-in 0.18s var(--ease-out);
+}
+.steps__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+}
+.steps__title {
+  margin: 0;
+  color: var(--second-lit);
+}
+.steps__head .muted {
+  flex: 1 1 auto;
+}
+.steps__list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.steps__list--inner {
+  margin-left: var(--space-4);
+}
+.steps__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--rule);
+}
+.steps__row[data-selected] {
+  background: var(--vellum);
+  border-color: var(--second);
+}
+.steps__time {
+  font-variant-numeric: tabular-nums;
+}
+.steps__text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.steps__buttons {
+  display: flex;
+  gap: var(--space-1);
+}
+.steps__buttons .btn {
+  padding: 2px 8px;
+}
+.steps__group-head {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-2);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.steps__group-head:hover {
+  background: var(--vellum);
+}
+.steps__preview {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+}
+.steps__field {
+  display: grid;
+  gap: var(--space-1);
+}
+.steps__diff {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+.steps__label {
+  margin: 0;
+  color: var(--second-lit);
+}
+.steps__note {
+  margin: 0;
+  color: var(--third-lit);
+}
+.steps__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+.steps__empty {
+  margin: 0;
+}
+
 /* ───────── Toast and blocker ───────── */
 .toast {
   position: fixed;

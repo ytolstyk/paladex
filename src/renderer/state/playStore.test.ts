@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import type { PaladexApi, LoadResult } from '@shared/ipc'
 import type { PlayState } from '@shared/schema'
 import { bless, freshState, smite, testCatalog } from '@/domain/testing'
-import { createPlayStore } from './playStore'
+import { canUndo, createPlayStore } from './playStore'
 
 const catalog = testCatalog()
 
@@ -134,6 +134,17 @@ describe('actions through the store', () => {
     expect(store.getState().play?.slotsUsed).toEqual({ '1': 1 })
   })
 
+  it('refuses a hit-point amount too large to save (it would make every later save fail)', async () => {
+    const { port, store } = await readyStore()
+    const writes = port.saved.length
+    store.getState().adjustHp(-(10 ** 300))
+    store.getState().adjustHp(-(2 ** 53 + 2))
+    expect(store.getState().undo).toHaveLength(0)
+    expect(port.saved).toHaveLength(writes)
+    store.getState().adjustHp(-999_999)
+    expect(store.getState().play?.vitals.hp).toBe(0)
+  })
+
   it('reset re-initialises from a fresh seed', async () => {
     const { port, store } = await readyStore({ status: 'unreadable', reason: 'x' })
     ;(port.loadState as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ status: 'empty' })
@@ -158,5 +169,87 @@ describe('spell timers', () => {
     expect(store.getState().play?.timers[0]?.remaining).toBe(24)
     store.getState().endTimer(bless.id)
     expect(store.getState().play?.timers).toEqual([])
+  })
+})
+
+describe('correcting the history', () => {
+  it('a default cast pays afresh after an earlier cast is removed; a picked payment stays fixed', async () => {
+    const { port, store } = await readyStore()
+    store.getState().cast(smite.id) // free cast
+    store.getState().cast(smite.id) // slot, as the default
+    const [first] = store.getState().undo.flatMap((e) => e.steps)
+    expect(store.getState().applyHistoryChange({ kind: 'remove', stepId: first!.id }, store.getState().undo)).toBe(true)
+    expect(store.getState().play?.counters['free-smite']).toBe(1)
+    expect(store.getState().play?.slotsUsed).toEqual({})
+    expect(port.saved.at(-1)?.counters['free-smite']).toBe(1)
+    expect(store.getState().toast?.msg).toContain('History changed')
+
+    // The same two casts, but the second was picked at level 2: removing the first leaves it a level 2 cast.
+    const picked = await readyStore()
+    picked.store.getState().cast(smite.id)
+    picked.store.getState().cast(smite.id, { kind: 'slot', level: 2 }, { picked: true })
+    const steps = picked.store.getState().undo.flatMap((e) => e.steps)
+    picked.store.getState().applyHistoryChange({ kind: 'remove', stepId: steps[0]!.id }, picked.store.getState().undo)
+    expect(picked.store.getState().play?.slotsUsed).toEqual({ '2': 1 })
+    expect(picked.store.getState().play?.counters['free-smite'] ?? 0).toBe(0)
+  })
+
+  it('refuses a change made against an undo list that has since moved', async () => {
+    const { store } = await readyStore()
+    store.getState().adjustHp(-5)
+    const shown = store.getState().undo
+    store.getState().cast(bless.id) // the list moves under an open preview
+    const id = shown.flatMap((e) => e.steps)[0]!.id
+    expect(store.getState().applyHistoryChange({ kind: 'remove', stepId: id }, shown)).toBe(false)
+    expect(store.getState().play?.vitals.hp).toBe(47)
+  })
+
+  it('Undo takes the change back (even when it left no steps), once, and any new action ends that', async () => {
+    const { port, store } = await readyStore()
+    store.getState().adjustHp(-5)
+    const id = store.getState().undo[0]!.steps[0]!.id
+    store.getState().applyHistoryChange({ kind: 'remove', stepId: id }, store.getState().undo)
+    expect(store.getState().play?.vitals.hp).toBe(52)
+    expect(store.getState().undo).toHaveLength(0)
+    expect(canUndo(store.getState())).toBe(true) // the stack is empty but the change can be taken back
+
+    store.getState().undoLast()
+    expect(store.getState().play?.vitals.hp).toBe(47)
+    expect(store.getState().undo).toHaveLength(1)
+    expect(store.getState().toast).toMatchObject({ msg: 'History change reverted', undoable: false })
+    expect(port.saved.at(-1)?.vitals.hp).toBe(47)
+    expect(store.getState().historyBackup).toBeNull()
+
+    // After a new action the backup is gone, and Undo is the plain one again.
+    store.getState().applyHistoryChange({ kind: 'remove', stepId: store.getState().undo[0]!.steps[0]!.id }, store.getState().undo)
+    store.getState().adjustHp(-1)
+    expect(store.getState().historyBackup).toBeNull()
+    store.getState().undoLast()
+    expect(store.getState().play?.vitals.hp).toBe(52)
+  })
+
+  it('"Undo from here" and an edit go through the same path, and the guard refuses when the sheet is out of step', async () => {
+    const { store } = await readyStore()
+    store.getState().adjustHp(-5)
+    store.getState().adjustHp(-3) // within 2 s of the first? the test clock moves 10 ms per call, so this is one run
+    const steps = store.getState().undo.flatMap((e) => e.steps)
+    expect(steps).toHaveLength(2)
+    expect(store.getState().applyHistoryChange({ kind: 'edit', stepId: steps[0]!.id, call: { type: 'hp', delta: -9 } }, store.getState().undo)).toBe(true)
+    expect(store.getState().play?.vitals.hp).toBe(52 - 9 - 3)
+    expect(store.getState().applyHistoryChange({ kind: 'edit', stepId: steps[0]!.id, call: { type: 'hp', delta: 0 } }, store.getState().undo)).toBe(false)
+
+    const again = store.getState().undo.flatMap((e) => e.steps)
+    expect(store.getState().applyHistoryChange({ kind: 'revert', stepId: again[1]!.id }, store.getState().undo)).toBe(true)
+    expect(store.getState().play?.vitals.hp).toBe(52 - 9)
+  })
+
+  it('reset and a failed save leave nothing of the backup behind', async () => {
+    const { port, store } = await readyStore()
+    store.getState().adjustHp(-5)
+    store.getState().applyHistoryChange({ kind: 'remove', stepId: store.getState().undo[0]!.steps[0]!.id }, store.getState().undo)
+    expect(store.getState().historyBackup).not.toBeNull()
+    ;(port.loadState as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ status: 'empty' })
+    await store.getState().resetState()
+    expect(store.getState().historyBackup).toBeNull()
   })
 })

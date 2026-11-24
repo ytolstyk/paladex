@@ -38,6 +38,10 @@ interface UiStore {
   chartOpen: boolean
   toggleChart(): void
   closeChart(): void
+  /** The list of recent steps above the footer, where one can be undone, changed or removed. In-session; closed by the settings page. */
+  historyOpen: boolean
+  toggleHistory(): void
+  closeHistory(): void
   /** The spell, feature or weapon shown in the detail drawer, by id (`spell:...` / `feature:...` / `weapon:...`). */
   detailId: string | null
   openDetail(id: string): void
@@ -79,12 +83,15 @@ export const useUiStore = create<UiStore>((set) => ({
   closeSettings: () => set({ view: 'sheet' }),
   toggleSettings: () =>
     // Opening settings also closes the detail drawer, so it cannot linger behind the page.
-    set((s) => (s.view === 'settings' ? { view: 'sheet' } : { view: 'settings', detailId: null })),
+    set((s) => (s.view === 'settings' ? { view: 'sheet' } : { view: 'settings', detailId: null, historyOpen: false })),
   stageTab: 'spells',
   setStageTab: (stageTab) => set({ stageTab }),
   chartOpen: false,
   toggleChart: () => set((s) => ({ chartOpen: !s.chartOpen })),
   closeChart: () => set({ chartOpen: false }),
+  historyOpen: false,
+  toggleHistory: () => set((s) => ({ historyOpen: !s.historyOpen })),
+  closeHistory: () => set({ historyOpen: false }),
   detailId: null,
   openDetail: (id) => set({ detailId: id }),
   closeDetail: () => set({ detailId: null }),

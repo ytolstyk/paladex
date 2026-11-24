@@ -1,10 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import { createInitialPlayState } from '@shared/initial'
-import { COALESCE_MS, popUndo, pushUndo, UNDO_LIMIT, undoKey, type UndoMeta } from './undo'
+import type { PlayState } from '@shared/schema'
+import type { Step } from './steps'
+import { COALESCE_MS, MAX_STEPS_PER_ENTRY, popUndo, pushUndo as pushStep, UNDO_LIMIT, undoKey, type UndoEntry, type UndoMeta } from './undo'
 
 const base = createInitialPlayState({ hpMax: 52, ac: 16, counters: [] }, 0)
 const at = (n: number) => ({ ...base, vitals: { ...base.vitals, hp: n } })
 const edit = (key: string): UndoMeta => ({ kind: 'edit', key })
+let nextId = 1
+/** The steps are not what these tests are about: each push records a plain one. */
+const pushUndo = (stack: readonly UndoEntry[], before: PlayState, meta: UndoMeta, now: number): UndoEntry[] => {
+  const step: Step = { id: nextId++, call: { type: 'hp', delta: -1 }, t: now, entry: { t: now, kind: 'hp', amount: -1 } }
+  return pushStep(stack, before, meta, step, now)
+}
 
 describe('pushUndo', () => {
   it('coalesces consecutive edits of the same field inside the window', () => {
@@ -42,6 +50,21 @@ describe('pushUndo', () => {
     stack = pushUndo(stack, at(49), { kind: 'toggle' }, 1003)
     stack = pushUndo(stack, at(48), { kind: 'turn' }, 1004)
     expect(stack).toHaveLength(5)
+  })
+
+  it('remembers every step of a coalesced run, in order', () => {
+    let stack = pushUndo([], at(52), edit('hp'), 1000)
+    stack = pushUndo(stack, at(51), edit('hp'), 1500)
+    expect(stack).toHaveLength(1)
+    expect(stack[0]?.steps.map((s) => s.t)).toEqual([1000, 1500])
+  })
+
+  it('starts a new entry when a run of taps gets very long, so one entry stays bounded', () => {
+    let stack: UndoEntry[] = []
+    for (let i = 0; i <= MAX_STEPS_PER_ENTRY; i++) stack = pushUndo(stack, at(50), edit('hp'), 1000 + i)
+    expect(stack).toHaveLength(2)
+    expect(stack[0]?.steps).toHaveLength(MAX_STEPS_PER_ENTRY)
+    expect(stack[1]?.steps).toHaveLength(1)
   })
 
   it('keeps only the last UNDO_LIMIT snapshots', () => {
