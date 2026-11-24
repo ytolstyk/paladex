@@ -1,11 +1,14 @@
-import { INITIATIVE_MAX, INITIATIVE_MIN, INSPIRATION_DICE, type InspirationDie } from '@shared/constants'
+import { CONDITIONS, INITIATIVE_MAX, INITIATIVE_MIN, INSPIRATION_DICE, type ConditionId, type InspirationDie } from '@shared/constants'
 import type { LogEntry, PlayState } from '@shared/schema'
 import { appendCoalescedLog, appendLog, type ActionResult } from './actions'
+import type { Catalog } from './catalog'
+import { CONDITION_INFO } from './conditions'
 import { formatLog } from './log'
+import { settleTimers } from './timers'
 import { undoKey } from './undo'
 
 /**
- * What a player carries from the table into their own turn: initiative and Bardic Inspiration. Same contract as `actions.ts`
+ * What a player carries from the table into their own turn: initiative, Bardic Inspiration and conditions. Same contract as `actions.ts`
  * (pure, null when there is nothing to do). Manual edits that come in runs (the dial, the die size) coalesce in the log as
  * well as in undo, and a rest ends held inspiration (see `takeRest`).
  */
@@ -46,5 +49,25 @@ export function setInspirationDie(state: PlayState, die: number, now: number): A
     state: appendCoalescedLog({ ...state, inspiration: { ...state.inspiration, die: size } }, entry),
     undo: { kind: 'edit', key: undoKey.inspirationDie },
     entry
+  }
+}
+
+/**
+ * Put a condition on the character (`on` true) or take it off. Null when it is already so. Only the conditions that include Incapacitated
+ * act on anything else: Incapacitated breaks concentration, so it ends (the same automatic rule as dropping to 0 hit points, and the
+ * log and toast say so). The rest are notes: nothing is blocked or changed by Frightened or Prone, and a rest never clears one.
+ */
+export function setCondition(state: PlayState, catalog: Catalog, id: ConditionId, on: boolean, now: number): ActionResult | null {
+  if (state.conditions.includes(id) === on) return null
+  const info = CONDITION_INFO[id]
+  // Filtering the full list (not pushing) keeps the saved list in CONDITIONS order.
+  const conditions = CONDITIONS.filter((c) => (c === id ? on : state.conditions.includes(c)))
+  const endedSpellId = on && info.incapacitating ? state.concentration : null
+  const entry: LogEntry = { t: now, kind: 'condition', condition: id, on, ...(endedSpellId ? { endedSpellId } : {}) }
+  return {
+    state: appendLog(settleTimers({ ...state, conditions, concentration: endedSpellId ? null : state.concentration }, catalog), entry),
+    undo: { kind: 'edit', key: undoKey.condition(id) },
+    entry,
+    ...(endedSpellId ? { toast: `${info.name}: concentration on ${catalog.nameOf(endedSpellId)} ends` } : {})
   }
 }

@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { AttacksPage } from './components/AttacksPage'
 import { Backdrop } from './components/Backdrop'
+import { ConditionsPanel } from './components/ConditionsPanel'
 import { FilterBar } from './components/FilterBar'
 import { DetailDrawer } from './components/DetailDrawer'
 import { DiceTray } from './components/DiceTray'
@@ -62,6 +63,7 @@ export function App(): React.JSX.Element {
             <SlotTracker />
             <TimerPanel />
             <TurnPanel />
+            <ConditionsPanel />
             <ResourcePanel />
           </aside>
           <main className="stage">

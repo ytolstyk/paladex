@@ -55,7 +55,7 @@ Today: "Prepare" toggles on each card, a "Prepared 2 of 6" counter, and "Show al
 Today: damage and heal from the HP popover. Temp HP is stored and absorbs damage, but there is no way to set it.
 
 - [ ] **Set temp HP** (and the rule that it doesn't stack) from the same popover. **S**
-- [ ] **Conditions**: toggle chips for Prone, Frightened, Poisoned and so on, with the rules text one click away. *(play state)* **M**
+- [x] **Conditions**: toggle chips for Prone, Frightened, Poisoned and so on, with the rules text one click away. *(done)* The 14 conditions of the 2024 rules; exhaustion is its own item below. Anything that makes you Incapacitated ends concentration.
 - [ ] **Death saves**: three success and three failure pips that appear at 0 HP and reset on healing. *(play state)* **S**
 - [ ] **Short rest dialog**: spend hit dice, roll or enter the result, and apply the healing. Today a short rest only gives back
       Channel Divinity. **M**

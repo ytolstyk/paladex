@@ -1,6 +1,6 @@
 import type { PlayState } from '@shared/schema'
 import type { Payment } from '@shared/types'
-import type { TurnStep } from '@shared/constants'
+import type { ConditionId, TurnStep } from '@shared/constants'
 import * as actions from './actions'
 import type { Call, CallOf, DropReason } from './calls'
 import type { Catalog } from './catalog'
@@ -31,6 +31,7 @@ const RUNNERS: { [K in Call['type']]: Runner<K> } = {
   initiative: (state, _catalog, call, t) => table.setInitiative(state, call.value, t),
   inspirationHeld: (state, _catalog, call, t) => table.setInspirationHeld(state, call.held, t),
   inspirationDie: (state, _catalog, call, t) => table.setInspirationDie(state, call.die, t),
+  condition: (state, catalog, call, t) => table.setCondition(state, catalog, call.id, call.on, t),
   dropConcentration: (state, catalog, call, t) => (state.concentration === call.spellId ? actions.dropConcentration(state, catalog, t) : null)
 }
 
@@ -58,6 +59,7 @@ const DROP_REASON: Record<Call['type'], DropReason> = {
   initiative: 'no-longer-needed',
   inspirationHeld: 'no-longer-needed',
   inspirationDie: 'no-longer-needed',
+  condition: 'no-longer-needed',
   dropConcentration: 'no-longer-needed'
 }
 
@@ -71,6 +73,7 @@ export const callFor = {
   turnStep: (play: PlayState, step: TurnStep): Call => ({ type: 'turnStep', step, on: !play.turn[TURN_STEP_FLAG[step]] }),
   prepared: (play: PlayState, spellId: string): Call => ({ type: 'prepared', spellId, on: !play.prepared.includes(spellId) }),
   favorite: (play: PlayState, spellId: string): Call => ({ type: 'favorite', spellId, on: !play.favorites.includes(spellId) }),
+  condition: (play: PlayState, id: ConditionId): Call => ({ type: 'condition', id, on: !play.conditions.includes(id) }),
   dropConcentration: (play: PlayState): Call | null => (play.concentration ? { type: 'dropConcentration', spellId: play.concentration } : null),
   /**
    * A cast runs with the payment the card showed (strict, so a refused cast looks like one). Only a payment the player picked is

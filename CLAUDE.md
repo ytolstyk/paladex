@@ -120,6 +120,18 @@ schema, vitest for tests. See README.md for scripts and layout.
 - The list is session only (never saved) and `historyOpen` is `uiStore` view state, closed when settings opens. Persisting the list would
   need a schema change and rollback-only saves; it is not done.
 
+## Conditions
+
+- `PlayState.conditions` is `ConditionId[]` (`CONDITIONS` in `shared/constants.ts`: the 14 of the 2024 rules, exhaustion excluded because it is a level). The schema reads it entry by
+  entry (`.default([])`): an unknown name, a duplicate or junk is dropped, and the list always comes out in `CONDITIONS` order. A `condition` log entry (`condition`, `on`, and
+  `endedSpellId` when it broke concentration) names its condition with a strict enum like `turn-step`, so a save holding one is unreadable to a build from before it (rollback only).
+- Names, one-line summaries, rules lines and log wording are `domain/conditions.ts` (`CONDITION_INFO`, a Record, so a new id will not compile until described). The rules lines are paraphrases.
+- One writer: `setCondition` in `domain/tableActions.ts`, `Call` kind `condition` (`{ id, on }`, an `on` value and never a flip, so a replay cannot invert it; `callFor.condition` builds it). Undo is an `edit` keyed per condition (`undoKey.condition`), so a mis-tap and its correction are one step.
+  Not editable in the history list, only removable.
+- Only the conditions that include Incapacitated (`incapacitating`: incapacitated, paralyzed, petrified, stunned, unconscious) do anything beyond being a note: setting one ends concentration, automatically,
+  like dropping to 0 hit points (log, toast and `settleTimers`). Taking it off does not give concentration back. Nothing is blocked, and prone, frightened and the rest change no numbers. Casting while Incapacitated is deliberately not warned about or refused (the table's ruling wins); the rule only acts when the condition is set. A rest never clears one.
+- `ConditionsPanel` (rail, after the turn panel) toggles and reads; the vitals banner shows the active ones as one row of badges (whole badges drop off when it is narrow; the panel lists all).
+
 ## Recently cast, history and duration timers
 
 - "Recently cast" and the History list (`RecentCasts`, `domain/recent.ts`) are read from `play.log` (cast and feature entries), so they follow Undo and add

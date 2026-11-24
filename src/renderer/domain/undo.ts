@@ -1,4 +1,4 @@
-import type { TurnStep } from '@shared/constants'
+import type { ConditionId, TurnStep } from '@shared/constants'
 import type { PlayState } from '@shared/schema'
 import type { Step } from './calls'
 
@@ -17,7 +17,9 @@ export const undoKey = {
   /** A run of New turn presses that only tick spell timers (the turn was already clear) is one history step. */
   newTurn: 'new-turn',
   /** A mis-tap on a turn step and its undo are one history step, like a run of ± taps. */
-  turnStep: (step: TurnStep): string => `turn-step:${step}`
+  turnStep: (step: TurnStep): string => `turn-step:${step}`,
+  /** A mis-tap on a condition chip and its correction are one history step; two different conditions never merge. */
+  condition: (id: ConditionId): string => `condition:${id}`
 }
 
 export interface UndoEntry {

@@ -36,6 +36,9 @@ describe('replaying the whole history with no change', () => {
     { type: 'dropConcentration', spellId: bless.id },
     { type: 'cast', spellId: bless.id },
     { type: 'endTimer', spellId: bless.id },
+    { type: 'condition', id: 'prone', on: true },
+    { type: 'condition', id: 'stunned', on: true },
+    { type: 'condition', id: 'prone', on: false },
     { type: 'rest', kind: 'short' },
     { type: 'rest', kind: 'long' }
   ]
@@ -136,6 +139,17 @@ describe('removing a step', () => {
     // Dropping concentration only ever ends the spell it ended, so with the cast gone there is nothing to drop.
     const second = replay(stack, catalog, { kind: 'remove', stepId: 3 })
     expect(second?.dropped.map((d) => [d.step.id, d.reason])).toEqual([[4, 'no-longer-needed']])
+  })
+
+  it('keeps the concentration a removed condition would have broken, and says so', () => {
+    const { play, stack } = runSession(catalog, at([{ type: 'cast', spellId: bless.id }, { type: 'condition', id: 'stunned', on: true }]))
+    expect(play.concentration).toBeNull()
+    const result = replay(stack, catalog, { kind: 'remove', stepId: 2 })
+    expect(result?.state.concentration).toBe(bless.id)
+    expect(result?.state.conditions).toEqual([])
+    const lines = describeDifference(play, result!.state, catalog)
+    expect(lines).toContain('Concentration: none → Bless')
+    expect(lines).toContain('Conditions: − Stunned')
   })
 
   it('leaves an empty stack when the only step is removed, and keeps step ids through a replay', () => {
@@ -276,7 +290,8 @@ describe('what the code must keep in step with', () => {
       activateFeature: 'feature',
       setInitiative: 'initiative',
       setInspirationHeld: 'inspirationHeld',
-      setInspirationDie: 'inspirationDie'
+      setInspirationDie: 'inspirationDie',
+      setCondition: 'condition'
     } as const satisfies Record<string, Call['type']>
     const helpers = ['appendLog', 'appendCoalescedLog']
     const exported = [...Object.keys(actions), ...Object.keys(table)].filter((k) => typeof (({ ...actions, ...table }) as Record<string, unknown>)[k] === 'function')
@@ -284,7 +299,7 @@ describe('what the code must keep in step with', () => {
     const kinds = new Set<string>(Object.values(callOf))
     const allKinds: Record<Call['type'], true> = {
       cast: true, slot: true, newTurn: true, endTimer: true, turnStep: true, feature: true, prepared: true, favorite: true,
-      counter: true, hp: true, rest: true, initiative: true, inspirationHeld: true, inspirationDie: true, dropConcentration: true
+      counter: true, hp: true, rest: true, initiative: true, inspirationHeld: true, inspirationDie: true, condition: true, dropConcentration: true
     }
     expect([...kinds].sort()).toEqual(Object.keys(allKinds).sort())
   })

@@ -52,6 +52,17 @@ export function ShieldIcon({ className }: IconProps): React.JSX.Element {
   )
 }
 
+/** A ring with a mark through it: conditions. */
+export function ConditionIcon({ className }: IconProps): React.JSX.Element {
+  return (
+    <svg {...ICON_SVG} className={className}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5v5.5" strokeWidth={1.6} />
+      <circle cx="12" cy="16.4" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
 /**
  * A ring of runes. It turns slowly (`.rune-ring` in app.css) while the paladin is concentrating: a quiet
  * "something is held" cue beside the text.

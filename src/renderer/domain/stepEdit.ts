@@ -89,6 +89,7 @@ const EDIT_RULES: { [K in Call['type']]: EditRule<K> | null } = {
   favorite: null,
   rest: null,
   inspirationHeld: null,
+  condition: null,
   dropConcentration: null
 }
 

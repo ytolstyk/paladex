@@ -1,4 +1,4 @@
-import type { InspirationDie, TurnStep } from '@shared/constants'
+import type { ConditionId, InspirationDie, TurnStep } from '@shared/constants'
 import type { LogEntry } from '@shared/schema'
 import type { Payment } from '@shared/types'
 import type { RestKind } from './rests'
@@ -30,6 +30,7 @@ export type Call =
   | { type: 'initiative'; value: number | null }
   | { type: 'inspirationHeld'; held: boolean }
   | { type: 'inspirationDie'; die: InspirationDie }
+  | { type: 'condition'; id: ConditionId; on: boolean }
   /** The spell whose concentration was dropped: a replay where that is no longer the concentration does nothing, never ends another. */
   | { type: 'dropConcentration'; spellId: string }
 

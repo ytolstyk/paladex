@@ -1,5 +1,7 @@
 import emblem from '@/assets/emblem.svg'
+import { CONDITION_INFO } from '@/domain/conditions'
 import { signed, spellAttackBonus, spellSaveDc } from '@/domain/derived'
+import { selectConditions } from '@/state/selectors'
 import { catalog, usePlayStore } from '@/state/session'
 import { useUiStore } from '@/state/uiStore'
 import { HpControl } from './HpControl'
@@ -7,6 +9,7 @@ import { HpControl } from './HpControl'
 export function VitalsBanner(): React.JSX.Element {
   const vitals = usePlayStore((s) => s.play?.vitals)
   const isDev = usePlayStore((s) => s.isDev)
+  const conditions = usePlayStore(selectConditions)
   const view = useUiStore((s) => s.view)
   const toggleSettings = useUiStore((s) => s.toggleSettings)
   const { character } = catalog
@@ -20,9 +23,20 @@ export function VitalsBanner(): React.JSX.Element {
           {character.name}
           {isDev && <span className="banner__dev">dev profile</span>}
         </h1>
-        <p className="banner__sub">
-          {character.race} {character.className} {character.level}, {character.subclass}
-        </p>
+        <div className="banner__line">
+          <p className="banner__sub">
+            {character.race} {character.className} {character.level}, {character.subclass}
+          </p>
+          {conditions.length > 0 && (
+            <ul className="banner__conditions" aria-label="Conditions">
+              {conditions.map((id) => (
+                <li key={id} className="banner__condition" title={CONDITION_INFO[id].summary}>
+                  {CONDITION_INFO[id].name}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
       <HpControl />

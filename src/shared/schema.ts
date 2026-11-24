@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import {
+  CONDITIONS,
   DEFAULT_INSPIRATION_DIE,
   emptyTurn,
   INITIATIVE_MAX,
@@ -33,8 +34,19 @@ const LogEntrySchema = z.object({
   die: z.number().int().optional(),
   /** The turn step a `turn-step` entry changed, and whether it is now marked (true) or cleared (false). */
   step: z.enum(TURN_STEPS).optional(),
-  on: z.boolean().optional()
+  /** Also whether a `condition` entry's condition now applies (true) or ended (false). */
+  on: z.boolean().optional(),
+  condition: z.enum(CONDITIONS).optional()
 })
+
+/**
+ * Read entry by entry like the timers: a name this build does not know is dropped, not a reason to refuse the save. Kept in the list's order, once each.
+ * (A `condition` log entry is stricter, like `step`: see its note in CLAUDE.md.)
+ */
+const ConditionsSchema = z
+  .array(z.unknown())
+  .default([])
+  .transform((entries) => CONDITIONS.filter((id) => entries.includes(id)))
 
 const TimerSchema = z
   .object({
@@ -92,6 +104,8 @@ export const PlayStateSchema = z.object({
       die: InspirationDieSchema.catch(DEFAULT_INSPIRATION_DIE).default(DEFAULT_INSPIRATION_DIE)
     })
     .default(() => ({ held: false, die: DEFAULT_INSPIRATION_DIE })),
+  /** Conditions on the character right now (2024 names, see `CONDITIONS`). Rests leave them alone: ending one is the table's call. */
+  conditions: ConditionsSchema,
   /**
    * Running duration timers, ticked by "New turn". Read entry by entry: one damaged timer is dropped, it does not make the whole
    * save unreadable. A timer for an unknown spell, or a second one for the same spell, is dropped by `reconcile`.

@@ -57,6 +57,10 @@ The top of the left rail holds two things you carry from the table into your own
   Bard gives it to you, pick the size they gave, and press Use it when you spend it, or Roll it to throw the die in the dice tray and spend it in one go. Any rest ends it, since it only lasts
   an hour. The die size is remembered, and every step is logged and undoable.
 
+- **Conditions.** Fourteen chips (Blinded to Unconscious, the 2024 rules; exhaustion is separate) in the rail. Press one to put it on or take it off; the active ones show as badges in the
+  banner and, under the chips, with what they do one click open. "All conditions" lists every rule. A condition that makes you Incapacitated (Incapacitated, Paralyzed, Petrified, Stunned, Unconscious)
+  ends your concentration, as the rules say, and says so. Nothing else is enforced, a rest does not clear them, and every change is logged and undoable.
+
 ## Recently cast, history and spell timers
 
 - **Recently cast.** Above the filters, a row of the last six different spells and features you used. Press one to open its

@@ -1,5 +1,6 @@
 import type { PlayState } from '@shared/schema'
 import type { Catalog } from './catalog'
+import { conditionName } from './conditions'
 import { sameValue } from './equal'
 
 /**
@@ -20,7 +21,7 @@ function differingKeys(a: Record<string, unknown>, b: Record<string, unknown>): 
   return [...new Set([...Object.keys(a), ...Object.keys(b)])].filter((key) => !sameValue(a[key], b[key])).sort()
 }
 
-function describeSetChange(label: string, before: readonly string[], after: readonly string[], nameOf: (id: string) => string): string[] {
+function describeSetChange<Id extends string>(label: string, before: readonly Id[], after: readonly Id[], nameOf: (id: Id) => string): string[] {
   const added = after.filter((id) => !before.includes(id)).map(nameOf)
   const removed = before.filter((id) => !after.includes(id)).map(nameOf)
   const parts: string[] = []
@@ -73,6 +74,10 @@ const DESCRIBERS: readonly { keys: readonly string[]; describe: Describer }[] = 
       ...(from.inspiration.held === to.inspiration.held ? [] : [`Bardic Inspiration: ${heldText(from.inspiration.held)} → ${heldText(to.inspiration.held)}`]),
       ...(from.inspiration.die === to.inspiration.die ? [] : [`Bardic Inspiration die: d${from.inspiration.die} → d${to.inspiration.die}`])
     ]
+  },
+  {
+    keys: ['conditions'],
+    describe: (from, to) => describeSetChange('Conditions', from.conditions, to.conditions, conditionName)
   },
   { keys: ['turn'], describe: (from, to) => (sameValue(from.turn, to.turn) ? [] : ['This turn: the marked steps change']) }
 ]

@@ -156,6 +156,38 @@ button {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.banner__line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+/* The subtitle gives way first when conditions are on: it already ellipsizes */
+.banner__line .banner__sub {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.banner__conditions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+  /* One row: a badge that does not fit drops off whole instead of being cut mid-word (the rail lists every active one) */
+  max-height: 1.6em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+}
+.banner__condition {
+  flex: none;
+  padding: 0 8px;
+  background: var(--third);
+  border: 1px solid var(--third-lit);
+  color: var(--on-third);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
 .vital {
   display: flex;
   flex-direction: column;
@@ -2191,6 +2223,59 @@ button.vital:hover .vital__value {
 .tray__body[data-natural='one'] .tray__total,
 .tray__body[data-natural='one'] .tray__note {
   color: var(--gules-lit);
+}
+
+/* ───────── Conditions (the rail) ───────── */
+/* A condition is state, not structure, so a pressed chip takes the third accent (the same as the banner's badges) */
+.conditions__chips .chip[aria-pressed='true'] {
+  background: var(--third);
+  border-color: var(--third-lit);
+  color: var(--on-third);
+}
+.conditions__active {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.condition {
+  padding: 4px 0 4px 10px;
+  border-left: 3px solid var(--third);
+}
+.condition summary,
+.conditions__all summary {
+  cursor: pointer;
+}
+.condition__name {
+  color: var(--third-lit);
+}
+.condition__summary {
+  display: block;
+  font-size: var(--step--1);
+}
+.condition__effects {
+  margin: var(--space-2) 0 0;
+  padding-left: 1.1em;
+  font-size: var(--step--1);
+}
+.conditions__all {
+  margin-top: var(--space-3);
+}
+.conditions__all summary {
+  color: var(--second-lit);
+}
+.conditions__rules {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+}
+.conditions__rules dt {
+  color: var(--second-lit);
+  font-weight: 700;
+}
+.conditions__rules dd {
+  margin: 0;
 }
 
 /* ───────── Turn steps (the rail) ───────── */

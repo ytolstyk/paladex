@@ -253,3 +253,33 @@ describe('correcting the history', () => {
     expect(store.getState().historyBackup).toBeNull()
   })
 })
+
+describe('conditions', () => {
+  it('toggles on and off and saves each; a quick tap and re-tap are one undo step, a different condition is its own', async () => {
+    const { port, store } = await readyStore()
+    store.getState().toggleCondition('prone')
+    expect(store.getState().play?.conditions).toEqual(['prone'])
+    store.getState().toggleCondition('prone')
+    expect(store.getState().play?.conditions).toEqual([])
+    expect(port.saved.at(-1)?.conditions).toEqual([])
+    store.getState().toggleCondition('poisoned')
+    expect(store.getState().undo).toHaveLength(2)
+    store.getState().undoLast()
+    expect(store.getState().play?.conditions).toEqual([])
+    store.getState().undoLast() // the whole tap and re-tap on Prone
+    expect(store.getState().play?.conditions).toEqual([])
+    expect(store.getState().undo).toHaveLength(0)
+  })
+
+  it('stunning a concentrating paladin ends the concentration with a toast, and Undo gives it back', async () => {
+    const { store } = await readyStore()
+    store.getState().cast(bless.id)
+    expect(store.getState().play?.concentration).toBe(bless.id)
+    store.getState().toggleCondition('stunned')
+    expect(store.getState().play?.concentration).toBeNull()
+    expect(store.getState().toast?.msg).toBe('Stunned: concentration on Bless ends')
+    store.getState().undoLast()
+    expect(store.getState().play?.concentration).toBe(bless.id)
+    expect(store.getState().play?.conditions).toEqual([])
+  })
+})

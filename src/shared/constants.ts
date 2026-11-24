@@ -31,8 +31,31 @@ export const LOG_KINDS = [
   'inspiration-use',
   'inspiration-die',
   'turn-step',
-  'timer-end'
+  'timer-end',
+  'condition'
 ] as const
+
+/**
+ * The 2024 conditions a player marks by hand, in the order they are listed. Exhaustion is not here: it is a level, not a switch, and
+ * has its own place on the roadmap. The words and rules for each are in `domain/conditions.ts`.
+ */
+export const CONDITIONS = [
+  'blinded',
+  'charmed',
+  'deafened',
+  'frightened',
+  'grappled',
+  'incapacitated',
+  'invisible',
+  'paralyzed',
+  'petrified',
+  'poisoned',
+  'prone',
+  'restrained',
+  'stunned',
+  'unconscious'
+] as const
+export type ConditionId = (typeof CONDITIONS)[number]
 
 /** The dial covers a d20 roll plus modifiers: a 1 is the lowest anyone acts, 25 is a generous ceiling. */
 export const INITIATIVE_MIN = 1

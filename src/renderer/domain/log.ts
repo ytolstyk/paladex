@@ -1,4 +1,5 @@
 import type { LogEntry } from '@shared/schema'
+import { CONDITION_INFO } from './conditions'
 import { TURN_STEP_LABEL } from './labels'
 
 const amountOf = (entry: LogEntry): number => Math.abs(entry.amount ?? 0)
@@ -22,6 +23,14 @@ function viaSuffix(entry: LogEntry): string {
 function turnStepText(entry: LogEntry): string {
   if (!entry.step) return 'A turn step changed'
   return TURN_STEP_LABEL[entry.step][entry.on === false ? 'off' : 'on']
+}
+
+/** "Fell Prone" / "No longer Prone", and what it cost when it broke concentration. Hand-edited entries may lack the condition. */
+function conditionText(entry: LogEntry, nameOf: (id: string) => string): string {
+  if (!entry.condition) return 'A condition changed'
+  const info = CONDITION_INFO[entry.condition]
+  const broken = entry.endedSpellId ? `; concentration on ${nameOf(entry.endedSpellId)} ends` : ''
+  return `${entry.on === false ? info.ended : info.began}${broken}`
 }
 
 /** Render a structured log entry as a sentence. Wording lives here so it can change without touching saved data. */
@@ -66,6 +75,8 @@ export function formatLog(entry: LogEntry, nameOf: (id: string) => string = (id)
       return turnStepText(entry)
     case 'timer-end':
       return `${name} has ended`
+    case 'condition':
+      return conditionText(entry, nameOf)
     case 'prepare':
       return `Prepared ${name}`
     case 'unprepare':

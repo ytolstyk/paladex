@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { DEFAULT_TURN_SECONDS, type InspirationDie, type TurnStep } from '@shared/constants'
+import { DEFAULT_TURN_SECONDS, type ConditionId, type InspirationDie, type TurnStep } from '@shared/constants'
 import type { PaladexApi } from '@shared/ipc'
 import type { PlayState } from '@shared/schema'
 import type { Payment } from '@shared/types'
@@ -71,6 +71,8 @@ export interface PaladexStore {
   /** Receive (true) or spend (false) Bardic Inspiration. */
   setInspirationHeld(held: boolean): void
   setInspirationDie(die: InspirationDie): void
+  /** Put a condition on the character, or take it off. Anything that makes them Incapacitated also ends concentration. */
+  toggleCondition(id: ConditionId): void
   dropConcentration(): void
   /** Undo the newest step, or take back the last history correction while that is still possible. */
   undoLast(): void
@@ -235,6 +237,11 @@ export function createPlayStore({ port, catalog, now = Date.now, turnSeconds = (
 
       setInspirationDie(die) {
         dispatch({ type: 'inspirationDie', die })
+      },
+
+      toggleCondition(id) {
+        const play = current()
+        if (play) dispatch(callFor.condition(play, id))
       },
 
       dropConcentration() {
