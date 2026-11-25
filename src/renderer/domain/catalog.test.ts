@@ -102,6 +102,24 @@ describe('weapons', () => {
   })
 })
 
+describe('proficiencies', () => {
+  const withProficiencies = (proficiencies: unknown): SeedData => {
+    const base = seedWith([bless])
+    return { ...base, character: { ...base.character, features: [layOnHands], proficiencies: proficiencies as SeedData['character']['proficiencies'] } }
+  }
+
+  it('the real seed carries its saving throws and skills', () => {
+    expect(createCatalog(seed).character.proficiencies.saves).toEqual(['wis', 'cha'])
+  })
+
+  it('rejects a seed without them, an unknown skill or a bad level, so a stale seed fails at startup and not on the tab', () => {
+    expect(() => createCatalog(withProficiencies(undefined))).toThrow(/proficiencies/)
+    expect(() => createCatalog(withProficiencies({ saves: ['wis'], skills: { juggling: 'proficient' } }))).toThrow(/proficiencies/)
+    expect(() => createCatalog(withProficiencies({ saves: ['wis'], skills: { stealth: 'half' } }))).toThrow(/proficiencies/)
+    expect(() => createCatalog(withProficiencies({ saves: ['luck'], skills: {} }))).toThrow(/proficiencies/)
+  })
+})
+
 describe('traits', () => {
   const withTraits = (traits: SeedData['traits']): SeedData => ({ ...seedWith([bless]), character: { ...seedWith([bless]).character, features: [layOnHands] }, traits })
 

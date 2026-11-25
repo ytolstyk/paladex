@@ -145,6 +145,7 @@ export function testCatalog(
       level: 5,
       abilities: { str: 16, dex: 11, con: 14, int: 10, wis: 14, cha: 15 },
       proficiencyBonus: 3,
+      proficiencies: { saves: ['wis', 'cha'], skills: { athletics: 'proficient' } },
       spellcastingAbility: 'cha',
       hpMax: 52,
       ac: 16,

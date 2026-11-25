@@ -14,6 +14,18 @@
       "cha": 16
     },
     "proficiencyBonus": 3,
+    "proficiencies": {
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skills": {
+        "athletics": "proficient",
+        "intimidation": "proficient",
+        "persuasion": "proficient",
+        "religion": "proficient"
+      }
+    },
     "spellcastingAbility": "cha",
     "hpMax": 52,
     "ac": 16,

@@ -45,6 +45,12 @@ part of the saved character.
   left them on the next launch. The search text does not: a forgotten word would greet you with an empty list. Clear filters
   clears what is remembered too. They live in the renderer's `localStorage` (key `paladex.view`), like the theme.
 
+## Stats
+
+The **Stats & saves** tab shows each ability's score and modifier with its saving throw, the passive Perception, Insight
+and Investigation, and all 18 skills. A lit diamond marks a saving throw or skill the sheet lists as proficient (a ringed one,
+expertise). The numbers are base ones worked out from the sheet, so they do not include an aura, Bless or an item's bonus.
+
 ## At the table
 
 The top of the left rail holds two things you carry from the table into your own turn. Both are saved with the character.

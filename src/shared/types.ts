@@ -1,11 +1,15 @@
 // Domain types shared by main, preload and renderer. Type-only imports: nothing here ships at runtime.
-import type { CAST_TIMES, ROLES, TRAIT_KINDS, TRAIT_WHENS } from './constants'
+import type { ABILITIES, CAST_TIMES, ROLES, SKILLS, TRAIT_KINDS, TRAIT_WHENS } from './constants'
 
 export type Role = (typeof ROLES)[number]
 export type Target = 'enemy' | 'ally' | 'self'
 /** A "Magic action" in 2024 wording is just an Action. */
 export type CastTime = (typeof CAST_TIMES)[number]
 export type SpellSource = 'class' | 'oath' | 'feature' | 'item' | 'cantrip'
+export type AbilityId = (typeof ABILITIES)[number]
+export type SkillId = (typeof SKILLS)[number]['id']
+/** Half proficiency (Jack of All Trades) is not modelled: no class of this character has it. */
+export type SkillProficiency = 'proficient' | 'expertise'
 export type TraitKind = (typeof TRAIT_KINDS)[number]
 export type TraitWhen = (typeof TRAIT_WHENS)[number]
 
@@ -159,14 +163,23 @@ export interface Weapon {
   description?: string
 }
 
+/** What the sheet says the character is trained in. The numbers come from `domain/stats.ts`, so they follow the scores. */
+export interface Proficiencies {
+  /** Saving throws the character adds proficiency to. */
+  saves: AbilityId[]
+  /** Skills with proficiency or expertise; a skill not listed is untrained. */
+  skills: Partial<Record<SkillId, SkillProficiency>>
+}
+
 export interface Character {
   name: string
   race: string
   className: string
   subclass: string
   level: number
-  abilities: Record<'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha', number>
+  abilities: Record<AbilityId, number>
   proficiencyBonus: number
+  proficiencies: Proficiencies
   spellcastingAbility: 'cha'
   hpMax: number
   ac: number

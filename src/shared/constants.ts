@@ -6,6 +6,47 @@ export const SCHEMA_VERSION = 1 as const
 /** Newest action-log entries kept in persisted state (bounds file size and undo snapshots). */
 export const LOG_CAP = 200
 
+/** The six abilities, in the order the sheet prints them. */
+export const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const
+
+/** Ability names as the rules print them. The importer lowercases them to match D&D Beyond's modifier subtypes. */
+export const ABILITY_NAMES = {
+  str: 'Strength',
+  dex: 'Dexterity',
+  con: 'Constitution',
+  int: 'Intelligence',
+  wis: 'Wisdom',
+  cha: 'Charisma'
+} as const satisfies Record<(typeof ABILITIES)[number], string>
+
+/** The 18 skills of the 2024 rules and the ability each is rolled with, in the order the sheet lists them. */
+export const SKILLS = [
+  { id: 'acrobatics', name: 'Acrobatics', ability: 'dex' },
+  { id: 'animal-handling', name: 'Animal Handling', ability: 'wis' },
+  { id: 'arcana', name: 'Arcana', ability: 'int' },
+  { id: 'athletics', name: 'Athletics', ability: 'str' },
+  { id: 'deception', name: 'Deception', ability: 'cha' },
+  { id: 'history', name: 'History', ability: 'int' },
+  { id: 'insight', name: 'Insight', ability: 'wis' },
+  { id: 'intimidation', name: 'Intimidation', ability: 'cha' },
+  { id: 'investigation', name: 'Investigation', ability: 'int' },
+  { id: 'medicine', name: 'Medicine', ability: 'wis' },
+  { id: 'nature', name: 'Nature', ability: 'int' },
+  { id: 'perception', name: 'Perception', ability: 'wis' },
+  { id: 'performance', name: 'Performance', ability: 'cha' },
+  { id: 'persuasion', name: 'Persuasion', ability: 'cha' },
+  { id: 'religion', name: 'Religion', ability: 'int' },
+  { id: 'sleight-of-hand', name: 'Sleight of Hand', ability: 'dex' },
+  { id: 'stealth', name: 'Stealth', ability: 'dex' },
+  { id: 'survival', name: 'Survival', ability: 'wis' }
+] as const
+
+/** Just the ids, for validating a seed. */
+export const SKILL_IDS = SKILLS.map((skill) => skill.id)
+
+/** The skills that have a passive score printed on the sheet (10 + the skill's modifier). */
+export const PASSIVE_SKILLS = ['perception', 'insight', 'investigation'] as const
+
 export const ROLES = ['offense', 'control', 'support', 'utility'] as const
 /** `long` = anything slower than an action, e.g. a 10-minute or 1-hour cast (see `Spell.castingNote`). */
 export const CAST_TIMES = ['action', 'bonus', 'reaction', 'long'] as const

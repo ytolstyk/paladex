@@ -13,6 +13,7 @@ import { SettingsPage } from './components/SettingsPage'
 import { SlotTracker } from './components/SlotTracker'
 import { SpellGrid } from './components/SpellGrid'
 import { STAGE_PANEL_ID, StageTabs, stageTabId } from './components/StageTabs'
+import { StatsPage } from './components/StatsPage'
 import { Toast } from './components/Toast'
 import { TablePanel } from './components/TablePanel'
 import { TimerPanel } from './components/TimerPanel'
@@ -84,6 +85,7 @@ export function App(): React.JSX.Element {
               )}
               {stageTab === 'attacks' && <AttacksPage />}
               {stageTab === 'traits' && <TraitsPage />}
+              {stageTab === 'stats' && <StatsPage />}
             </div>
           </main>
         </>

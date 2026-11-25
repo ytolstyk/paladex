@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { CAST_TIMES, ROLES, TRAIT_KINDS, TRAIT_WHENS } from '../src/shared/constants'
-import type { SeedData } from '../src/shared/types'
+import { ABILITIES, CAST_TIMES, ROLES, SKILL_IDS, TRAIT_KINDS, TRAIT_WHENS } from '../src/shared/constants'
+import type { SeedData, SkillId } from '../src/shared/types'
 
 /**
  * Runtime validator for the generated seed. It lives under scripts/ so zod stays out of the renderer bundle:
@@ -130,6 +130,16 @@ const trait = z
 
 const score = z.number().int().min(1).max(30)
 
+const ability = z.enum(ABILITIES)
+const skillIds = SKILL_IDS as [SkillId, ...SkillId[]] // z.enum needs a non-empty tuple; SKILL_IDS is never empty
+
+const proficiencies = z
+  .object({
+    saves: z.array(ability).refine((list) => new Set(list).size === list.length, 'a saving throw is listed once'),
+    skills: z.partialRecord(z.enum(skillIds), z.enum(['proficient', 'expertise']))
+  })
+  .strict()
+
 const character = z
   .object({
     name: z.string().min(1),
@@ -139,6 +149,7 @@ const character = z
     level: z.number().int().min(1).max(20),
     abilities: z.object({ str: score, dex: score, con: score, int: score, wis: score, cha: score }).strict(),
     proficiencyBonus: z.number().int().min(2).max(6),
+    proficiencies,
     spellcastingAbility: z.literal('cha'),
     hpMax: z.number().int().positive(),
     ac: z.number().int().positive(),

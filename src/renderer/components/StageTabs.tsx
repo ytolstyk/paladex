@@ -5,7 +5,8 @@ import { useUiStore, type StageTab } from '@/state/uiStore'
 const TABS: { id: StageTab; label: string; more: string }[] = [
   { id: 'spells', label: 'Spells', more: ' & features' },
   { id: 'attacks', label: 'Weapons', more: ' & attacks' },
-  { id: 'traits', label: 'Feats', more: ' & traits' }
+  { id: 'traits', label: 'Feats', more: ' & traits' },
+  { id: 'stats', label: 'Stats', more: ' & saves' }
 ]
 
 export const stageTabId = (tab: StageTab): string => `stage-tab-${tab}`

@@ -1,5 +1,5 @@
 // Relative, not `@shared`: the seed script (tsx, outside Vite) loads this file and cannot resolve the alias at runtime.
-import { TRAIT_KINDS, TRAIT_WHENS } from '../../shared/constants'
+import { ABILITIES, SKILL_IDS, TRAIT_KINDS, TRAIT_WHENS } from '../../shared/constants'
 import type { Character, CounterDef, Feature, SeedData, Spell, SpellComponents, Trait, Weapon } from '@shared/types'
 import { isChoosable } from './prepared'
 import { paladinSlotCapacity } from './slots'
@@ -41,6 +41,19 @@ function assertWeaponShape(weapon: Weapon): void {
     DICE.test(weapon.damage.dice) &&
     Number.isInteger(weapon.range?.normal)
   if (!ok) throw new Error(`Weapon "${weapon.name}" is malformed; regenerate the seed (npm run seed)`)
+}
+
+/** The Stats tab indexes `proficiencies` without a guard, so a seed from before it (or a mistyped id) fails at startup, not on the tab. */
+function assertProficiencies({ proficiencies }: Character): void {
+  const skillIds: readonly string[] = SKILL_IDS
+  const ok =
+    Array.isArray(proficiencies?.saves) &&
+    proficiencies.saves.every((id) => ABILITIES.includes(id)) &&
+    typeof proficiencies.skills === 'object' &&
+    proficiencies.skills !== null &&
+    !Array.isArray(proficiencies.skills) &&
+    Object.entries(proficiencies.skills).every(([id, level]) => skillIds.includes(id) && (level === 'proficient' || level === 'expertise'))
+  if (!ok) throw new Error('Seed data has no valid saving throw and skill proficiencies; regenerate the seed (npm run seed)')
 }
 
 function assertUniqueIds(kind: string, items: readonly { id: string }[]): void {
@@ -97,6 +110,7 @@ function assertCatalogInvariants(seed: SeedData): void {
       throw new Error(`Feature "${feature.name}" spends ${feature.spend.kind} but counter "${counter.id}" is a ${counter.kind}`)
     }
   }
+  assertProficiencies(character)
   assertUniqueIds('weapon', character.weapons)
   character.weapons.forEach(assertWeaponShape)
   assertTraits(seed)

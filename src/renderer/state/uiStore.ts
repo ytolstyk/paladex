@@ -14,7 +14,7 @@ export const VIEW_STORAGE_KEY = 'paladex.view'
 export type ViewId = 'sheet' | 'settings'
 
 /** Which view of the sheet's stage is showing. In-session only: like the settings page it is not a filter, so it is not remembered. */
-export type StageTab = 'spells' | 'attacks' | 'traits'
+export type StageTab = 'spells' | 'attacks' | 'traits' | 'stats'
 
 /** The id of the search field (on the spells tab and on the Feats & traits tab, never both at once), so `/` can focus it without reaching into a component. */
 export const SEARCH_INPUT_ID = 'spell-search'

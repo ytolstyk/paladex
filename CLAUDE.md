@@ -86,6 +86,15 @@ schema, vitest for tests. See README.md for scripts and layout.
   search is `traitMatches` in `search.ts`. `TraitsPage` owns the tab's search input and uses `SEARCH_INPUT_ID` (only one tab renders at a time, so `/` works on both). `TraitCard` keeps the
   `spell-card` class so `opensDetail` treats it like a spell card; its "See also" buttons are their own action. The detail drawer shows a trait through `detailEntry` (`kind: 'trait'`).
 
+## Stats tab
+
+- `uiStore.stageTab` also has `'stats'` ("Stats & saves"). `StatsPage` is read only and saves nothing: ability modifiers, saving throws, the passive
+  scores (`PASSIVE_SKILLS`: Perception, Insight, Investigation) and the 18 skills. All of it is `domain/stats.ts` `buildStats` (pure), from `Character.abilities`,
+  `proficiencyBonus` and `Character.proficiencies` (`saves` + `skills`: `proficient` / `expertise`; seed data, from DDB `proficiency` / `expertise` modifiers by `buildProficiencies` in `normalize.ts`).
+  `ABILITIES` and `SKILLS` (with each skill's ability) are in `shared/constants.ts`.
+- They are BASE numbers, like the attack numbers: no aura, spell or item bonus (Aura of Protection arrives at Paladin 6 and is not added), and no half proficiency. A re-seed
+  after a level-up or a new skill refreshes them; a passive Perception check against the rendered sheet is in `normalize.test.ts`.
+
 ## The turn, and the turn chart
 
 - `TurnState` (`shared/constants.ts`) is `slotSpellCast`, `bonusActionSpent`, `actionSpent`, `moved`, `reactionSpent`, `castsSinceNewTurn`. The three

@@ -101,6 +101,14 @@ describe('stage tab', () => {
     expect(storage.writes).toEqual([])
   })
 
+  it('has a stats tab, also view state only', async () => {
+    const storage = fakeStorage()
+    const { useUiStore } = await loadStore(storage)
+    useUiStore.getState().setStageTab('stats')
+    expect(useUiStore.getState().stageTab).toBe('stats')
+    expect(storage.writes).toEqual([])
+  })
+
   it('keeps the chosen tab and the filters when settings is opened and closed', async () => {
     const { useUiStore } = await loadStore(fakeStorage())
     useUiStore.getState().setStageTab('attacks')

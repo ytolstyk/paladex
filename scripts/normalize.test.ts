@@ -3,7 +3,8 @@ import { existsSync, readFileSync } from 'node:fs'
 import type { SeedData } from '../src/shared/types'
 import { createCatalog } from '../src/renderer/domain/catalog'
 import { abilityMod, proficiencyForLevel } from '../src/renderer/domain/derived'
-import { evalArithmetic, htmlToText, normalizeDdb, resolvePlaceholder, resolvePlaceholders, slugify, weaponKindKey } from './normalize'
+import { buildStats } from '../src/renderer/domain/stats'
+import { buildProficiencies, evalArithmetic, htmlToText, normalizeDdb, resolvePlaceholder, resolvePlaceholders, slugify, weaponKindKey } from './normalize'
 import { ATTACK_RIDER_FEATURES, ATTACK_RIDER_SPELLS } from './data/attack-riders'
 import { SeedSchema } from './seed-schema'
 
@@ -25,6 +26,14 @@ describe('seed matches the DDB reference sheet', () => {
   it('final ability scores include feat ASIs and the Amulet of Health', () => {
     expect(seed.character.abilities).toEqual(ref.abilityScores)
     expect(abilityMod(seed.character.abilities.dex)).toBe(ref.rendered.initiative)
+  })
+
+  it('saving throws and skills come from the sheet; passive Perception matches the rendered one', () => {
+    expect(seed.character.proficiencies).toEqual({
+      saves: ['wis', 'cha'],
+      skills: { athletics: 'proficient', intimidation: 'proficient', persuasion: 'proficient', religion: 'proficient' }
+    })
+    expect(buildStats(seed.character).passives.find((p) => p.id === 'perception')?.value).toBe(ref.rendered.passivePerception)
   })
 
   it('resource pools', () => {
@@ -488,5 +497,27 @@ describe('placeholder resolution', () => {
 
   it('proficiency by level', () => {
     expect([1, 4, 5, 9, 13, 17].map(proficiencyForLevel)).toEqual([2, 2, 3, 4, 5, 6])
+  })
+})
+
+describe('buildProficiencies', () => {
+  const sheet = (modifiers: object[], inventory: object[] = []) => ({ modifiers: { class: modifiers, item: [] }, inventory })
+  const mod = (type: string, subType: string) => ({ type, subType })
+
+  it('reads saves and skills, and expertise wins over proficiency', () => {
+    const result = buildProficiencies(
+      sheet([mod('proficiency', 'wisdom-saving-throws'), mod('proficiency', 'perception'), mod('expertise', 'perception'), mod('proficiency', 'sleight-of-hand')])
+    )
+    expect(result).toEqual({ saves: ['wis'], skills: { perception: 'expertise', 'sleight-of-hand': 'proficient' } })
+  })
+
+  it('lists saves in the sheet order whatever order DDB gives them', () => {
+    const result = buildProficiencies(sheet([mod('proficiency', 'charisma-saving-throws'), mod('proficiency', 'strength-saving-throws')]))
+    expect(result.saves).toEqual(['str', 'cha'])
+  })
+
+  it('ignores other modifier types and unknown subtypes (a weapon or tool proficiency)', () => {
+    const result = buildProficiencies(sheet([mod('proficiency', 'martial-weapons'), mod('bonus', 'perception'), mod('advantage', 'stealth')]))
+    expect(result).toEqual({ saves: [], skills: {} })
   })
 })

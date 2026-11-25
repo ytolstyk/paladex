@@ -1,7 +1,8 @@
 import { createCatalog } from '../src/renderer/domain/catalog'
 import { abilityMod, proficiencyForLevel } from '../src/renderer/domain/derived'
 import { isChoosable } from '../src/renderer/domain/prepared'
-import type { Character, CounterDef, Feature, SeedData, Spell, Trait, Weapon } from '../src/shared/types'
+import { ABILITIES, ABILITY_NAMES, SKILLS } from '../src/shared/constants'
+import type { AbilityId, Character, CounterDef, Feature, Proficiencies, SeedData, Spell, Trait, Weapon } from '../src/shared/types'
 import { componentsFromCode, componentsFromDdb } from './components'
 import { ATTACK_RIDER_FEATURES, ATTACK_RIDER_SPELLS } from './data/attack-riders'
 import { AUTHORED_SPELLS } from './data/authored-spells'
@@ -14,8 +15,7 @@ import { DICE_PATTERN, SeedSchema } from './seed-schema'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Json = any
 
-const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const
-type Ability = (typeof ABILITIES)[number]
+type Ability = AbilityId
 const STAT_ID: Record<Ability, number> = { str: 1, dex: 2, con: 3, int: 4, wis: 5, cha: 6 }
 const SCORE_SUBTYPE: Record<Ability, string> = {
   str: 'strength-score',
@@ -205,6 +205,22 @@ export function finalAbilities(data: Json): Record<Ability, number> {
     out[key] = Math.max(natural, ...sets)
   }
   return out
+}
+
+/**
+ * Saving throws and skills the character is trained in. DDB lists each as a `proficiency` modifier (`wisdom-saving-throws`,
+ * `perception`) and adds an `expertise` one for a doubled skill. Bonuses to a roll (an aura, a magic item) are not read: the
+ * app shows base numbers, like the attack numbers.
+ */
+export function buildProficiencies(data: Json): Proficiencies {
+  const mods = activeModifiers(data)
+  const has = (type: string, subType: string): boolean => mods.some((m) => m.type === type && m.subType === subType)
+  const skills: Proficiencies['skills'] = {}
+  for (const { id } of SKILLS) {
+    if (has('expertise', id)) skills[id] = 'expertise'
+    else if (has('proficiency', id)) skills[id] = 'proficient'
+  }
+  return { saves: ABILITIES.filter((key) => has('proficiency', `${ABILITY_NAMES[key].toLowerCase()}-saving-throws`)), skills }
 }
 
 export function hitPointMax(data: Json, abilities: Record<Ability, number>, level: number): number {
@@ -724,6 +740,7 @@ export function normalizeDdb(payload: Json): NormalizeResult {
     level,
     abilities,
     proficiencyBonus: proficiency,
+    proficiencies: buildProficiencies(data),
     spellcastingAbility: 'cha',
     hpMax: hitPointMax(data, abilities, level),
     ac: armorClass(data, abilities),
